@@ -1,6 +1,10 @@
 ---@diagnostic disable: trailing-space
 -- sudoku solver in lua, at least an attempt of one
-package.path = package.path .. ';/usr/local/share/lua/5.1/?.lua'
+
+package.path = package.path .. ';/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;./?.lua;./?/init.lua'
+package.cpath = package.cpath .. ';/usr/local/lib/lua/5.3/?.so;/usr/lib/x86_64-linux-gnu/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so'
+
+
 local iniReader   = require "inifile"
 local rowNames    = {'A', 'B', 'C','D','E','F','G','H','I'}
 local colNames    =  {1,2,3,4,5,6,7,8,9}
@@ -319,7 +323,7 @@ local function printPuzzle( sudokuPuzzle )
     msg = msg .. cprint('Number of Operations: ','green') .. tostring(solverInfo.numOperations) .. '\n'
     msg = msg .. cprint('Number of Recursions: ','green') .. tostring(solverInfo.numRecursions) .. '\n'
     --msg = msg .. cprint('Difficult Level: ', 'green') .. getDifficulty() .. '\n'
-    --msg = msg .. cprint('Elapsed Time: ','green') .. string.format('%.8f seconds', solverInfo.runTime_seconds) .. '\n'
+    msg = msg .. cprint('Elapsed Time: ','green') .. string.format('%.8f seconds', solverInfo.runTime_seconds) .. '\n'
 
     local isValid = isPuzzleSolved(sudokuPuzzle)
     if isValid == true
@@ -375,8 +379,8 @@ local function solveTheThing(thePuzzle)
         local nextGuesses = string2Table( thePuzzle[entryPoint] )
         for _,nextGuess in ipairs(nextGuesses)
         do
-            print(string.format('Entry: %s - Value -%s',entryPoint, nextGuess ))
-            printPuzzle(thePuzzle)
+            --print(string.format('Entry: %s - Value -%s',entryPoint, nextGuess ))
+            --printPuzzle(thePuzzle)
             solverInfo.numRecursions = solverInfo.numRecursions+1
             nextPuzzleGuess = copyTable(thePuzzle)
             nextPuzzleGuess[entryPoint] = nextGuess
@@ -405,7 +409,7 @@ local function doTheThing(inFilePath)
     return theSolution
 end
 
-local luaFile = '/home/dsaidman/projects/sudoku/samples.ini'
+local luaFile = '/home/dsaidman/projects/sudokuSolver/samples.ini'
 doTheThing(luaFile)
 
 
