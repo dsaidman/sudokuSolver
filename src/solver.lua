@@ -4,7 +4,8 @@
 package.path = package.path .. ';/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;./?.lua;./?/init.lua'
 package.cpath = package.cpath .. ';/usr/local/lib/lua/5.3/?.so;/usr/lib/x86_64-linux-gnu/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so'
 
-
+local luaFile     = '/home/dsaidman/projects/sudokuSolver/samples.ini'
+local mode        = 'evil'
 local iniReader   = require "inifile"
 local rowNames    = {'A', 'B', 'C','D','E','F','G','H','I'}
 local colNames    =  {1,2,3,4,5,6,7,8,9}
@@ -27,14 +28,15 @@ local difficultEnum = {
     [3] = 'SO SO',
     [4] = 'HARD',
     [5] = 'VERY HARD',
-    [6] = 'DASTURDLY EVIL'
-}
+    [6] = 'EVIL',
+    [7] = 'DASTURDLY EVIL'}
 local function string2Table(inString)
     local outArg = {}
     for ii = 1, #inString
     do
         outArg[ii] = inString:sub(ii,ii)
     end
+    table.sort(outArg)
     return outArg
 end
 
@@ -54,11 +56,9 @@ end
 
 local function cross(inArg1, inArg2)
     local outArg = {}
-    local n = 0
     for _,arg1 in pairs(inArg1) do
         for _,arg2 in pairs(inArg2) do
-            n = n+1
-            outArg[n] = arg1 .. arg2
+            outArg[#outArg+1] = arg1 .. arg2
         end
     end
     return outArg
@@ -80,7 +80,8 @@ local function findStringMember(theStr, theMembers)
     return nil
 end
 
-local function importFromFile(filePath) return iniReader.parse(filePath).HARD end
+local function importFromFile(filePath) return iniReader.parse(filePath)[mode:upper()] end
+local importedValues  = importFromFile(luaFile)
 
 local function cprint(msg, color)
     local val
@@ -124,7 +125,8 @@ local function getCellNeighbors(theGridID)
     local columnGroupIdx = findStringMember(
         getCol(theGridID),
         cellColumns)
-    return cross( string2Table(cellRows[rowGroupIdx]),  string2Table(cellColumns[columnGroupIdx]) )
+    local outArg = cross( string2Table(cellRows[rowGroupIdx]),  string2Table(cellColumns[columnGroupIdx]) )
+    return outArg
 end
 
 local function getAllPuzzleFamilies()
@@ -153,6 +155,7 @@ local function getAllPuzzleFamilies()
                 getCellNeighbors( tostring(getRow(cellRows[iRow])) .. tostring(getCol(cellColumns[iCol]))))
         end
     end
+
     return theFamilies
 end
 
@@ -164,7 +167,6 @@ local function getSquareNeighbors(gridKey)
         getColumnNeighbors(gridKey),
         getCellNeighbors(gridKey))
     allSquares[gridKey] = nil
-
     return allSquares
 end
 
@@ -237,13 +239,12 @@ end
 
 local function importPuzzle(fileName)
     local startingPuzzle = initEmptyPuzzle()
-    local importedValues = importFromFile(fileName)
+    --local importedValues = importFromFile(fileName)
 
     for gridID, gridValue in pairs(importedValues)
     do
         startingPuzzle[gridID] = tostring(gridValue)
     end
-
     return startingPuzzle
 
 end
@@ -268,16 +269,18 @@ end
 local function getDifficulty()
     if solverInfo.numRecursions == 0 then
         return difficultEnum[1]
-    elseif solverInfo.numRecursions == 1 then
+    elseif solverInfo.numRecursions < 5 then
         return difficultEnum[2]
-    elseif solverInfo.numRecursions > 3 then
+    elseif solverInfo.numRecursions < 25 then
         return difficultEnum[3]
-    elseif solverInfo.numRecursions > 10 then
+    elseif solverInfo.numRecursions < 50 then
         return difficultEnum[4]
-    elseif solverInfo.numRecursions > 20 then
+    elseif solverInfo.numRecursions < 100 then
         return difficultEnum[5]
-    elseif solverInfo.numRecursions > 50 then
+    elseif solverInfo.numRecursions < 400 then
         return difficultEnum[6]
+    else
+        return difficultEnum[7]
     end
 end
 
@@ -316,13 +319,20 @@ local function printPuzzle( sudokuPuzzle )
             then
                 msg = msg .. ' | '
             end
-            msg = msg .. string.format('%10s',sudokuPuzzle[rowName .. tostring(colName)])
+            local gridKey = rowName .. tostring(colName)
+            if importedValues[gridKey] == nil
+
+            then
+                msg = msg .. string.format('%10s',sudokuPuzzle[gridKey])
+            else
+                msg = msg .. cprint(string.format('%10s',sudokuPuzzle[gridKey]),'red')
+            end
         end
         msg = msg .. '\n'
     end
     msg = msg .. cprint('Number of Operations: ','green') .. tostring(solverInfo.numOperations) .. '\n'
     msg = msg .. cprint('Number of Recursions: ','green') .. tostring(solverInfo.numRecursions) .. '\n'
-    --msg = msg .. cprint('Difficult Level: ', 'green') .. getDifficulty() .. '\n'
+    msg = msg .. cprint('Difficult Level: ', 'green') .. getDifficulty() .. '\n'
     msg = msg .. cprint('Elapsed Time: ','green') .. string.format('%.8f seconds', solverInfo.runTime_seconds) .. '\n'
 
     local isValid = isPuzzleSolved(sudokuPuzzle)
@@ -409,7 +419,7 @@ local function doTheThing(inFilePath)
     return theSolution
 end
 
-local luaFile = '/home/dsaidman/projects/sudokuSolver/samples.ini'
+
 doTheThing(luaFile)
 
 
