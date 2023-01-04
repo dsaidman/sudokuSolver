@@ -4,9 +4,13 @@
 package.path = package.path .. ';/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;./?.lua;./?/init.lua'
 package.cpath = package.cpath .. ';/usr/local/lib/lua/5.3/?.so;/usr/lib/x86_64-linux-gnu/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so'
 
+
+local iniReader   = require "inifile"
+local myFuns      = require "helpers"
+
 local luaFile     = '/home/dsaidman/projects/sudokuSolver/samples.ini'
 local mode        = 'evil'
-local iniReader   = require "inifile"
+
 local rowNames    = {'A', 'B', 'C','D','E','F','G','H','I'}
 local colNames    =  {1,2,3,4,5,6,7,8,9}
 local valueList   =  '123456789'
@@ -30,109 +34,74 @@ local difficultEnum = {
     [5] = 'VERY HARD',
     [6] = 'EVIL',
     [7] = 'DASTURDLY EVIL'}
-local function string2Table(inString)
-    local outArg = {}
-    for ii = 1, #inString
-    do
-        outArg[ii] = inString:sub(ii,ii)
-    end
-    table.sort(outArg)
-    return outArg
-end
 
-local function catTables(...)
-    local outArg = {}
-    local inArgs = {...}
-    for _,nextTable in ipairs(inArgs)
-    do
-        for _,v in pairs(nextTable)
-        do
-            outArg[v]=v
-        end
-    end
-    return outArg
-
-end
-
-local function cross(inArg1, inArg2)
-    local outArg = {}
-    for _,arg1 in pairs(inArg1) do
-        for _,arg2 in pairs(inArg2) do
-            outArg[#outArg+1] = arg1 .. arg2
-        end
-    end
-    return outArg
-end
-
-local allKeys = cross(rowNames, colNames)
+local allKeys = myFuns.cross(rowNames, colNames)
 
 local function getRow(theGridID) return string.sub(theGridID,1,1) end
 
 local function getCol(theGridID) return string.sub(theGridID,2,2) end
 
-local function findStringMember(theStr, theMembers)
-    for idx,groupMembers in pairs(theMembers)
-    do
-        if string.find(groupMembers, theStr)  then
-            return idx
-        end
-    end
-    return nil
-end
-
 local function importFromFile(filePath) return iniReader.parse(filePath)[mode:upper()] end
 local importedValues  = importFromFile(luaFile)
 
-local function cprint(msg, color)
-    local val
-    if color == 'red' then
-        val = 31
-    elseif color == 'green' then
-        val = 32
-    elseif color == 'orange' then
-        val = 33
-    elseif color == 'blue' then
-        val = 34
-    end
-
-    return string.format("\27[%dm%s\27[0m", val, msg)
-end
-
+local theRowNeighbors = {}
 local function getRowNeighbors(theGridID)
-    local theNeighbors = {}
-    local theRow = getRow(theGridID)
-    for _,theCol in pairs(colNames) do
-        table.insert(theNeighbors, theRow .. tostring(theCol))
+
+    if theRowNeighbors[theGridID] == nil
+    then
+        local theNeighbors = {}
+        local theRow = getRow(theGridID)
+        for _,theCol in pairs(colNames) do
+            table.insert(theNeighbors, theRow .. tostring(theCol))
+        end
+        theRowNeighbors[theGridID] = theNeighbors
+        return theRowNeighbors[theGridID]
+    else
+        return theRowNeighbors[theGridID]
     end
-    return theNeighbors
 
 end
 
+local theColumnNeighbors = {}
 local function getColumnNeighbors(theGridID)
-    local theNeighbors = {}
-    local theCol = getCol(theGridID)
-    for _,theRow in ipairs(rowNames) do
-        table.insert(theNeighbors, theRow .. tostring(theCol))
+
+    if theColumnNeighbors[theGridID] == nil
+    then
+        local theNeighbors = {}
+        local theCol = getCol(theGridID)
+        for _,theRow in ipairs(rowNames) do
+            table.insert(theNeighbors, theRow .. tostring(theCol))
+        end
+        theColumnNeighbors[theGridID] = theNeighbors
+        return theColumnNeighbors[theGridID]
+    else
+        return theColumnNeighbors[theGridID]
     end
-    return theNeighbors
 end
 
+local theCellNeighbors = {} -- put outside so can cache the result
 local function getCellNeighbors(theGridID)
 
-    local rowGroupIdx    = findStringMember(
-        getRow(theGridID),
-        cellRows)
-    local columnGroupIdx = findStringMember(
-        getCol(theGridID),
-        cellColumns)
-    local outArg = cross( string2Table(cellRows[rowGroupIdx]),  string2Table(cellColumns[columnGroupIdx]) )
-    return outArg
+    if theCellNeighbors[theGridID] == nil
+    then
+        local rowGroupIdx    = myFuns.findStringMember(
+            getRow(theGridID),
+            cellRows)
+        local columnGroupIdx = myFuns.findStringMember(
+            getCol(theGridID),
+            cellColumns)
+        theCellNeighbors[theGridID] = myFuns.cross( 
+            myFuns.string2Table(cellRows[rowGroupIdx]),
+            myFuns.string2Table(cellColumns[columnGroupIdx]) )
+        return theCellNeighbors[theGridID]
+    else
+        return theCellNeighbors[theGridID]
+    end
 end
 
 local function getAllPuzzleFamilies()
-    -- be sure only do this once and not waste the effort
-
     local theFamilies = {}
+    -- be sure only do this once and not waste the effort
 
     -- the row families
     for _,rowName in pairs(rowNames)
@@ -140,13 +109,13 @@ local function getAllPuzzleFamilies()
         table.insert(theFamilies, getRowNeighbors(rowName .. '1') )
     end
 
-    -- the column families
+        -- the column families
     for _,colNumber in pairs(colNames)
     do
         table.insert(theFamilies, getColumnNeighbors('A' .. tostring(colNumber)) )
     end
 
-    -- the cell families. the same getRow and getCol will work here to grab one of each cell
+        -- the cell families. the same getRow and getCol will work here to grab one of each cell
 
     for iRow = 1,3 do
         for iCol = 1,3 do
@@ -158,16 +127,22 @@ local function getAllPuzzleFamilies()
 
     return theFamilies
 end
-
 local allFamilies = getAllPuzzleFamilies()
 
+local allSquareNeighbors = {}
 local function getSquareNeighbors(gridKey)
-    local allSquares = catTables(
-        getRowNeighbors(gridKey),
-        getColumnNeighbors(gridKey),
-        getCellNeighbors(gridKey))
-    allSquares[gridKey] = nil
-    return allSquares
+    if allSquareNeighbors[gridKey] == nil
+    then
+        local allSquares = myFuns.joinTables(
+            getRowNeighbors(gridKey),
+            getColumnNeighbors(gridKey),
+            getCellNeighbors(gridKey))
+        allSquares[gridKey] = nil
+        allSquareNeighbors[gridKey] = allSquares
+        return allSquareNeighbors[gridKey]
+    else
+        return allSquareNeighbors[gridKey]
+    end
 end
 
 local function isValidFamily( thePuzzle, theFamily )
@@ -230,7 +205,7 @@ end
 
 local function initEmptyPuzzle()
     local emptyPuzzle = {}
-    local gridKeys = cross(rowNames, colNames)
+    local gridKeys = myFuns.cross(rowNames, colNames)
     for _,gridKey in pairs(gridKeys) do
          emptyPuzzle[gridKey] = valueList
     end
@@ -250,20 +225,56 @@ local function importPuzzle(fileName)
 end
 
 local function getNextEntryPoint(thePuzzle)
-    local minKey
+    local minKeys = {}
     local minVal = 99
     for gridKey,gridVal in pairs(thePuzzle)
     do
         if #gridVal < minVal and #gridVal > 1
         then
-            minKey = gridKey
+            minKeys = {}
+            minKeys[gridKey] = thePuzzle[gridKey]
             minVal =  #gridVal
-            if minVal == 2 then
-                return minKey
-            end
+        elseif #gridVal == minVal
+        then
+            minKeys[gridKey] = thePuzzle[gridKey]
         end
     end
-    return minKey
+
+    return minKeys
+end
+local previousEntry
+local function getNextEntryPoint2(thePuzzle)
+
+    local filteredPuzzle = getNextEntryPoint(myFuns.copyTable(thePuzzle))
+    local filteredVals   = table.concat(myFuns.asIndexedTable(filteredPuzzle),'')
+
+    if previousEntry ~= nil and filteredPuzzle[previousEntry]~=nil then -- be sure not to repeat and go into endless search
+        filteredPuzzle[previousEntry] = nil
+    end
+    -- get occurances of each number so we take the smallest
+    local occuranceCount = myFuns.countOccurances(thePuzzle)
+
+
+    -- only pick incomplete result
+    for key, value in pairs(occuranceCount) do
+
+        if value == 0 or string.find(filteredVals,key)==nil then
+            occuranceCount[key]=nil
+        end
+    end
+
+    local maxNumber = tostring(select(2,myFuns.max(occuranceCount)))
+    for theGridKey, theGridValue in pairs(filteredPuzzle) do
+        if string.find(theGridValue, maxNumber)
+        then
+            local sortedGuesses = myFuns.string2Table(filteredPuzzle[theGridKey])
+            
+            table.sort(sortedGuesses, function(v1, v2) return occuranceCount[v1] > occuranceCount[v2] end )
+            previousEntry = theGridKey
+            return theGridKey, sortedGuesses
+        end
+    end
+    return nil, nil
 end
 
 local function getDifficulty()
@@ -284,14 +295,7 @@ local function getDifficulty()
     end
 end
 
-local function copyTable(origTable)
-    local newTable = {}
-    for key, val in pairs(origTable)
-    do
-        newTable[key] = val
-    end
-    return newTable
-end
+
 
 local function printPuzzle( sudokuPuzzle )
 
@@ -303,7 +307,7 @@ local function printPuzzle( sudokuPuzzle )
         then
             msg = msg .. string.format('%3s',' ')
         end
-        msg = msg .. cprint(string.format('%10s',tostring(colIdx)),'orange')
+        msg = msg .. myFuns.cprint(string.format('%10s',tostring(colIdx)),'orange')
     end
     msg = msg .. '\n'
 
@@ -311,9 +315,9 @@ local function printPuzzle( sudokuPuzzle )
     for rowIdx,rowName in ipairs(rowNames) do
         if ((rowIdx % 3) == 1)
         then
-            msg = msg .. string.format('%7s',' ') .. string.rep('-',44) .. '\n'
+            msg = msg .. string.format('%7s',' ') .. string.rep('-',98) .. '\n'
         end
-        msg = msg .. cprint(rowName .. ' -> ','orange')
+        msg = msg .. myFuns.cprint(rowName .. ' -> ','orange')
         for _,colName in ipairs(colNames) do
             if ((colName % 3) == 1)
             then
@@ -325,22 +329,24 @@ local function printPuzzle( sudokuPuzzle )
             then
                 msg = msg .. string.format('%10s',sudokuPuzzle[gridKey])
             else
-                msg = msg .. cprint(string.format('%10s',sudokuPuzzle[gridKey]),'red')
+                msg = msg .. myFuns.cprint(string.format('%10s',sudokuPuzzle[gridKey]),'red')
             end
         end
         msg = msg .. '\n'
     end
-    msg = msg .. cprint('Number of Operations: ','green') .. tostring(solverInfo.numOperations) .. '\n'
-    msg = msg .. cprint('Number of Recursions: ','green') .. tostring(solverInfo.numRecursions) .. '\n'
-    msg = msg .. cprint('Difficult Level: ', 'green') .. getDifficulty() .. '\n'
-    msg = msg .. cprint('Elapsed Time: ','green') .. string.format('%.8f seconds', solverInfo.runTime_seconds) .. '\n'
+    msg = msg .. myFuns.cprint('Number of Operations: ','green') .. tostring(solverInfo.numOperations) .. '\n'
+    msg = msg .. myFuns.cprint('Number of Recursions: ','green') .. tostring(solverInfo.numRecursions) .. '\n'
+    msg = msg .. myFuns.cprint('Difficult Level: ', 'green') .. getDifficulty() .. '\n'
+    if solverInfo['runTime_seconds'] ~= nil then
+        msg = msg .. myFuns.cprint('Elapsed Time: ','green') .. string.format('%.8f seconds', solverInfo.runTime_seconds) .. '\n'
+    end
 
     local isValid = isPuzzleSolved(sudokuPuzzle)
     if isValid == true
     then
-        msg = msg .. cprint('Solution is valid','green') .. '\n'
+        msg = msg .. myFuns.cprint('Solution is valid','green') .. '\n'
     else
-        msg = msg .. cprint('Solution is invalid','red') .. '\n'
+        msg = msg .. myFuns.cprint('Solution is invalid','red') .. '\n'
     end
 
     print(msg)
@@ -385,16 +391,19 @@ local function solveTheThing(thePuzzle)
         end
     else
         local nextPuzzleGuess
-        local entryPoint = getNextEntryPoint(thePuzzle)
-        local nextGuesses = string2Table( thePuzzle[entryPoint] )
+        local entryPoint, nextGuesses = getNextEntryPoint2(thePuzzle)
+
+        if entryPoint == nil then
+            return -1
+        end
         for _,nextGuess in ipairs(nextGuesses)
         do
             --print(string.format('Entry: %s - Value -%s',entryPoint, nextGuess ))
             --printPuzzle(thePuzzle)
             solverInfo.numRecursions = solverInfo.numRecursions+1
-            nextPuzzleGuess = copyTable(thePuzzle)
+            nextPuzzleGuess = myFuns.copyTable(thePuzzle)
             nextPuzzleGuess[entryPoint] = nextGuess
-            nextPuzzleGuess = solveTheThing(copyTable(nextPuzzleGuess))
+            nextPuzzleGuess = solveTheThing(myFuns.copyTable(nextPuzzleGuess))
             if isPuzzleComplete(nextPuzzleGuess) == true then
                 if (isPuzzleSolved(nextPuzzleGuess)==true)
                 then
@@ -411,7 +420,8 @@ end
 
 local function doTheThing(inFilePath)
     local myPuzzle = importPuzzle(inFilePath)
-
+    printPuzzle(myPuzzle)
+    print(myFuns.cprint('Running...','red'))
     local startTime = os.clock()
     local theSolution = solveTheThing( myPuzzle )
     solverInfo['runTime_seconds'] = os.clock()-startTime
