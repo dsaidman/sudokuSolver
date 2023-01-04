@@ -223,8 +223,9 @@ local function importPuzzle(fileName)
     return startingPuzzle
 
 end
-local previousKey
-local function getNextEntryPoint3(thePuzzle)
+
+--local previousKey
+local function getNextEntryPoint(thePuzzle)
     local occuranceCount    = myFuns.countOccurances(thePuzzle)
 
     local maxOccuranceValue = tostring(select(2,myFuns.max(occuranceCount)))
@@ -247,7 +248,7 @@ local function getNextEntryPoint3(thePuzzle)
         local continueFlag = true
         for theGridKey, theGridValue in pairs(filteredPuzzle) do
 
-            if string.find(theGridValue, maxOccuranceValue) and (#theGridValue == numPossibilities) and (theGridKey~=previousKey)
+            if string.find(theGridValue, maxOccuranceValue) and (#theGridValue == numPossibilities) --and (theGridKey~=previousKey)
             then
 
                 continueFlag = false
@@ -267,7 +268,7 @@ local function getNextEntryPoint3(thePuzzle)
     end
 
     local entryPointKey = select(2,myFuns.max(sumOccurances))
-    previousKey = entryPointKey
+    --previousKey = entryPointKey
     if thePuzzle[entryPointKey] == nil then
         return nil, nil
     else
@@ -276,59 +277,6 @@ local function getNextEntryPoint3(thePuzzle)
 
         return entryPointKey, orderedGuesses
     end
-end
-
-local function getNextEntryPoint(thePuzzle)
-    local minKeys = {}
-    local minVal = 99
-    for gridKey,gridVal in pairs(thePuzzle)
-    do
-        if #gridVal < minVal and #gridVal > 1
-        then
-            minKeys = {}
-            minKeys[gridKey] = thePuzzle[gridKey]
-            minVal =  #gridVal
-        elseif #gridVal == minVal
-        then
-            minKeys[gridKey] = thePuzzle[gridKey]
-        end
-    end
-
-    return minKeys
-end
-local previousEntry
-local function getNextEntryPoint2(thePuzzle)
-
-    local filteredPuzzle = getNextEntryPoint(myFuns.copyTable(thePuzzle))
-    local filteredVals   = table.concat(myFuns.asIndexedTable(filteredPuzzle),'')
-
-    if previousEntry ~= nil and filteredPuzzle[previousEntry]~=nil then -- be sure not to repeat and go into endless search
-        filteredPuzzle[previousEntry] = nil
-    end
-    -- get occurances of each number so we take the smallest
-    local occuranceCount = myFuns.countOccurances(thePuzzle)
-
-
-    -- only pick incomplete result
-    for key, value in pairs(occuranceCount) do
-
-        if value == 0 or string.find(filteredVals,key)==nil then
-            occuranceCount[key]=nil
-        end
-    end
-
-    local maxNumber = tostring(select(2,myFuns.max(occuranceCount)))
-    for theGridKey, theGridValue in pairs(filteredPuzzle) do
-        if string.find(theGridValue, maxNumber)
-        then
-            local sortedGuesses = myFuns.string2Table(filteredPuzzle[theGridKey])
-
-            table.sort(sortedGuesses, function(v1, v2) return occuranceCount[v1] > occuranceCount[v2] end )
-            previousEntry = theGridKey
-            return theGridKey, sortedGuesses
-        end
-    end
-    return nil, nil
 end
 
 local function getDifficulty()
@@ -348,8 +296,6 @@ local function getDifficulty()
         return difficultEnum[7]
     end
 end
-
-
 
 local function printPuzzle( sudokuPuzzle )
 
@@ -388,9 +334,11 @@ local function printPuzzle( sudokuPuzzle )
         end
         msg = msg .. '\n'
     end
-    msg = msg .. myFuns.cprint('Number of Operations: ','green') .. tostring(solverInfo.numOperations) .. '\n'
-    msg = msg .. myFuns.cprint('Number of Recursions: ','green') .. tostring(solverInfo.numRecursions) .. '\n'
-    msg = msg .. myFuns.cprint('Difficult Level: ', 'green') .. getDifficulty() .. '\n'
+     if isPuzzleComplete(sudokuPuzzle) then
+        msg = msg .. myFuns.cprint('Number of Operations: ','green') .. tostring(solverInfo.numOperations) .. '\n'
+        msg = msg .. myFuns.cprint('Number of Recursions: ','green') .. tostring(solverInfo.numRecursions) .. '\n'
+        msg = msg .. myFuns.cprint('Difficult Level: ', 'green') .. getDifficulty() .. '\n'
+    end
     if solverInfo['runTime_seconds'] ~= nil then
         msg = msg .. myFuns.cprint('Elapsed Time: ','green') .. string.format('%.8f seconds', solverInfo.runTime_seconds) .. '\n'
     end
@@ -445,7 +393,7 @@ local function solveTheThing(thePuzzle)
         end
     else
         local nextPuzzleGuess
-        local entryPoint, nextGuesses = getNextEntryPoint3(thePuzzle)
+        local entryPoint, nextGuesses = getNextEntryPoint(thePuzzle)
 
         if entryPoint == nil then
             return -1
