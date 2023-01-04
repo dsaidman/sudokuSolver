@@ -223,6 +223,60 @@ local function importPuzzle(fileName)
     return startingPuzzle
 
 end
+local previousKey
+local function getNextEntryPoint3(thePuzzle)
+    local occuranceCount    = myFuns.countOccurances(thePuzzle)
+
+    local maxOccuranceValue = tostring(select(2,myFuns.max(occuranceCount)))
+    local filteredPuzzle = {}
+    for theGridKey, theGridValue in pairs(thePuzzle) do
+        if string.find(theGridValue, maxOccuranceValue) then
+           filteredPuzzle[theGridKey]=thePuzzle[theGridKey]
+        end
+    end
+
+    local maxAvailable   = 0
+    for _,value in pairs(thePuzzle)
+    do
+        maxAvailable = math.max(maxAvailable, #value)
+    end
+
+    local possibleKeys = {}
+    for numPossibilities = 2, maxAvailable
+    do
+        local continueFlag = true
+        for theGridKey, theGridValue in pairs(filteredPuzzle) do
+
+            if string.find(theGridValue, maxOccuranceValue) and (#theGridValue == numPossibilities) and (theGridKey~=previousKey)
+            then
+
+                continueFlag = false
+                table.insert(possibleKeys, theGridKey)
+            end
+        end
+        if continueFlag == false then break end
+    end
+
+    local sumOccurances = {}
+    for _, gridKey in ipairs(possibleKeys) do
+        sumOccurances[gridKey] = 0
+        local possibleVals = myFuns.string2Table(filteredPuzzle[gridKey])
+        for _,possibleVal in ipairs(possibleVals) do
+             sumOccurances[gridKey] =  sumOccurances[gridKey] + occuranceCount[possibleVal]
+        end
+    end
+
+    local entryPointKey = select(2,myFuns.max(sumOccurances))
+    previousKey = entryPointKey
+    if thePuzzle[entryPointKey] == nil then
+        return nil, nil
+    else
+        local orderedGuesses = myFuns.string2Table(thePuzzle[entryPointKey])
+        table.sort(orderedGuesses, function (v1, v2) return occuranceCount[v1] > occuranceCount[v2] end)
+
+        return entryPointKey, orderedGuesses
+    end
+end
 
 local function getNextEntryPoint(thePuzzle)
     local minKeys = {}
@@ -268,7 +322,7 @@ local function getNextEntryPoint2(thePuzzle)
         if string.find(theGridValue, maxNumber)
         then
             local sortedGuesses = myFuns.string2Table(filteredPuzzle[theGridKey])
-            
+
             table.sort(sortedGuesses, function(v1, v2) return occuranceCount[v1] > occuranceCount[v2] end )
             previousEntry = theGridKey
             return theGridKey, sortedGuesses
@@ -391,7 +445,7 @@ local function solveTheThing(thePuzzle)
         end
     else
         local nextPuzzleGuess
-        local entryPoint, nextGuesses = getNextEntryPoint2(thePuzzle)
+        local entryPoint, nextGuesses = getNextEntryPoint3(thePuzzle)
 
         if entryPoint == nil then
             return -1

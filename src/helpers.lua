@@ -34,7 +34,7 @@ function helperFuns.string2Table(inString)
     local outArg = {}
     for ii = 1, #inString
     do
-        outArg[ii] = inString:sub(ii,ii)
+        outArg[#outArg+1] = inString:sub(ii,ii)
     end
     return outArg
 end
@@ -124,6 +124,15 @@ function helperFuns.cprint(msg, color)
     end
 
     return string.format("\27[%dm%s\27[0m", val, msg)
+end
+
+function helperFuns.subsref(inArg, referenceKeys)
+    local outArg = {}
+    for _, key in ipairs(referenceKeys)
+    do
+        outArg[key] = inArg[key]
+    end
+    return outArg
 end
 
 
