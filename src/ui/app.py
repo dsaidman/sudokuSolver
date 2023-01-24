@@ -3,34 +3,45 @@
 from PyQt5.QtGui import QPalette, QColor
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-import string
+from string import ascii_uppercase, digits
 from math import floor
+from enum import Enum, auto
+from functools import partial
+
 # Some globals to avoid recomputing often
-puzzleRows = list(string.ascii_uppercase[0:9])
-puzzleCols = list(string.digits[1:10])
+puzzleRows = list(ascii_uppercase[0:9])
+puzzleCols = list(digits[1:10])
 
 puzzleSquares = []
-for row in puzzleRows:
-    for col in puzzleCols:
-        puzzleSquares.append(row+col)
-del row, col
+[puzzleSquares.append(row+col) for row in puzzleRows for col in puzzleCols]
 
+# Some gui globals with default widget vals
 _tooltip        = ""
 _statustip      = ""
 _whatsthis      = ""
 _accessibleName = ""
-_fontFamily = "MS Reference Sans Serif"
+_fontFamily     = "MS Reference Sans Serif"
+_guiHeightPixels = 1100
+_guiWidthPixels  = 950
 
+class PuzzleStausEnum(Enum):
+    NotReady   = auto()
+    Locking    = auto()
+    Ready      = auto()
+    Solving    = auto()
+    Solved     = auto()
+    
+class ThemeEnum(Enum):
+    Dark       = auto()
+    Light      = auto()
+    
 # UI MainWindow
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.NonModal)
-        MainWindow.resize(938, 1088)
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        font.setPointSize(12)
-        MainWindow.setFont(font)
+        MainWindow.resize(_guiWidthPixels, _guiHeightPixels)
+        MainWindow.setFont(QtGui.QFont(_fontFamily, 12))
         MainWindow.setWindowTitle("SudokuSolverApp")
         MainWindow.setToolTip(_tooltip)
         MainWindow.setStatusTip(_statustip)
@@ -38,6 +49,7 @@ class Ui_MainWindow(object):
         MainWindow.setAccessibleName(_accessibleName)
         MainWindow.setAccessibleDescription(_accessibleName)
         MainWindow.setDockNestingEnabled(True)
+        
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setToolTip(_tooltip)
         self.centralWidget.setStatusTip(_statustip)
@@ -45,8 +57,11 @@ class Ui_MainWindow(object):
         self.centralWidget.setAccessibleName(_accessibleName)
         self.centralWidget.setAccessibleDescription(_accessibleName)
         self.centralWidget.setObjectName("centralWidget")
+        
+        self.centralWidget.puzzleStatus = PuzzleStausEnum.NotReady
+        
         self.titleLabel = QtWidgets.QLabel(self.centralWidget)
-        self.titleLabel.setGeometry(QtCore.QRect(0, 0, 931, 101))
+        self.titleLabel.setGeometry(QtCore.QRect(0, 0, _guiWidthPixels, 100))
         self.titleLabel.setFont(QtGui.QFont(
             _fontFamily, 40, 50, False))
         self.titleLabel.setToolTip(_tooltip)
@@ -62,149 +77,26 @@ class Ui_MainWindow(object):
         self.titleLabel.setObjectName("titleLabel")
         
         self.puzzleFrame = PuzzleFrame(self.centralWidget)
-
-
-        self.setStartBtn = QtWidgets.QPushButton(self.centralWidget)
-        self.setStartBtn.setEnabled(False)
-        self.setStartBtn.setGeometry(QtCore.QRect(10, 850, 361, 41))
-        self.setStartBtn.setFont(QtGui.QFont(_fontFamily, 14))
-        self.setStartBtn.setToolTip(_tooltip)
-        self.setStartBtn.setStatusTip(_statustip)
-        self.setStartBtn.setWhatsThis(_whatsthis)
-        self.setStartBtn.setAccessibleName(_accessibleName)
-        self.setStartBtn.setAccessibleDescription(_accessibleName)
-        self.setStartBtn.setText("SET START")
-        self.setStartBtn.setShortcut("")
-        self.setStartBtn.setObjectName("setStartBtn")
-        self.setNumSquaresLabel = QtWidgets.QLabel(self.centralWidget)
-        self.setNumSquaresLabel.setGeometry(QtCore.QRect(391, 851, 531, 38))
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        font.setPointSize(14)
-        font.setBold(True)
-        font.setItalic(False)
-        font.setWeight(75)
-        self.setNumSquaresLabel.setFont(font)
-        self.setNumSquaresLabel.setToolTip(_tooltip)
-        self.setNumSquaresLabel.setStatusTip(_statustip)
-        self.setNumSquaresLabel.setWhatsThis(_whatsthis)
-        self.setNumSquaresLabel.setAccessibleName(_accessibleName)
-        self.setNumSquaresLabel.setAccessibleDescription(_accessibleName)
-        self.setNumSquaresLabel.setText("0 OF 17 SQUARES SET")
-        self.setNumSquaresLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.setNumSquaresLabel.setObjectName("setNumSquaresLabel")
-        self.solveBtn = QtWidgets.QPushButton(self.centralWidget)
-        self.solveBtn.setEnabled(False)
-        self.solveBtn.setGeometry(QtCore.QRect(10, 900, 911, 41))
-
-        self.solveBtn.setFont(QtGui.QFont(_fontFamily,14))
-        self.solveBtn.setToolTip(_tooltip)
-        self.solveBtn.setStatusTip(_statustip)
-        self.solveBtn.setWhatsThis(_whatsthis)
-        self.solveBtn.setAccessibleName(_accessibleName)
-        self.solveBtn.setAccessibleDescription(_accessibleName)
-        self.solveBtn.setText("SOLVE")
-        self.solveBtn.setShortcut("")
-        self.solveBtn.setObjectName("solveBtn")
+        self.uiFrame     = UiPanel(self.centralWidget)
+        
+        
+        #self.titleLabel.raise_()
+        self.uiFrame.raise_()
+        #self.puzzleInfoLabel.raise_()
+        #self.solvePuzzleBtn.raise_()
         self.puzzleFrame.raise_()
-        self.titleLabel.raise_()
-        self.setStartBtn.raise_()
-        self.setNumSquaresLabel.raise_()
-        self.solveBtn.raise_()
+        
         MainWindow.setCentralWidget(self.centralWidget)
-        self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 938, 22))
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        font.setPointSize(8)
-        self.menuBar.setFont(font)
-        self.menuBar.setAcceptDrops(False)
-        self.menuBar.setToolTip(_tooltip)
-        self.menuBar.setStatusTip(_statustip)
-        self.menuBar.setWhatsThis(_whatsthis)
-        self.menuBar.setAccessibleName(_accessibleName)
-        self.menuBar.setAccessibleDescription(_accessibleName)
-        self.menuBar.setObjectName("menuBar")
-        self.fileMenu = QtWidgets.QMenu(self.menuBar)
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        font.setPointSize(7)
-        self.fileMenu.setFont(font)
-        self.fileMenu.setToolTip(_tooltip)
-        self.fileMenu.setStatusTip(_statustip)
-        self.fileMenu.setWhatsThis(_whatsthis)
-        self.fileMenu.setAccessibleName(_accessibleName)
-        self.fileMenu.setAccessibleDescription(_accessibleName)
-        self.fileMenu.setTitle("FILE")
-        self.fileMenu.setObjectName("fileMenu")
-        self.setThemeMenu = QtWidgets.QMenu(self.menuBar)
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        font.setPointSize(7)
-        self.setThemeMenu.setFont(font)
-        self.setThemeMenu.setToolTip(_tooltip)
-        self.setThemeMenu.setStatusTip(_statustip)
-        self.setThemeMenu.setWhatsThis(_whatsthis)
-        self.setThemeMenu.setAccessibleName(_accessibleName)
-        self.setThemeMenu.setAccessibleDescription(_accessibleName)
-        self.setThemeMenu.setTitle("THEME")
-        self.setThemeMenu.setObjectName("setThemeMenu")
-        MainWindow.setMenuBar(self.menuBar)
-        self.importFromIniAction = QtWidgets.QAction(MainWindow)
-        self.importFromIniAction.setText("IMPORT FROM INI")
-        self.importFromIniAction.setIconText("IMPORT FROM INI")
-        self.importFromIniAction.setToolTip("IMPORT FROM INI")
-        self.importFromIniAction.setStatusTip(_statustip)
-        self.importFromIniAction.setWhatsThis(_whatsthis)
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        self.importFromIniAction.setFont(font)
-        self.importFromIniAction.setMenuRole(QtWidgets.QAction.ApplicationSpecificRole)
-        self.importFromIniAction.setObjectName("importFromIniAction")
-        self.setLightThemeAction = QtWidgets.QAction(MainWindow)
-        self.setLightThemeAction.setCheckable(True)
-        self.setLightThemeAction.setChecked(True)
-        self.setLightThemeAction.setText("LIGHT")
-        self.setLightThemeAction.setIconText("LIGHT")
-        self.setLightThemeAction.setToolTip("Set Light Mode")
-        self.setLightThemeAction.setStatusTip(_statustip)
-        self.setLightThemeAction.setWhatsThis(_whatsthis)
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        self.setLightThemeAction.setFont(font)
-        self.setLightThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
-        self.setLightThemeAction.setShortcutVisibleInContextMenu(False)
-        self.setLightThemeAction.setObjectName("setLightThemeAction")
-        self.setDarkThemeAction = QtWidgets.QAction(MainWindow)
-        self.setDarkThemeAction.setCheckable(True)
-        self.setDarkThemeAction.setText("DARK")
-        self.setDarkThemeAction.setIconText("DARK")
-        self.setDarkThemeAction.setToolTip("Set Dark Mode")
-        self.setDarkThemeAction.setStatusTip(_statustip)
-        self.setDarkThemeAction.setWhatsThis(_whatsthis)
-        font = QtGui.QFont()
-        font.setFamily(_fontFamily)
-        font.setPointSize(7)
-        self.setDarkThemeAction.setFont(font)
-        self.setDarkThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
-        self.setDarkThemeAction.setObjectName("setDarkThemeAction")
-        self.fileMenu.addAction(self.importFromIniAction)
-        self.setThemeMenu.addAction(self.setLightThemeAction)
-        self.setThemeMenu.addAction(self.setDarkThemeAction)
-        self.menuBar.addAction(self.fileMenu.menuAction())
-        self.menuBar.addAction(self.setThemeMenu.menuAction())
+        
+        self.menuBar = MenuBar(MainWindow)
 
         self.retranslateUi(MainWindow)
-        #self.A1.textChanged['QString'].connect(self.setNumSquaresLabel.setText) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         for idx in range(0,80):
             MainWindow.setTabOrder(
                 self.puzzleFrame.squares[puzzleSquares[idx]],
                 self.puzzleFrame.squares[puzzleSquares[idx+1]])
-        
-        #MainWindow.setTabOrder(self.squares['I9'], self.setStartBtn)
-        #MainWindow.setTabOrder(self.setStartBtn, self.solveBtn)
 
     def retranslateUi(self, MainWindow):
         pass
@@ -242,9 +134,22 @@ class PuzzleFrame(QtWidgets.QFrame):
         self._setSquares()
         self._setHeaders()
         self._setBorderLines()
+        
+        self.puzzleStatus = PuzzleStausEnum.NotReady
 
+    def setFilledSqure(self):
+        cnt = 0
+        for squareKey in puzzleSquares: cnt = cnt+1 if self.squares[squareKey].getText() else cnt
+        
+    def getNumFilledSquares(self):
+        cnt = 0
+        for squareKey in puzzleSquares:
+            cnt = cnt+1 if str.isdigit(self.squares[squareKey].text()) else cnt
+        return cnt
+        
     def eventFilter(self, source, event):
-    
+        
+        
         if isinstance(source, PuzzleSquare) and event.type() == QtGui.QKeyEvent.KeyPress:
             sourceObjectName = source.objectName()
             rowNum = sourceObjectName[0]
@@ -277,10 +182,12 @@ class PuzzleFrame(QtWidgets.QFrame):
             returnVal = self._setNewFocus(None,sourceObjectName)
             self._setFocusCursor(sourceObjectName)
             return returnVal
-             
+
         return False
       
     def _setNewFocus(self, oldKey, newKey ):
+        
+        
         returnVal = False
         if oldKey in self.squares and oldKey != newKey: 
             self.squares[oldKey].clearFocus()
@@ -417,10 +324,17 @@ class PuzzleSquare(QtWidgets.QLineEdit):
         self.setDragEnabled(True)
         self.setPlaceholderText("")
         self.setClearButtonEnabled(False)
-        self.textChanged.connect(self.squareTextChanged)
-        self.hasValue = False
         
+        self.textChanged.connect(self.squareTextChanged)
+          
     def squareTextChanged(self,newTextStr):
+        
+        if self.parentWidget().parentWidget().puzzleStatus == PuzzleStausEnum.NotReady:
+            self.setStyleSheet(
+                "color: rgb(255,140,0);font-weight: bold;")
+        elif self.parentWidget().parentWidget().puzzleStatus == PuzzleStausEnum.Ready:
+            self.setStyleSheet(
+                "color: rgb(219,226,233); font-weight: normal;")
         _prevText = self.text()
         _newText  = newTextStr
         _newTextStr = list([val for val in _newText if val.isnumeric()])
@@ -431,7 +345,7 @@ class PuzzleSquare(QtWidgets.QLineEdit):
             self.setText(newTextStr[0])
             _nextKey = puzzleSquares[puzzleSquares.index(self.objectName())+1]
         self.parentWidget().parentWidget()._setNewFocus(self.objectName(),_nextKey)
-
+        
 class PuzzleBorderLine(QtWidgets.QFrame):
     def __init__(self, parent, frameShape, objectName=None):
         super(PuzzleBorderLine, self).__init__(parent, objectName=None)
@@ -465,29 +379,255 @@ class PuzzleHeader(QtWidgets.QLabel):
         self.setText(text)
         self.setAlignment(QtCore.Qt.AlignCenter)
 
-def getDarkPalette():
-    palette = QPalette()
-    palette.setColor(QPalette.Window, QColor(53, 53, 53))
-    palette.setColor(QPalette.WindowText, QtCore.Qt.white)
-    palette.setColor(QPalette.Base, QColor(25, 25, 25))
-    palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-    palette.setColor(QPalette.ToolTipBase, QtCore.Qt.black)
-    palette.setColor(QPalette.ToolTipText, QtCore.Qt.white)
-    palette.setColor(QPalette.Text, QtCore.Qt.white)
-    palette.setColor(QPalette.Button, QColor(53, 53, 53))
-    palette.setColor(QPalette.ButtonText, QtCore.Qt.white)
-    palette.setColor(QPalette.BrightText, QtCore.Qt.red)
-    palette.setColor(QPalette.Link, QColor(42, 130, 218))
-    palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-    palette.setColor(QPalette.HighlightedText, QtCore.Qt.black)
-    return palette
-
+class PuzzleInfoLabel(QtWidgets.QLabel):
+    
+    _italic     = True
+    _pointSize  = 14
+    _bold       = True
+    _weight     = 75
+    
+    def __init__(self, parent, objectName="puzzleInfoLabel"):
+        super(PuzzleInfoLabel, self).__init__(
+            parent, objectName="puzzleInfoLabel")
         
+        self.setParent(parent)
+        self.setObjectName(objectName)
+        
+        puzzleLabelFont = QtGui.QFont(_fontFamily, self._pointSize)
+        puzzleLabelFont.setBold(self._bold)
+        puzzleLabelFont.setItalic(self._italic)
+        puzzleLabelFont.setWeight(self._weight)
+        
+        self.setGeometry(QtCore.QRect(391, 851, 531, 38)) # Change this
+        
+        self.setFont(puzzleLabelFont)
+        self.setToolTip(_tooltip)
+        self.setStatusTip(_statustip)
+        self.setWhatsThis(_whatsthis)
+        self.setAccessibleName(_accessibleName)
+        self.setAccessibleDescription(_accessibleName)
+        self.setText("0 OF 17 SQUARES SET")
+        self.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+
+        # Connect the puzzle squares to update text when changed. Cant do before because this class didnt exist yet
+        _puzzleSquares = self.parent().parent().findChildren(QtWidgets.QFrame, 'puzzleFrame')[0].squares
+        
+        for theSquare in _puzzleSquares.values():
+            theSquare.textChanged.connect(self.refresh)
+        
+    def refresh(self):
+        
+        puzzleSquares = self.parent().parent().findChildren(QtWidgets.QFrame, 'puzzleFrame')[0]
+        numFilledSquares = puzzleSquares.getNumFilledSquares()
+
+        self.setText(str(numFilledSquares) + " OF 17 SQUARES SET")
+        
+        setBtn = self.parent().findChild(QtWidgets.QPushButton, 'setPuzzleButton')
+
+        if numFilledSquares >= 17 and setBtn.isEnabled() is False:
+            setBtn.setEnabled(True)
+        elif numFilledSquares < 17 and setBtn.isEnabled() is True:
+            setBtn.setEnabled(False)
+
+class SetPuzzleButton(QtWidgets.QPushButton):
+    def __init__(self, parent, objectName='setPuzzleButton'):
+        super(SetPuzzleButton, self).__init__(
+            parent, objectName='setPuzzleButton')
+
+        self.setParent(parent)
+        self.setObjectName(objectName)
+        self.setEnabled(False)
+        self.setGeometry(QtCore.QRect(10, 850, 361, 41))
+        self.setFont(QtGui.QFont(_fontFamily, 14))
+        self.setToolTip('The puzzle can be solved once the minimum number of squares required for a unique solution have been entered')
+        self.setStatusTip(_statustip)
+        self.setWhatsThis(_whatsthis)
+        self.setAccessibleName(_accessibleName)
+        self.setAccessibleDescription(_accessibleName)
+        self.setText("SET START")
+        self.setShortcut("")
+        
+        self.clicked.connect(self.parent().setSolvePuzzleBtnStatus)
+        
+class SolvePuzzleButton(QtWidgets.QPushButton):
+    def __init__(self, parent, objectName='solvePuzzleButton'):
+        super(SolvePuzzleButton, self).__init__(
+            parent, objectName='solvePuzzleButton')
+
+        self.setParent(parent)
+        self.setObjectName(objectName)
+        self.setEnabled(False)
+        self.setGeometry(QtCore.QRect(10, 900, 911, 41))
+
+        self.setFont(QtGui.QFont(_fontFamily, 14))
+        self.setToolTip(_tooltip)
+        self.setStatusTip(_statustip)
+        self.setWhatsThis(_whatsthis)
+        self.setAccessibleName(_accessibleName)
+        self.setAccessibleDescription(_accessibleName)
+        self.setText("SOLVE")
+        self.setShortcut("")
+        self.setObjectName("solveBtn")
+        
+        self.clicked.connect(self.solvePuzzle)
+        
+    def solvePuzzle(self):
+        pass
+           
+class UiPanel(QtWidgets.QFrame):
+    def __init__(self, parent, objectName='UIPanel'):
+        super(UiPanel, self).__init__(parent, objectName='UIPanel')
+        
+        self.setParent(parent)
+        self.setObjectName(objectName)
+
+        self.setupUiPanel()
+    
+    def setupUiPanel(self):
+        
+        self.puzzleInfoLabel = PuzzleInfoLabel(parent=self)
+        self.setPuzzleBtn    = SetPuzzleButton(parent=self)
+        self.solvePuzzleBtn  = SolvePuzzleButton(parent=self)
+
+    def setSolvePuzzleBtnStatus(self):
+        self.solvePuzzleBtn.setEnabled(True)
+
+class MenuBar(QtWidgets.QMenuBar):
+    _font = QtGui.QFont(_fontFamily, 8)
+    def __init__(self, theMainWindow):
+        super(MenuBar, self).__init__(theMainWindow)
+
+        self.setGeometry(QtCore.QRect(0, 0, 938, 22))
+        
+        self.setFont(self._font)
+        self.setAcceptDrops(False)
+        self.setToolTip(_tooltip)
+        self.setStatusTip(_statustip)
+        self.setWhatsThis(_whatsthis)
+        self.setAccessibleName(_accessibleName)
+        self.setAccessibleDescription(_accessibleName)
+        self.setObjectName("menuBar")
+        
+        self.initMenuBarComponents(theMainWindow)
+        self.initMenuBarActions(theMainWindow)
+        
+        self.fileMenu.addAction(self.importFromIniAction)
+        self.setThemeMenu.addAction(self.setLightThemeAction)
+        self.setThemeMenu.addAction(self.setDarkThemeAction)
+        self.addAction(self.fileMenu.menuAction())
+        self.addAction(self.setThemeMenu.menuAction())
+        
+    def initMenuBarComponents(self,theMainWindow):
+            
+        self.fileMenu = QtWidgets.QMenu(self)
+        self.fileMenu.setFont(self._font)
+        self.fileMenu.setToolTip(_tooltip)
+        self.fileMenu.setStatusTip(_statustip)
+        self.fileMenu.setWhatsThis(_whatsthis)
+        self.fileMenu.setAccessibleName(_accessibleName)
+        self.fileMenu.setAccessibleDescription(_accessibleName)
+        self.fileMenu.setTitle("FILE")
+        self.fileMenu.setObjectName("fileMenu")
+            
+        self.setThemeMenu = QtWidgets.QMenu(self)
+        self.setThemeMenu.setFont(self._font)
+        self.setThemeMenu.setToolTip(_tooltip)
+        self.setThemeMenu.setStatusTip(_statustip)
+        self.setThemeMenu.setWhatsThis(_whatsthis)
+        self.setThemeMenu.setAccessibleName(_accessibleName)
+        self.setThemeMenu.setAccessibleDescription(_accessibleName)
+        self.setThemeMenu.setTitle("THEME")
+        self.setThemeMenu.setObjectName("setThemeMenu")
+
+        theMainWindow.setMenuBar(self)
+            
+    def initMenuBarActions(self, theMainWindow):
+            
+        self.importFromIniAction = QtWidgets.QAction(theMainWindow)
+        self.importFromIniAction.setText("IMPORT FROM INI")
+        self.importFromIniAction.setIconText("IMPORT FROM INI")
+        self.importFromIniAction.setToolTip("IMPORT FROM INI")
+        self.importFromIniAction.setStatusTip(_statustip)
+        self.importFromIniAction.setWhatsThis(_whatsthis)
+        self.importFromIniAction.setFont(self._font)
+        self.importFromIniAction.setMenuRole(QtWidgets.QAction.ApplicationSpecificRole)
+        self.importFromIniAction.setObjectName("importFromIniAction")
+            
+        self.setLightThemeAction = QtWidgets.QAction(theMainWindow)
+        self.setLightThemeAction.setCheckable(True)
+        self.setLightThemeAction.setChecked(False)
+        self.setLightThemeAction.setText("LIGHT")
+        self.setLightThemeAction.setIconText("LIGHT")
+        self.setLightThemeAction.setToolTip("Set Light Mode")
+        self.setLightThemeAction.setStatusTip(_statustip)
+        self.setLightThemeAction.setWhatsThis(_whatsthis)
+        self.setLightThemeAction.setFont(self._font)
+        self.setLightThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
+        self.setLightThemeAction.setShortcutVisibleInContextMenu(False)
+        self.setLightThemeAction.setObjectName("setLightThemeAction")
+        self.setLightThemeAction.triggered.connect(self.setLightMode)
+        
+        self.setDarkThemeAction = QtWidgets.QAction(theMainWindow)
+        self.setDarkThemeAction.setCheckable(True)
+        self.setDarkThemeAction.setChecked(True)
+        self.setDarkThemeAction.setText("DARK")
+        self.setDarkThemeAction.setIconText("DARK")
+        self.setDarkThemeAction.setToolTip("Set Dark Mode")
+        self.setDarkThemeAction.setStatusTip(_statustip)
+        self.setDarkThemeAction.setWhatsThis(_whatsthis)
+        self.setDarkThemeAction.setFont(self._font)
+        self.setDarkThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
+        self.setDarkThemeAction.setObjectName("setDarkThemeAction")
+        self.setDarkThemeAction.triggered.connect(self.setDarkMode)
+
+        self.setLightThemeAction.triggered.connect(partial(self.uncheckTheBox, self.setDarkThemeAction))
+        self.setDarkThemeAction.triggered.connect(
+            partial(self.uncheckTheBox, self.setLightThemeAction))
+    
+    def setLightMode(self):
+        
+        QtGui.QGuiApplication.setPalette(GuiPalette(ThemeEnum.Light))
+
+    def setDarkMode(self):
+        QtGui.QGuiApplication.setPalette(GuiPalette(ThemeEnum.Dark))
+        
+    def uncheckTheBox(self,otherBox):
+        otherBox.setChecked(False)
+    
+
+class GuiPalette(QPalette):
+    def __init__(self, theTheme=ThemeEnum.Dark):
+        
+        super(GuiPalette,self).__init__()
+        
+        self.theme = theTheme
+        
+        if theTheme == ThemeEnum.Dark:
+            self.setColor(QtGui.QPalette.Window,
+                                 QtGui.QColor(41, 44, 51))
+            self.setColor(QtGui.QPalette.WindowText, QtCore.Qt.white)
+            self.setColor(QtGui.QPalette.Base, QtGui.QColor(15, 15, 15))
+            self.setColor(QtGui.QPalette.AlternateBase,
+                             QtGui.QColor(41, 44, 51))
+            self.setColor(QtGui.QPalette.ToolTipBase, QtCore.Qt.white)
+            self.setColor(QtGui.QPalette.ToolTipText, QtCore.Qt.white)
+            self.setColor(QtGui.QPalette.Text, QtCore.Qt.white)
+            self.setColor(QtGui.QPalette.Button, QtGui.QColor(41, 44, 51))
+            self.setColor(QtGui.QPalette.ButtonText, QtCore.Qt.white)
+            self.setColor(QtGui.QPalette.BrightText, QtCore.Qt.red)
+            self.setColor(QtGui.QPalette.Highlight,
+                             QtGui.QColor(100, 100, 225))
+            self.setColor(QtGui.QPalette.HighlightedText, QtCore.Qt.black)
+          
+        elif theTheme == ThemeEnum.Light:
+            pass
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
-    app.setPalette( getDarkPalette())
+    app.setPalette(GuiPalette(ThemeEnum.Dark))
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
