@@ -394,12 +394,12 @@ class PuzzleSquare(QtWidgets.QLineEdit):
         _newTextStr = list([val for val in _newText if val.isnumeric()])
         if not _newTextStr:
             self.setText("")
-            _nextKey = self.name()
+            _nextKey = self.name
         else:
             self.setText(newTextStr[0])
             _nextKey = self.nextSquare
 
-        self.parentWidget().parentWidget()._setNewFocus(self.objectName(), _nextKey)
+        grabPuzzleFrame()._setNewFocus(self.name, _nextKey)
 
     def _refreshQtProps(self):
         changeQtLineEditProp(self,'isValid',self.isValid.name)

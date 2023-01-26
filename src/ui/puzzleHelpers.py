@@ -26,6 +26,7 @@ class SudokuParams:
     
     @lru_cache
     def nextSquare(self, currentKey):
+        
         return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
     
     @lru_cache(maxsize=82, typed=False)
