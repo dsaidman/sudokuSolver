@@ -1,6 +1,7 @@
 from string import ascii_uppercase, digits
 from functools import cached_property, lru_cache
 
+
 class SudokuParams:
 
     @cached_property
@@ -22,6 +23,10 @@ class SudokuParams:
     @cached_property
     def columnCells(self):
         return [digits[idx:(idx+3)] for idx in [1, 4, 7]]
+    
+    @lru_cache
+    def nextSquare(self, currentKey):
+        return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
     
     @lru_cache(maxsize=82, typed=False)
     def neighbors(self, squareID):
@@ -50,7 +55,8 @@ class SudokuParams:
         if squareID in neighborList:
             neighborList.remove(squareID)
         return sorted(neighborList)
-
+    
+    
 
 #if __name__ == "__main__":
 #    return PuzzleDefinition()
