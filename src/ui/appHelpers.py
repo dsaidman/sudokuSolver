@@ -12,13 +12,13 @@ class AppStatusEnum(Enum):
     Solved = auto()
 
 class SquareTypeEnum(Enum):
-    Unset = 1
-    InputUnlocked = 2
+    Unset = -1
+    InputUnlocked = auto()
     InputLocked = auto()
     UserSet = auto()
 
 class ValidityEnum(Enum):
-    NoStatement = auto()
+    NoStatement = -1
     Valid = auto()
     Invalid = auto()
 
@@ -36,9 +36,9 @@ class GuiPalette(QPalette):
         self.theme = theTheme
 
         if theTheme == ThemeEnum.Dark:
-            self.setColor(QPalette.Window, QColor(41, 44, 51))
+            self.setColor(QPalette.Window, QColor(30, 30, 30))
             self.setColor(QPalette.WindowText, Qt.white)
-            self.setColor(QPalette.Base, QColor(15, 15, 15))
+            self.setColor(QPalette.Base, QColor(50, 50, 51))
             self.setColor(QPalette.AlternateBase, QColor(41, 44, 51))
             self.setColor(QPalette.ToolTipBase, Qt.white)
             self.setColor(QPalette.ToolTipText, Qt.white)
