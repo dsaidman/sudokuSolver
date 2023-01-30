@@ -464,7 +464,7 @@ class PuzzleSquare(QtWidgets.QLineEdit):
             name=self.name, tip=self._isValid.name))
         self.textChanged.connect(self._onTextChange)
         self.textChanged.connect(grabPuzzleFrame().refresh)
-        self.textEdited.connect(self._onTextChange)
+        #self.textEdited.connect(self._setSolution)
 
     def _onTextChange(self, newTextStr):
         _prevText = self.text()
@@ -678,6 +678,12 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             result = sp_run([cmd], capture_output=True, shell=True)
             os.chdir(currentPath)
             self.setSolution(str(result.stdout))
+            self.setText('SOLVED')
+            self.setEnabled(False)
+            infoLabel = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
+            infoLabel.setText('81 of 81 SQUARES SET: SOLVED')
+            puzzleFrame.refresh()
+
             
     def setSolution(self, resultStr):
         puzzleSquares = grabPuzzleSquares()
@@ -688,6 +694,8 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
                     re_search('({k})=([1-9])'.format(k=puzzleKey), str(resultStr)).group(2))
                 
                 puzzleSquares[puzzleKey].setText(txt)
+            puzzleSquares[puzzleKey].setEnabled(False)
+        
             
             
         
@@ -785,28 +793,41 @@ class MenuBar(QtWidgets.QMenuBar):
         self.importFromIniAction.setFont(self._font)
         self.importFromIniAction.setMenuRole(
             QtWidgets.QAction.ApplicationSpecificRole)
+        self.importFromIniAction.shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+I"), self)
         self.importFromIniAction.setObjectName("importFromIniAction")
         self.importFromIniAction.triggered.connect(self.importIni)
+        self.importFromIniAction.shortcut.activated.connect(self.importIni)
+
+        puzzleFrame = grabPuzzleFrame()
 
         self.setLightThemeAction = QtWidgets.QAction(theMainWindow)
         self.setLightThemeAction.setCheckable(True)
         self.setLightThemeAction.setChecked(False)
-        self.setLightThemeAction.setText("LIGHT")
+        self.setLightThemeAction.setText("&LIGHT")
         self.setLightThemeAction.setIconText("LIGHT")
         self.setLightThemeAction.setToolTip("Set Light Mode")
         self.setLightThemeAction.setStatusTip(_statustip)
         self.setLightThemeAction.setWhatsThis(_whatsthis)
         self.setLightThemeAction.setFont(self._font)
+        self.setLightThemeAction.shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+L"), self)
         self.setLightThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
         self.setLightThemeAction.setShortcutVisibleInContextMenu(False)
         self.setLightThemeAction.setObjectName("setLightThemeAction")
         self.setLightThemeAction.triggered.connect(self.setLightMode)
+        self.setLightThemeAction.triggered.connect(puzzleFrame.refresh)
+        self.setLightThemeAction.shortcut.activated.connect(self.setLightMode)
+        self.setLightThemeAction.shortcut.activated.connect(
+            puzzleFrame.refresh)
 
         self.setDarkThemeAction = QtWidgets.QAction(theMainWindow)
         self.setDarkThemeAction.setCheckable(True)
         self.setDarkThemeAction.setChecked(True)
-        self.setDarkThemeAction.setText("DARK")
+        self.setDarkThemeAction.setText("&DARK")
         self.setDarkThemeAction.setIconText("DARK")
+        self.setDarkThemeAction.shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+D"), self)
         self.setDarkThemeAction.setToolTip("Set Dark Mode")
         self.setDarkThemeAction.setStatusTip(_statustip)
         self.setDarkThemeAction.setWhatsThis(_whatsthis)
@@ -814,6 +835,10 @@ class MenuBar(QtWidgets.QMenuBar):
         self.setDarkThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
         self.setDarkThemeAction.setObjectName("setDarkThemeAction")
         self.setDarkThemeAction.triggered.connect(self.setDarkMode)
+        self.setDarkThemeAction.triggered.connect(puzzleFrame.refresh)
+        self.setDarkThemeAction.shortcut.activated.connect(self.setDarkMode)
+        self.setDarkThemeAction.shortcut.activated.connect(
+            puzzleFrame.refresh)
 
         self.setLightThemeAction.triggered.connect(
             partial(self.uncheckTheBox, self.setDarkThemeAction))
@@ -827,7 +852,7 @@ class MenuBar(QtWidgets.QMenuBar):
             squares = grabPuzzleSquares()
             puzzleIni = configparser.ConfigParser()
             puzzleIni.read(fname)
-            puzzleName = list(puzzleIni._sections.keys())[0]
+            puzzleName = list(puzzleIni._sections.keys())[-1]
             puzzleIni._sections[puzzleName]
             for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
                 squares[squareKey.upper()].setText(squareVal)
