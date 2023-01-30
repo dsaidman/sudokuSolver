@@ -5,11 +5,12 @@ package.path = package.path .. ';/usr/local/share/lua/5.3/?.lua;/usr/local/share
 package.cpath = package.cpath .. ';/usr/local/lib/lua/5.3/?.so;/usr/lib/x86_64-linux-gnu/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so'
 
 
-local iniReader   = require "inifile"
-local myFuns      = require "helpers"
+--local iniReader   = require "inifile"
+local myFuns      = require("helpers")
+local parser      = require('inputHandler')
 
-local luaFile     = '/home/dsaidman/projects/sudokuSolver/samples.ini'
-local mode        = 'evil'
+--local luaFile     = '/home/dsaidman/projects/sudokuSolver/samples.ini'
+--local mode        = 'evil'
 
 local rowNames    = {'A', 'B', 'C','D','E','F','G','H','I'}
 local colNames    =  {1,2,3,4,5,6,7,8,9}
@@ -41,8 +42,8 @@ local function getRow(theGridID) return string.sub(theGridID,1,1) end
 
 local function getCol(theGridID) return string.sub(theGridID,2,2) end
 
-local function importFromFile(filePath) return iniReader.parse(filePath)[mode:upper()] end
-local importedValues  = importFromFile(luaFile)
+--local function importFromFile(filePath) return iniReader.parse(filePath)[mode:upper()] end
+--local importedValues  = importFromFile(luaFile)
 
 local theRowNeighbors = {}
 local function getRowNeighbors(theGridID)
@@ -212,16 +213,14 @@ local function initEmptyPuzzle()
     return emptyPuzzle
 end
 
-local function importPuzzle(fileName)
+local importedValues = parser.parse()
+local function importPuzzle()
     local startingPuzzle = initEmptyPuzzle()
-    --local importedValues = importFromFile(fileName)
-
     for gridID, gridValue in pairs(importedValues)
     do
         startingPuzzle[gridID] = tostring(gridValue)
     end
     return startingPuzzle
-
 end
 
 --local previousKey
@@ -295,6 +294,15 @@ local function getDifficulty()
     else
         return difficultEnum[7]
     end
+end
+
+local function puzzle2String( sudokuPuzzle )
+    local argOut = ''
+    for key, val in pairs(sudokuPuzzle)
+    do
+        argOut = argOut .. key .. '=' .. val .. '\n'
+    end
+    return argOut
 end
 
 local function printPuzzle( sudokuPuzzle )
@@ -420,18 +428,27 @@ local function solveTheThing(thePuzzle)
     end
 end
 
-local function doTheThing(inFilePath)
-    local myPuzzle = importPuzzle(inFilePath)
-    printPuzzle(myPuzzle)
+
+---local function doTheThing(inFilePath)
+---    local myPuzzle = importPuzzle(inFilePath)
+---    printPuzzle(myPuzzle)
+---   print(myFuns.cprint('Running...','red'))
+---    local startTime = os.clock()
+---    local theSolution = solveTheThing( myPuzzle )
+---    solverInfo['runTime_seconds'] = os.clock()-startTime
+---    printPuzzle(theSolution)
+---    return theSolution
+---end
+local function doTheThing()
+    local myPuzzle =importPuzzle()
+    --printPuzzle(myPuzzle)
     print(myFuns.cprint('Running...','red'))
     local startTime = os.clock()
     local theSolution = solveTheThing( myPuzzle )
     solverInfo['runTime_seconds'] = os.clock()-startTime
-    printPuzzle(theSolution)
+    --printPuzzle(theSolution)
+    print( puzzle2String(theSolution) )
     return theSolution
 end
 
-
-doTheThing(luaFile)
-
-
+doTheThing()

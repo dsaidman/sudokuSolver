@@ -18,19 +18,6 @@
             "env": {}
         },
         {
-            "name": "launch-gideros",
-            "type": "lua",
-            "request": "launch",
-            "workingDirectory": "${workspaceRoot}",
-            "giderosPath": "C:/Program Files (x86)/Gideros",
-            "gprojPath": "${workspaceRoot}/GPROJ.gproj",
-            "jumpToGiderosErrorPosition": false,
-            "stopGiderosWhenDebuggerStops": true,
-            "listenPublicly": false,
-            "listenPort": 56789,
-            "encoding": "UTF-8"
-        },
-        {
             "name": "wait",
             "type": "lua",
             "request": "attach",

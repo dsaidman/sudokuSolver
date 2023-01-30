@@ -1,5 +1,6 @@
 local helperFuns = {}
 
+
 function helperFuns.min(inTable)
     local minVal = math.huge
     local minKey

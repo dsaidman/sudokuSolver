@@ -1,7 +1,9 @@
 from enum import Enum, auto, unique
+from functools import lru_cache
 from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
-
+from PyQt5.QtWidgets import QFileDialog, QDesktopWidget, QApplication
 
 class AppStatusEnum(Enum):
     NotReady = auto()
@@ -16,6 +18,7 @@ class SquareTypeEnum(Enum):
     InputUnlocked = auto()
     InputLocked = auto()
     UserSet = auto()
+    Solved = auto()
 
 class ValidityEnum(Enum):
     NoStatement = -1
@@ -25,7 +28,6 @@ class ValidityEnum(Enum):
 class ThemeEnum(Enum):
     Dark = auto()
     Light = auto()
-
 
 class GuiPalette(QPalette):
 
@@ -52,7 +54,3 @@ class GuiPalette(QPalette):
         elif theTheme == ThemeEnum.Light:
             pass
 
-theStyleSheet = '''
-
-
-'''
