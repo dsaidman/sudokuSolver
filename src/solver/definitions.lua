@@ -25,4 +25,3 @@ definitions.difficultEnum = {
     [7] = 'DASTURDLY EVIL'}
 
 return definitions
-
