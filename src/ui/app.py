@@ -13,6 +13,7 @@ from puzzleHelpers import luaPy
 from appHelpers import AppStatusEnum, SquareTypeEnum, ValidityEnum, GuiPalette, ThemeEnum
 import os
 import configparser
+from time import perf_counter as tictoc
 # Some gui globals with default widget vals
 _tooltip = ""
 _statustip = ""
@@ -362,10 +363,13 @@ class PuzzleFrame(QtWidgets.QFrame):
             else:
                 return False
         elif isinstance(source, PuzzleSquare) and ((event.type() == QtCore.QEvent.Type.FocusIn) or (event.type() == QtCore.QEvent.Type.MouseButtonPress)):
-            sourceObjectName = source.objectName()
-            returnVal = self._setNewFocus(None, sourceObjectName)
-            self._setFocusCursor(sourceObjectName)
-            return returnVal
+            if source.isEnabled == True:
+                sourceObjectName = source.objectName()
+                returnVal = self._setNewFocus(None, sourceObjectName)
+                self._setFocusCursor(sourceObjectName)
+                return returnVal
+            else:
+                return False
 
         return False
 
@@ -684,9 +688,14 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             return False
         else:
             puzzleArg = luaPy.dict2Table(puzzleFrame.asDict())
-
             solveFun = luaPy.sovler['solve']
+            
+            # Everything is ready to call
+            tStart = tictoc()
             result = solveFun( puzzleArg )
+            tDuration_seconds = tictoc()-tStart
+            print(f"Elapsed time: {tDuration_seconds} seconds")
+            
             theSolution = {}
             for squareKey, squareValue in result.items():
                 theSolution[squareKey] = squareValue
@@ -848,14 +857,20 @@ class MenuBar(QtWidgets.QMenuBar):
 
     def importIni(self):
         fname = QtWidgets.QFileDialog.getOpenFileName(
-            self, 'Load ini file', os.getcwd(), "Ini file (*.ini)")
+            self,
+            'Load ini file',
+            os.path.join(_basepath,'input'), 
+            "Ini Files (*.ini *.txt)")
         if fname:
             puzzleFrame = grabPuzzleFrame()
             infoLabel   = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
             squares = puzzleFrame.squares
             puzzleIni = configparser.ConfigParser()
             puzzleIni.read(fname)
-            puzzleName = list(puzzleIni._sections.keys())[-1]
+            puzzleNames = list(puzzleIni._sections.keys())
+            if len(puzzleNames) == 0:
+                return
+            puzzleName = puzzleNames[0]
             puzzleIni._sections[puzzleName]
             for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
                 squares[squareKey.upper()].setText(squareVal)
