@@ -1,15 +1,7 @@
 ---@diagnostic disable: trailing-space
 -- sudoku solver in lua, at least an attempt of one
 
-package.path = package.path .. ';./?.lua;./?/init.lua'
-
---package.path = package.path .. ';/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;
---package.cpath = package.cpath .. ';/usr/local/lib/lua/5.3/?.so;/usr/lib/x86_64-linux-gnu/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so'
-
-
---local iniReader   = require "inifile"
 local myFuns      = require("helpers")
-local parser      = require('inputHandler')
 local defs        = require('definitions')
 
 local rowNames    = defs.rowNames

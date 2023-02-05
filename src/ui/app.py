@@ -8,27 +8,21 @@ from string import ascii_uppercase, digits
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QColor, QPalette
 
-from puzzleHelpers import SudokuParams
+from puzzleHelpers import sudokuParams as params
+from puzzleHelpers import luaPy
 from appHelpers import AppStatusEnum, SquareTypeEnum, ValidityEnum, GuiPalette, ThemeEnum
 import os
 import configparser
-from glob import glob
-from re import search as re_search
-from subprocess import run as sp_run
-import lupa
-from lupa import LuaRuntime
-
 # Some gui globals with default widget vals
 _tooltip = ""
 _statustip = ""
 _whatsthis = ""
 _accessibleName = ""
-_fontFamily = 'Segoi U'
+_fontFamily = 'Segoi Ui'
 _guiHeightPixels = 1100
 _guiWidthPixels = 950
 _basepath = os.path.abspath(os.path.join(
     os.path.dirname(__file__), '..','..'))
-params = SudokuParams()
 
 # UI MainWindow
 
@@ -58,6 +52,7 @@ class AppMainWindow(QtWidgets.QMainWindow):
         self.setDockNestingEnabled(True)
         self._status = AppStatusEnum.Unlocked
         self.resizeApp()
+        self.setStyleSheet('* {font-family: MS Reference Sans Sherif}')
 
         self.centralWidget = QtWidgets.QWidget(parent=self)
         self.centralWidget.setObjectName("centralWidget")
@@ -77,7 +72,7 @@ class AppMainWindow(QtWidgets.QMainWindow):
         self.titleLabel = QtWidgets.QLabel(self.centralWidget)
         # self.titleLabel.setGeometry(QtCore.QRect(0, 0, _guiWidthPixels, 100))
         self.titleLabel.setFont(QtGui.QFont(
-            _fontFamily, 40, 50, False))
+            _fontFamily, 26, 50, False))
         self.titleLabel.setAutoFillBackground(True)
         self.titleLabel.setFrameShadow(QtWidgets.QFrame.Plain)
         self.titleLabel.setText("SUDOKU SOLVER")
@@ -167,7 +162,7 @@ class PuzzleFrame(QtWidgets.QFrame):
                 return self._isValid
         self._isValid = ValidityEnum.Valid
         return self._isValid
-
+    
     def __init__(self, parent):
         super(PuzzleFrame, self).__init__(parent)
         self.setParent(parent)
@@ -190,7 +185,7 @@ class PuzzleFrame(QtWidgets.QFrame):
         self._initSquares()
         self._initHeaders()
         self._initBorderLines()
-
+        
     def asString(self):
         argList = []
         for squareKey, squareValue in self.squares.items():
@@ -206,17 +201,15 @@ class PuzzleFrame(QtWidgets.QFrame):
             if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text()) > 0:
                 argList[squareKey] = squareValue.text()
         return argList
-    
-    def asTable(self):
-        lua      = params._lua
-        tableFun =  lua.eval('function(d) local t = {} for key, value in python.iterex(d.items()) do t[key] = value end return t end')
-        return tableFun(lupa.as_attrgetter(self.asDict()))
         
     
-    def refresh(self):
-        for square in self.squares.values():
-            square._applyFormatting()
+    def _refresh(self):
+        if self.isValid: self._applyFormatting()
 
+    def _applyFormatting(self):
+        for puzzleSquares in self.squares.values():
+            puzzleSquares._applyFormatting()
+        
     def toggleLock(self):
         puzzleValid = grabPuzzleFrame().isValid
         solveBtn = grabWidget(QtWidgets.QPushButton, 'solveBtn')
@@ -235,10 +228,11 @@ class PuzzleFrame(QtWidgets.QFrame):
                 if len(square.text()) > 0 and square.squareType == SquareTypeEnum.InputUnlocked:
                     square.squareType = SquareTypeEnum.InputLocked
                     square.setReadOnly(True)
+                if len(square.text()) == 0:
+                    square.squareType = SquareTypeEnum.UserSet
             grabMainWindow().status = AppStatusEnum.Locked
             solveBtn._enableMe()
             setBtn.setText("LOCKED")
-        self.refresh()
 
     def _setNewFocus(self, oldKey, newKey):
         returnVal = False
@@ -375,7 +369,6 @@ class PuzzleFrame(QtWidgets.QFrame):
 
         return False
 
-    
 class PuzzleSquare(QtWidgets.QLineEdit):
 
     @cached_property
@@ -446,8 +439,8 @@ class PuzzleSquare(QtWidgets.QLineEdit):
             self._isValid = retVal
             self.setToolTip('Square {name}: {tip}'.format(
                 name=self.name, tip=retVal.name))
-
-        return retVal
+        self._isValid = retVal
+        return self._isValid
 
     def __init__(self, parent, objectName=None):
         super(PuzzleSquare, self).__init__(parent, objectName=None)
@@ -479,9 +472,8 @@ class PuzzleSquare(QtWidgets.QLineEdit):
         self._squareType = SquareTypeEnum.InputUnlocked
         self.setToolTip('Square {name}: {tip}'.format(
             name=self.name, tip=self._isValid.name))
-        self.textChanged.connect(self._onTextChange)
-        self.textChanged.connect(grabPuzzleFrame().refresh)
-        #self.textEdited.connect(self._setSolution)
+        self.textEdited.connect(self._onTextChange)
+        self.textEdited.connect(grabPuzzleFrame()._refresh)
 
     def _onTextChange(self, newTextStr):
         _prevText = self.text()
@@ -497,9 +489,18 @@ class PuzzleSquare(QtWidgets.QLineEdit):
             self.clearFocus()
         self.clearFocus()
         grabWidget(QtWidgets.QLineEdit, _nextKey).setFocus()
+        
+    def _resetAction(self):
+        self.setEnabled(True)
+        self.setText('') 
+        self.squareType = SquareTypeEnum.InputUnlocked
+        self._isValid = ValidityEnum.Valid
+        self._applyFormatting()
+
 
     def _applyFormatting(self):
-        isValid = self.isValid
+        isValid = self._isValid
+        
         if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
@@ -522,13 +523,13 @@ class PuzzleSquare(QtWidgets.QLineEdit):
                                "border-color: rgb(255,140,0);}")
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.UserSet:
             self.setStyleSheet("QLineEdit {"
-                               "color:	rgb(212,212,200);"
+                               "color:	rgb(212,255,200);"
                                "font-weight: normal;"
                                "font-size: 12pt;"
                                "font-style: regular;}")
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.Solved:
             self.setStyleSheet("QLineEdit {"
-                               "color:	green;"
+                               "color:	rgb(0,255,0);"
                                "font-weight: normal;"
                                "font-size: 12pt;"
                                "font-style: regular;}")
@@ -580,7 +581,6 @@ class PuzzleInfoLabel(QtWidgets.QLabel):
         puzzleLabelFont = QtGui.QFont(_fontFamily, 14)
         puzzleLabelFont.setBold(False)
         puzzleLabelFont.setItalic(False)
-        puzzleLabelFont.setWeight(75)
 
         # self.setGeometry(QtCore.QRect(391, 851, 531, 38))  # Change this
         self.setText("0 OF 17 SQUARES SET")
@@ -590,9 +590,9 @@ class PuzzleInfoLabel(QtWidgets.QLabel):
         # Connect the puzzle squares to update text when changed. Cant do before because this class didnt exist yet
 
         for theSquare in grabPuzzleSquares().values():
-            theSquare.textChanged.connect(self.refresh)
+            theSquare.textEdited.connect(self._refresh)
 
-    def refresh(self):
+    def _refresh(self):
 
         puzzleFrame = grabWidget(QtWidgets.QFrame, 'puzzleFrame')
         numFilledSquares = puzzleFrame.validSquareCount
@@ -603,16 +603,21 @@ class PuzzleInfoLabel(QtWidgets.QLabel):
 
         if puzzleIsValid == ValidityEnum.Invalid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(255, 0, 0); font-style: italic;font-weight: regular;font-size: 18pt;}")
+                "QLabel{ color: rgb(255, 0, 0); font-style: italic;font-weight: regular;font-size: 14pt;}")
             setPuzzleBtn._disableMe()
-        elif numFilledSquares >= 17 and puzzleIsValid == ValidityEnum.Valid:
+        elif numFilledSquares >= 17 and numFilledSquares < 81 and puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(255, 140, 0); font-style: regular;font-weight: bold;font-size: 18pt;}")
+                "QLabel{ color: rgb(255, 140, 0); font-style: regular;font-weight: bold;font-size: 14pt;}")
             theText = theText + ': READY'
+            setPuzzleBtn._enableMe()
+        elif numFilledSquares == 81 and puzzleIsValid == ValidityEnum.Valid:
+            self.setStyleSheet(
+                "QLabel{ color: rgb(0, 255, 0); font-style: regular;font-weight: bold;font-size: 14pt;}")
+            theText = theText + ': COMPLETE'
             setPuzzleBtn._enableMe()
         elif numFilledSquares < 17 or puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(212,212,200); font-style: normal;font-weight: regular;font-size: 18pt;}")
+                "QLabel{ color: rgb(212,212,200); font-style: normal;font-weight: regular;font-size: 14pt;}")
             setPuzzleBtn._disableMe()
         self.setText(theText)
 
@@ -663,7 +668,7 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
 
     def _enableMe(self):
         self.setEnabled(True)
-        self.setStyleSheet("color: green;"
+        self.setStyleSheet("color: rgb(0,255,0);"
                            "font-weight: bold;")
 
     def _disableMe(self):
@@ -678,45 +683,36 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             print('\tPuzzle not valid condition, returning')
             return False
         else:
-            puzzleArg = puzzleFrame.asTable()
-            currentPath = os.getcwd()
-            newRoot = os.path.join(_basepath, 'src', 'solver')
-            os.chdir(newRoot)
-            solveFun = params._solverModule['solve']
+            puzzleArg = luaPy.dict2Table(puzzleFrame.asDict())
+
+            solveFun = luaPy.sovler['solve']
             result = solveFun( puzzleArg )
             theSolution = {}
             for squareKey, squareValue in result.items():
                 theSolution[squareKey] = squareValue
-            
-            
-            """
-            _includes = [file for file in glob('*.lua') if file.endswith('lua')]
-            includesArg = [' -l {file}'.format(file=luaFile) for luaFile in _includes]
-            includesArg = ' '.join(includesArg)
-            
-            cmd = '{exe} {script} {args}'.format(
-                exe='/usr/bin/luajit',
-                script='solver.lua',
-                # includes=includesArg,
-                args=argStr)
 
-            result = sp_run([cmd], capture_output=True, shell=True)"""
-            os.chdir(currentPath)
             self.setSolution(theSolution)
             self.setText('SOLVED')
             self.setEnabled(False)
             infoLabel = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
             infoLabel.setText('81 of 81 SQUARES SET: SOLVED')
-            puzzleFrame.refresh()
-
+            puzzleFrame._refresh()
+            infoLabel._refresh()
             
     def setSolution(self, theSolutionDict):
         puzzleSquares = grabPuzzleSquares()
+        allComplete = True
         for puzzleKey in params.squares:
             if puzzleSquares[puzzleKey].squareType is not SquareTypeEnum.InputLocked:
                 puzzleSquares[puzzleKey].squareType = SquareTypeEnum.Solved
                 puzzleSquares[puzzleKey].setText(theSolutionDict[puzzleKey])
+            else:
+                allComplete = False
             puzzleSquares[puzzleKey].setEnabled(False)
+        if allComplete:
+            for squareValue in puzzleSquares.values():
+                squareValue._applyFormatting()
+                squareValue.setEnabled(False)
         
             
         
@@ -758,46 +754,28 @@ class MenuBar(QtWidgets.QMenuBar):
         super(MenuBar, self).__init__(theMainWindow)
 
         # self.setGeometry(QtCore.QRect(0, 0, 938, 22))
-
-        self.setFont(self._font)
         self.setAcceptDrops(False)
         self.setObjectName("menuBar")
 
         self.initMenuBarComponents(theMainWindow)
         self.initMenuBarActions(theMainWindow)
 
-        self.fileMenu.addAction(self.importFromIniAction)
+        self.fileMenu.addAction(self.importFromIniAction)       
+        self.fileMenu.addAction(self.resetAllAction)
+        
+        
         self.setThemeMenu.addAction(self.setLightThemeAction)
         self.setThemeMenu.addAction(self.setDarkThemeAction)
         self.addAction(self.fileMenu.menuAction())
         self.addAction(self.setThemeMenu.menuAction())
 
-        ''' # Connect the theme changed to update the properties
-        for square in grabPuzzleSquares().values():
-            self.setLightThemeAction.triggered.connect(
-                partial(square.themeChanged, ThemeEnum.Light))
-            self.setDarkThemeAction.triggered.connect(
-                partial(square.themeChanged, ThemeEnum.Dark)) '''
-
     def initMenuBarComponents(self, theMainWindow):
 
         self.fileMenu = QtWidgets.QMenu(self)
-        self.fileMenu.setFont(self._font)
-        self.fileMenu.setToolTip(_tooltip)
-        self.fileMenu.setStatusTip(_statustip)
-        self.fileMenu.setWhatsThis(_whatsthis)
-        self.fileMenu.setAccessibleName(_accessibleName)
-        self.fileMenu.setAccessibleDescription(_accessibleName)
         self.fileMenu.setTitle("FILE")
         self.fileMenu.setObjectName("fileMenu")
 
         self.setThemeMenu = QtWidgets.QMenu(self)
-        self.setThemeMenu.setFont(self._font)
-        self.setThemeMenu.setToolTip(_tooltip)
-        self.setThemeMenu.setStatusTip(_statustip)
-        self.setThemeMenu.setWhatsThis(_whatsthis)
-        self.setThemeMenu.setAccessibleName(_accessibleName)
-        self.setThemeMenu.setAccessibleDescription(_accessibleName)
         self.setThemeMenu.setTitle("THEME")
         self.setThemeMenu.setObjectName("setThemeMenu")
 
@@ -805,13 +783,11 @@ class MenuBar(QtWidgets.QMenuBar):
 
     def initMenuBarActions(self, theMainWindow):
 
+        puzzleFrame = grabPuzzleFrame()
         self.importFromIniAction = QtWidgets.QAction(theMainWindow)
         self.importFromIniAction.setText("&IMPORT FROM INI")
         self.importFromIniAction.setIconText("IMPORT FROM INI")
         self.importFromIniAction.setToolTip("IMPORT FROM INI")
-        self.importFromIniAction.setStatusTip(_statustip)
-        self.importFromIniAction.setWhatsThis(_whatsthis)
-        self.importFromIniAction.setFont(self._font)
         self.importFromIniAction.setMenuRole(
             QtWidgets.QAction.ApplicationSpecificRole)
         self.importFromIniAction.shortcut = QtWidgets.QShortcut(
@@ -820,27 +796,35 @@ class MenuBar(QtWidgets.QMenuBar):
         self.importFromIniAction.triggered.connect(self.importIni)
         self.importFromIniAction.shortcut.activated.connect(self.importIni)
 
-        puzzleFrame = grabPuzzleFrame()
-
+        self.resetAllAction = QtWidgets.QAction(theMainWindow)
+        self.resetAllAction.setText("&RESET ALL")
+        self.resetAllAction.setIconText("RESET ALL")
+        self.resetAllAction.setToolTip("RESET ALL SQUARES")
+        self.resetAllAction.setMenuRole(
+            QtWidgets.QAction.ApplicationSpecificRole)
+        self.resetAllAction.shortcut = QtWidgets.QShortcut(
+            QtGui.QKeySequence("Ctrl+R"), self)
+        self.resetAllAction.setObjectName("resetAction")
+        
+        self.resetAllAction.triggered.connect(self.resetAction)
+        self.resetAllAction.shortcut.activated.connect(self.resetAction)
+        
         self.setLightThemeAction = QtWidgets.QAction(theMainWindow)
         self.setLightThemeAction.setCheckable(True)
         self.setLightThemeAction.setChecked(False)
         self.setLightThemeAction.setText("&LIGHT")
         self.setLightThemeAction.setIconText("LIGHT")
         self.setLightThemeAction.setToolTip("Set Light Mode")
-        self.setLightThemeAction.setStatusTip(_statustip)
-        self.setLightThemeAction.setWhatsThis(_whatsthis)
-        self.setLightThemeAction.setFont(self._font)
         self.setLightThemeAction.shortcut = QtWidgets.QShortcut(
             QtGui.QKeySequence("Ctrl+L"), self)
         self.setLightThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
         self.setLightThemeAction.setShortcutVisibleInContextMenu(False)
         self.setLightThemeAction.setObjectName("setLightThemeAction")
         self.setLightThemeAction.triggered.connect(self.setLightMode)
-        self.setLightThemeAction.triggered.connect(puzzleFrame.refresh)
         self.setLightThemeAction.shortcut.activated.connect(self.setLightMode)
-        self.setLightThemeAction.shortcut.activated.connect(
-            puzzleFrame.refresh)
+        self.setLightThemeAction.triggered.connect(puzzleFrame._refresh)
+        self.setLightThemeAction.shortcut.activated.connect(puzzleFrame._refresh)
+
 
         self.setDarkThemeAction = QtWidgets.QAction(theMainWindow)
         self.setDarkThemeAction.setCheckable(True)
@@ -850,16 +834,12 @@ class MenuBar(QtWidgets.QMenuBar):
         self.setDarkThemeAction.shortcut = QtWidgets.QShortcut(
             QtGui.QKeySequence("Ctrl+D"), self)
         self.setDarkThemeAction.setToolTip("Set Dark Mode")
-        self.setDarkThemeAction.setStatusTip(_statustip)
-        self.setDarkThemeAction.setWhatsThis(_whatsthis)
-        self.setDarkThemeAction.setFont(self._font)
         self.setDarkThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
         self.setDarkThemeAction.setObjectName("setDarkThemeAction")
         self.setDarkThemeAction.triggered.connect(self.setDarkMode)
-        self.setDarkThemeAction.triggered.connect(puzzleFrame.refresh)
+        self.setDarkThemeAction.triggered.connect(puzzleFrame._refresh)
         self.setDarkThemeAction.shortcut.activated.connect(self.setDarkMode)
-        self.setDarkThemeAction.shortcut.activated.connect(
-            puzzleFrame.refresh)
+        self.setDarkThemeAction.shortcut.activated.connect(puzzleFrame._refresh)
 
         self.setLightThemeAction.triggered.connect(
             partial(self.uncheckTheBox, self.setDarkThemeAction))
@@ -870,7 +850,9 @@ class MenuBar(QtWidgets.QMenuBar):
         fname = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Load ini file', os.getcwd(), "Ini file (*.ini)")
         if fname:
-            squares = grabPuzzleSquares()
+            puzzleFrame = grabPuzzleFrame()
+            infoLabel   = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
+            squares = puzzleFrame.squares
             puzzleIni = configparser.ConfigParser()
             puzzleIni.read(fname)
             puzzleName = list(puzzleIni._sections.keys())[-1]
@@ -878,8 +860,22 @@ class MenuBar(QtWidgets.QMenuBar):
             for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
                 squares[squareKey.upper()].setText(squareVal)
                 squares[squareKey.upper()].squareType = SquareTypeEnum.InputUnlocked
-            grabPuzzleFrame().toggleLock()
-            # squares[squareKey]._applyFormatting()
+                squares[squareKey.upper()]._applyFormatting()
+            puzzleFrame.toggleLock()
+            puzzleFrame._refresh()
+            infoLabel._refresh()
+
+    def resetAction(self):
+        
+        puzzleFrame     = grabPuzzleFrame()
+        squares = puzzleFrame.squares
+        puzzleInfoLabel = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
+        for square in squares.values():
+            square._resetAction()
+
+        puzzleInfoLabel.setText('Solve')
+        puzzleInfoLabel._refresh()
+        puzzleFrame.toggleLock()
 
     def setLightMode(self):
         QtGui.QGuiApplication.setPalette(GuiPalette(ThemeEnum.Light))
