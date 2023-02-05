@@ -1,150 +1,29 @@
 ---@diagnostic disable: trailing-space
 -- sudoku solver in lua, at least an attempt of one
 
-package.path = package.path .. ';/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;./?.lua;./?/init.lua'
-package.cpath = package.cpath .. ';/usr/local/lib/lua/5.3/?.so;/usr/lib/x86_64-linux-gnu/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so'
+package.path = package.path .. ';./?.lua;./?/init.lua'
+
+--package.path = package.path .. ';/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;
+--package.cpath = package.cpath .. ';/usr/local/lib/lua/5.3/?.so;/usr/lib/x86_64-linux-gnu/lua/5.3/?.so;/usr/lib/lua/5.3/?.so;/usr/local/lib/lua/5.3/loadall.so;./?.so'
 
 
 --local iniReader   = require "inifile"
 local myFuns      = require("helpers")
 local parser      = require('inputHandler')
+local defs        = require('definitions')
 
---local luaFile     = '/home/dsaidman/projects/sudokuSolver/samples.ini'
---local mode        = 'evil'
+local rowNames    = defs.rowNames
+local colNames    = defs.colNames
+local valueList   = table.concat(defs.colNames)
 
-local rowNames    = {'A', 'B', 'C','D','E','F','G','H','I'}
-local colNames    =  {1,2,3,4,5,6,7,8,9}
-local valueList   =  '123456789'
-local cellRows    = {
-                        [1] = 'ABC',
-                        [2] = 'DEF',
-                        [3] = 'GHI'}
-local cellColumns = {
-                        [1] = '123',
-                        [2] = '456',
-                        [3] = '789'}
 local solverInfo = {
                         ['numOperations'] = 0,
                         ['numRecursions'] = 0}
 
-local difficultEnum = {
-    [1] = 'TRIVIAL',
-    [2] = 'EASY',
-    [3] = 'SO SO',
-    [4] = 'HARD',
-    [5] = 'VERY HARD',
-    [6] = 'EVIL',
-    [7] = 'DASTURDLY EVIL'}
+local difficultEnum = defs.difficultyEnum
 
-local allKeys = myFuns.cross(rowNames, colNames)
-
-local function getRow(theGridID) return string.sub(theGridID,1,1) end
-
-local function getCol(theGridID) return string.sub(theGridID,2,2) end
-
---local function importFromFile(filePath) return iniReader.parse(filePath)[mode:upper()] end
---local importedValues  = importFromFile(luaFile)
-
-local theRowNeighbors = {}
-local function getRowNeighbors(theGridID)
-
-    if theRowNeighbors[theGridID] == nil
-    then
-        local theNeighbors = {}
-        local theRow = getRow(theGridID)
-        for _,theCol in pairs(colNames) do
-            table.insert(theNeighbors, theRow .. tostring(theCol))
-        end
-        theRowNeighbors[theGridID] = theNeighbors
-        return theRowNeighbors[theGridID]
-    else
-        return theRowNeighbors[theGridID]
-    end
-
-end
-
-local theColumnNeighbors = {}
-local function getColumnNeighbors(theGridID)
-
-    if theColumnNeighbors[theGridID] == nil
-    then
-        local theNeighbors = {}
-        local theCol = getCol(theGridID)
-        for _,theRow in ipairs(rowNames) do
-            table.insert(theNeighbors, theRow .. tostring(theCol))
-        end
-        theColumnNeighbors[theGridID] = theNeighbors
-        return theColumnNeighbors[theGridID]
-    else
-        return theColumnNeighbors[theGridID]
-    end
-end
-
-local theCellNeighbors = {} -- put outside so can cache the result
-local function getCellNeighbors(theGridID)
-
-    if theCellNeighbors[theGridID] == nil
-    then
-        local rowGroupIdx    = myFuns.findStringMember(
-            getRow(theGridID),
-            cellRows)
-        local columnGroupIdx = myFuns.findStringMember(
-            getCol(theGridID),
-            cellColumns)
-        theCellNeighbors[theGridID] = myFuns.cross( 
-            myFuns.string2Table(cellRows[rowGroupIdx]),
-            myFuns.string2Table(cellColumns[columnGroupIdx]) )
-        return theCellNeighbors[theGridID]
-    else
-        return theCellNeighbors[theGridID]
-    end
-end
-
-local function getAllPuzzleFamilies()
-    local theFamilies = {}
-    -- be sure only do this once and not waste the effort
-
-    -- the row families
-    for _,rowName in pairs(rowNames)
-    do
-        table.insert(theFamilies, getRowNeighbors(rowName .. '1') )
-    end
-
-        -- the column families
-    for _,colNumber in pairs(colNames)
-    do
-        table.insert(theFamilies, getColumnNeighbors('A' .. tostring(colNumber)) )
-    end
-
-        -- the cell families. the same getRow and getCol will work here to grab one of each cell
-
-    for iRow = 1,3 do
-        for iCol = 1,3 do
-            table.insert(
-                theFamilies,
-                getCellNeighbors( tostring(getRow(cellRows[iRow])) .. tostring(getCol(cellColumns[iCol]))))
-        end
-    end
-
-    return theFamilies
-end
-local allFamilies = getAllPuzzleFamilies()
-
-local allSquareNeighbors = {}
-local function getSquareNeighbors(gridKey)
-    if allSquareNeighbors[gridKey] == nil
-    then
-        local allSquares = myFuns.joinTables(
-            getRowNeighbors(gridKey),
-            getColumnNeighbors(gridKey),
-            getCellNeighbors(gridKey))
-        allSquares[gridKey] = nil
-        allSquareNeighbors[gridKey] = allSquares
-        return allSquareNeighbors[gridKey]
-    else
-        return allSquareNeighbors[gridKey]
-    end
-end
+local allKeys     = defs.allKeys
+local allFamilies = defs.allFamilies
 
 local function isValidFamily( thePuzzle, theFamily )
 
@@ -213,11 +92,11 @@ local function initEmptyPuzzle()
     return emptyPuzzle
 end
 
-local importedValues = parser.parse()
-local function importPuzzle()
+local function importPuzzle(startingValues)
     local startingPuzzle = initEmptyPuzzle()
-    for gridID, gridValue in pairs(importedValues)
+    for gridID, gridValue in pairs(startingValues)
     do
+        print(gridID .. ' = ' .. gridValue)
         startingPuzzle[gridID] = tostring(gridValue)
     end
     return startingPuzzle
@@ -305,7 +184,7 @@ local function puzzle2String( sudokuPuzzle )
     return argOut
 end
 
-local function printPuzzle( sudokuPuzzle )
+--[[ local function printPuzzle( sudokuPuzzle )
 
     -- print row headers
     local msg = '\n' .. string.format('%5s',' ')
@@ -360,7 +239,7 @@ local function printPuzzle( sudokuPuzzle )
     end
 
     print(msg)
-end
+end ]]
 
 local function solveTheThing(thePuzzle)
 
@@ -375,7 +254,7 @@ local function solveTheThing(thePuzzle)
 
             if #gridValues == 1
             then
-                allNeighbors = getSquareNeighbors(gridID)
+                allNeighbors = defs.getNeighbors(gridID)
                 for neighborKey in pairs(allNeighbors)
                 do
                     neighborVals = thePuzzle[neighborKey]
@@ -439,8 +318,10 @@ end
 ---    printPuzzle(theSolution)
 ---    return theSolution
 ---end
-local function doTheThing()
-    local myPuzzle =importPuzzle()
+local solver = {}
+function solver.solve(myStartingVals)
+
+    local myPuzzle = importPuzzle(myStartingVals)
     --printPuzzle(myPuzzle)
     print(myFuns.cprint('Running...','red'))
     local startTime = os.clock()
@@ -451,5 +332,4 @@ local function doTheThing()
     return theSolution
 end
 
-
---doTheThing()
+return solver

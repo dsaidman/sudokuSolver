@@ -1,6 +1,5 @@
 local helperFuns = {}
 
-
 function helperFuns.min(inTable)
     local minVal = math.huge
     local minKey
@@ -136,5 +135,8 @@ function helperFuns.subsref(inArg, referenceKeys)
     return outArg
 end
 
+function helperFuns.getRow(theGridID) return string.sub(theGridID,1,1) end
+
+function helperFuns.getCol(theGridID) return string.sub(theGridID,2,2) end
 
 return helperFuns

@@ -15,6 +15,8 @@ import configparser
 from glob import glob
 from re import search as re_search
 from subprocess import run as sp_run
+import lupa
+from lupa import LuaRuntime
 
 # Some gui globals with default widget vals
 _tooltip = ""
@@ -166,15 +168,6 @@ class PuzzleFrame(QtWidgets.QFrame):
         self._isValid = ValidityEnum.Valid
         return self._isValid
 
-    @property
-    def asArgString(self):
-        argList = []
-        for squareKey, squareValue in self.squares.items():
-            if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text())>0:
-                
-                argList.append('--{key}={val}'.format(key=squareKey,val=squareValue.text()))
-        return ' '.join(argList)
-    
     def __init__(self, parent):
         super(PuzzleFrame, self).__init__(parent)
         self.setParent(parent)
@@ -198,6 +191,28 @@ class PuzzleFrame(QtWidgets.QFrame):
         self._initHeaders()
         self._initBorderLines()
 
+    def asString(self):
+        argList = []
+        for squareKey, squareValue in self.squares.items():
+            if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text()) > 0:
+
+                argList.append(
+                    '--{key}={val}'.format(key=squareKey, val=squareValue.text()))
+        return ' '.join(argList)
+    
+    def asDict(self):
+        argList = {}
+        for squareKey, squareValue in self.squares.items():
+            if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text()) > 0:
+                argList[squareKey] = squareValue.text()
+        return argList
+    
+    def asTable(self):
+        lua      = params._lua
+        tableFun =  lua.eval('function(d) local t = {} for key, value in python.iterex(d.items()) do t[key] = value end return t end')
+        return tableFun(lupa.as_attrgetter(self.asDict()))
+        
+    
     def refresh(self):
         for square in self.squares.values():
             square._applyFormatting()
@@ -395,10 +410,12 @@ class PuzzleSquare(QtWidgets.QLineEdit):
 
     @cached_property
     def neighborKeys(self):
+        
         return self._neighborKeys
 
     @property
     def neighbors(self):
+        
         squares = grabPuzzleSquares()
         outArg = {}
         for squareKey in self.neighborKeys:
@@ -661,10 +678,18 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             print('\tPuzzle not valid condition, returning')
             return False
         else:
-            argStr = puzzleFrame.asArgString
+            puzzleArg = puzzleFrame.asTable()
             currentPath = os.getcwd()
             newRoot = os.path.join(_basepath, 'src', 'solver')
             os.chdir(newRoot)
+            solveFun = params._solverModule['solve']
+            result = solveFun( puzzleArg )
+            theSolution = {}
+            for squareKey, squareValue in result.items():
+                theSolution[squareKey] = squareValue
+            
+            
+            """
             _includes = [file for file in glob('*.lua') if file.endswith('lua')]
             includesArg = [' -l {file}'.format(file=luaFile) for luaFile in _includes]
             includesArg = ' '.join(includesArg)
@@ -675,9 +700,9 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
                 # includes=includesArg,
                 args=argStr)
 
-            result = sp_run([cmd], capture_output=True, shell=True)
+            result = sp_run([cmd], capture_output=True, shell=True)"""
             os.chdir(currentPath)
-            self.setSolution(str(result.stdout))
+            self.setSolution(theSolution)
             self.setText('SOLVED')
             self.setEnabled(False)
             infoLabel = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
@@ -685,18 +710,14 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             puzzleFrame.refresh()
 
             
-    def setSolution(self, resultStr):
+    def setSolution(self, theSolutionDict):
         puzzleSquares = grabPuzzleSquares()
         for puzzleKey in params.squares:
             if puzzleSquares[puzzleKey].squareType is not SquareTypeEnum.InputLocked:
                 puzzleSquares[puzzleKey].squareType = SquareTypeEnum.Solved
-                txt = str(
-                    re_search('({k})=([1-9])'.format(k=puzzleKey), str(resultStr)).group(2))
-                
-                puzzleSquares[puzzleKey].setText(txt)
+                puzzleSquares[puzzleKey].setText(theSolutionDict[puzzleKey])
             puzzleSquares[puzzleKey].setEnabled(False)
         
-            
             
         
 class UiPanel(QtWidgets.QFrame):
