@@ -27,7 +27,7 @@ class LuaPy(object):
     @cached_property
     def defintions(self):
         return self._luaDefinitionsModule
-    
+
     @cached_property
     def sovler(self):
         return self._luaSolverModule
@@ -59,13 +59,13 @@ class LuaPy(object):
         os.chdir(self._luaSourceDir)
 
         lua = lupa.LuaRuntime()
-        
+
         lua.execute(
             "package.path = package.path .. ';{relpath}/?.lua;{relpath}/?/init.lua'".format(relpath=self.luaSourcePath))
         self._lua = lua
         self._luaDefinitionsModule = lua.require('definitions')[0]
         self._luaSolverModule = lua.require('solver')[0]
-        
+
         os.chdir(currentDir)
 
     @staticmethod
@@ -76,13 +76,14 @@ class LuaPy(object):
 
     def dict2Table(self, d):
         lua = self._lua
-        
+
         tableFun = lua.eval(
             'function(d) local t = {} for key, value in python.iterex(d.items()) do t[key] = value end return t end')
         return tableFun(lupa.as_attrgetter(d))
 
 
 luaPy = LuaPy()
+
 
 class SudokuParams:
 
@@ -105,7 +106,7 @@ class SudokuParams:
     def nextSquare(self, currentKey):
         return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
 
-    @lru_cache(maxsize = 82, typed = False)
+    @lru_cache(maxsize=82, typed=False)
     def lastSquare(self, currentKey):
         return self.squares[((self.squares.index(currentKey) + -1) % len(self.squares))]
 
@@ -114,5 +115,5 @@ class SudokuParams:
 
         return list(luaPy.defintions['getNeighbors'](squareID))
 
-sudokuParams = SudokuParams()
 
+sudokuParams = SudokuParams()

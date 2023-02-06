@@ -1,9 +1,8 @@
-from enum import Enum, auto, unique
-from functools import lru_cache
+from enum import Enum, auto
 from PyQt5.QtGui import QPalette, QColor
-from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QFileDialog, QDesktopWidget, QApplication
+from PyQt5 import QtWidgets
+from functools import lru_cache
 
 class AppStatusEnum(Enum):
     NotReady = auto()
@@ -54,3 +53,38 @@ class GuiPalette(QPalette):
         elif theTheme == ThemeEnum.Light:
             pass
 
+
+def grabWidget(widgetType, widgetName):
+    centralWidget = grabMainWindow().centralWidget
+    return centralWidget.findChildren(widgetType, widgetName)[0]
+
+
+def grabAppInstance():
+    return QtWidgets.QApplication([])
+
+
+@lru_cache(typed=False)
+def grabMainWindow():
+    return [widget for widget in QtWidgets.QApplication.topLevelWidgets() if isinstance(widget, QtWidgets.QMainWindow)][0]
+
+
+def grabPuzzleFrame():
+    return grabWidget(QtWidgets.QFrame, 'puzzleFrame')
+
+
+def grabUiFrame():
+    return grabWidget(QtWidgets.QFrame, 'UIPanel')
+
+
+def grabPuzzleSquares():
+    return grabPuzzleFrame().squares
+
+
+def getAppStatus():
+    return grabMainWindow().status
+
+def changeQtLineEditProp(widget, prop, newVal):
+    widget.setProperty(prop, newVal)
+    widget.style().unpolish(widget)
+    widget.style().polish(widget)
+    widget.update()
