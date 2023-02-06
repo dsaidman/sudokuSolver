@@ -1,3 +1,5 @@
+
+
 # from string import ascii_uppercase, digits
 import os
 import sys
@@ -18,22 +20,67 @@ except ImportError:
 from lupa import LuaRuntime
 
 
-class LuaPy(object):
-
+class LuaPy:
+    """
+    Create lua runtime instance with lua modules that evaluate sudoku rules and sudoku solving processes.
+    
+    LuaPy creates a lua runtime in lupa. The lua runtime calls 'require' on the definitions.lua file
+    and solver.lua to import their functions and values into python as tables. The module tables are
+    initialized on formation and cached in order to prevent formation of redundant lua runtimes or
+    imported modules.
+    
+    Returns:
+        obj : LuaPy object
+    """
+    
     @property
     def lua(self):
+        """
+        Returns base lua runtime to be executed in the app
+
+        Returns:
+            lupa.luaRuntime : lua runtime object
+        """
         return self._lua
 
     @cached_property
     def defintions(self):
+        """
+        Returns ./definitions.lua as a lupa table
+        
+        Uses lupa 'require' on definitions.lua to import the lua file as module that can executed in python.
+        The property is cached to keep multiple modules from becoming initialized.
+        The module contains functions that defines the squares of the puzzles, has cached functions that determine
+        the neighbors of a square, as well as other lightweight and cached methods
+
+        Returns:
+            table : lua table object containing functions and variables that define sudoku puzzles
+        """        
         return self._luaDefinitionsModule
 
     @cached_property
     def sovler(self):
+        """
+        Returns ./solver.lua as a lupa table
+
+        Uses lupa 'require' on solver.lua to import the lua file as module that can executed in python.
+        The property is cached to keep multiple modules from becoming initialized.
+        The table only contains a single function called solve(), which accepts a sudoku puzzle represented
+        as a lua table
+
+        Returns:
+            table : lua table object containing functions and variables that define sudoku puzzles
+        """
         return self._luaSolverModule
 
     @property
     def luaSourcePath(self):
+        """
+        Returns path relative to 
+
+        Returns:
+            _type_: _description_
+        """        
         return str(self._luaSourceDir.relative_to(Path('.').resolve()))
 
     @property
@@ -45,28 +92,30 @@ class LuaPy(object):
         return str(self._luaSourceDir)
 
     def __init__(self):
-
+        """
+        Constructor method initializes lua runtime and modules
+        """
         print(
             f"Using {lupa.LuaRuntime().lua_implementation} (compiled with {lupa.LUA_VERSION})")
         self._version = lupa.LUA_VERSION
-        self._luaSourceDir = Path(os.path.abspath(os.path.join(
-            os.path.dirname(sys.argv[0]), '..', 'solver'))).resolve()
+        #self._luaSourceDir = Path(os.path.abspath(os.path.join(
+        #    os.path.dirname(sys.argv[0]), '..', 'solver'))).resolve()
 
         # luaImportPath = self.luaImportPath
 
-        currentDir = str(Path('.').resolve())
+        #currentDir = str(Path('.').resolve())
 
-        os.chdir(self._luaSourceDir)
+        #os.chdir(self._luaSourceDir)
 
         lua = lupa.LuaRuntime()
 
-        lua.execute(
-            "package.path = package.path .. ';{relpath}/?.lua;{relpath}/?/init.lua'".format(relpath=self.luaSourcePath))
+        #lua.execute(
+        #    "package.path = package.path .. ';{relpath}/?.lua;{relpath}/?/init.lua'".format(relpath=self.luaSourcePath))
         self._lua = lua
         self._luaDefinitionsModule = lua.require('definitions')[0]
         self._luaSolverModule = lua.require('solver')[0]
-
-        os.chdir(currentDir)
+        return self
+        #os.chdir(currentDir)
 
     @staticmethod
     def relPath2ImportPath(relPath):
