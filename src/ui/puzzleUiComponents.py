@@ -6,10 +6,10 @@ from appHelpers import (AppStatusEnum, SquareTypeEnum, ThemeEnum, ValidityEnum,
                         grabPuzzleSquares, grabUiFrame, grabWidget)
 from puzzleHelpers import sudokuParams as params
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+_fontFamily = "Segoi Ui"
 
 class PuzzleFrame(QtWidgets.QFrame):
-    
+
     
     @property
     def squareCount(self):
@@ -77,7 +77,7 @@ class PuzzleFrame(QtWidgets.QFrame):
         
     
     def _refresh(self):
-        if self.isValid: self._applyFormatting()
+        self._applyFormatting()
 
     def _applyFormatting(self):
         for puzzleSquares in self.squares.values():
@@ -106,8 +106,10 @@ class PuzzleFrame(QtWidgets.QFrame):
             grabMainWindow().status = AppStatusEnum.Locked
             solveBtn._enableMe()
             setBtn.setText("LOCKED")
-
+        self._refresh()
+        
     def _setNewFocus(self, oldKey, newKey):
+
         returnVal = False
         if oldKey in self.squares and oldKey != newKey:
             self.squares[oldKey].clearFocus()
@@ -125,7 +127,9 @@ class PuzzleFrame(QtWidgets.QFrame):
 
         return returnVal
 
-    def _setFocusCursor(self, key):
+    def _setFocusCursor(self, key=None):
+        if key == None:
+            key = self.objectName()
         self.squares[key].setCursorPosition(0)
         self.squares[key].end(False)
         self.squares[key].home(True)
@@ -234,19 +238,19 @@ class PuzzleFrame(QtWidgets.QFrame):
                 return self._setNewFocus(sourceObjectName, newKey)
             else:
                 return False
-        elif isinstance(source, PuzzleSquare) and ((event.type() == QtCore.QEvent.Type.FocusIn) or (event.type() == QtCore.QEvent.Type.MouseButtonPress)):
-            if source.isEnabled == True:
+        elif isinstance(source, PuzzleSquare) and ((event.type() == QtCore.QEvent.Type.FocusIn) or (event.type() == QtCore.QEvent.Type.MouseButtonRelease)):
+           
+            if source.isEnabled() == True:
                 sourceObjectName = source.objectName()
                 returnVal = self._setNewFocus(None, sourceObjectName)
                 self._setFocusCursor(sourceObjectName)
                 return returnVal
             else:
                 return False
-
         return False
     
 class PuzzleSquare(QtWidgets.QLineEdit):
-
+    
     @cached_property
     def _sizePolicy(self):
         # Set the size policy so constant across all
@@ -356,9 +360,9 @@ class PuzzleSquare(QtWidgets.QLineEdit):
         else:
             self.setText(newTextStr[0])
             _nextKey = self.nextSquare
-            self.clearFocus()
-        self.clearFocus()
-        grabWidget(QtWidgets.QLineEdit, _nextKey).setFocus()
+        grabPuzzleFrame()._setNewFocus(self.objectName(),_nextKey)
+        #theNextSquare = grabWidget(QtWidgets.QLineEdit, _nextKey)
+        
         
     def _resetAction(self):
         self.setEnabled(True)
@@ -391,7 +395,7 @@ class PuzzleSquare(QtWidgets.QLineEdit):
                                "font-style: normal;"
                                "background-color: rgb(30,30,30);"
                                "border-color: rgb(255,140,0);}")
-        elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.UserSet:
+        elif (isValid == ValidityEnum.Valid or isValid == ValidityEnum.NoStatement) and self.squareType == SquareTypeEnum.UserSet:
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(212,255,200);"
                                "font-weight: normal;"
@@ -413,13 +417,10 @@ class PuzzleBorderLine(QtWidgets.QFrame):
         self.setObjectName(objectName)
         self.setParent(parent)
         self.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.setLineWidth(3)
+        self.setLineWidth(1)
         self.setFrameShape(frameShape)
 
-
 class PuzzleHeader(QtWidgets.QLabel):
-
-
     def __init__(self, parent, text=None, objectName=None):
         super(PuzzleHeader, self).__init__(parent, text=None,  objectName=None)
 
@@ -427,3 +428,4 @@ class PuzzleHeader(QtWidgets.QLabel):
         self.setParent(parent)
         self.setText(text)
         self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setStyleSheet("font-family: Segoe Ui; font-weight: bold; font-size: 14pt")

@@ -39,7 +39,7 @@ class AppMainWindow(QtWidgets.QMainWindow):
         self.setDockNestingEnabled(True)
         self._status = AppStatusEnum.Unlocked
         self.resizeApp()
-        self.setStyleSheet('* {font-family: Segoe Ui}')
+        self.setStyleSheet('* {font-family: Segoe Ui; font-size: 12pt}')
 
         self.centralWidget = QtWidgets.QWidget(parent=self)
         self.centralWidget.setObjectName("centralWidget")
@@ -58,14 +58,13 @@ class AppMainWindow(QtWidgets.QMainWindow):
         # Title Label
         self.titleLabel = QtWidgets.QLabel(self.centralWidget)
         # self.titleLabel.setGeometry(QtCore.QRect(0, 0, _guiWidthPixels, 100))
-        self.titleLabel.setFont(QtGui.QFont(
-            _fontFamily, 26, 50, False))
         self.titleLabel.setAutoFillBackground(True)
         self.titleLabel.setFrameShadow(QtWidgets.QFrame.Plain)
         self.titleLabel.setText("SUDOKU SOLVER")
         self.titleLabel.setScaledContents(True)
         self.titleLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.titleLabel.setObjectName("titleLabel")
+        self.titleLabel.setStyleSheet("font-family: Segoe Ui; font-size: 28pt")
         anotherLayout.addWidget(self.titleLabel, 0, 0,
                                 alignment=QtCore.Qt.AlignmentFlag.AlignVCenter)
 

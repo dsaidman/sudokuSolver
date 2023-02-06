@@ -6,7 +6,7 @@ from appHelpers import (ValidityEnum, SquareTypeEnum, grabPuzzleFrame, grabPuzzl
 from puzzleHelpers import luaPy
 from puzzleHelpers import sudokuParams as params
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+_fontFamily = "Segoi Ui"
 
 class UiPanel(QtWidgets.QFrame):
     def __init__(self, parent, objectName='UIPanel'):
@@ -45,6 +45,10 @@ class PuzzleInfoLabel(QtWidgets.QLabel):
 
         self.setParent(parent)
         self.setObjectName(objectName)
+
+        puzzleLabelFont = QtGui.QFont(_fontFamily, 14)
+        puzzleLabelFont.setBold(False)
+        puzzleLabelFont.setItalic(False)
 
         # self.setGeometry(QtCore.QRect(391, 851, 531, 38))  # Change this
         self.setText("0 OF 17 SQUARES SET")
@@ -93,6 +97,8 @@ class SetPuzzleBtn(QtWidgets.QPushButton):
 
         self.setParent(parent)
         self.setObjectName(objectName)
+        # self.setGeometry(QtCore.QRect(10, 850, 361, 41))
+        self.setFont(QtGui.QFont(_fontFamily, 14))
 
         self.setText("LOCK PUZZLE")
         self.setShortcut("")
@@ -103,7 +109,7 @@ class SetPuzzleBtn(QtWidgets.QPushButton):
     def _enableMe(self):
         self.setEnabled(True)
         self.setStyleSheet(
-            "QPushButton {color: rgb(212,212,200); font-weight: bold;}")
+            "QPushButton {color: rgb(212,212,200);""font-weight: bold;}")
         self.setToolTip(
             'Push button to lock the puzzle to be solved')
 
@@ -120,6 +126,8 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             parent, objectName='solvePuzzleButton')
 
         self.setParent(parent)
+        # self.setGeometry(QtCore.QRect(10, 900, 911, 41))
+        self.setFont(QtGui.QFont(_fontFamily, 14))
         self.setText("SOLVE")
         self.setShortcut("")
         self.setObjectName("solveBtn")
@@ -165,16 +173,19 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             infoLabel._refresh()
             
     def setSolution(self, theSolutionDict):
-        puzzleSquares = grabPuzzleSquares()
+        puzzleFrame = grabPuzzleFrame()
+        puzzleSquares = puzzleFrame.squares
         allComplete = True
         for puzzleKey in params.squares:
-            if puzzleSquares[puzzleKey].squareType is not SquareTypeEnum.InputLocked:
+            if puzzleSquares[puzzleKey].squareType is SquareTypeEnum.UserSet:
                 puzzleSquares[puzzleKey].squareType = SquareTypeEnum.Solved
                 puzzleSquares[puzzleKey].setText(theSolutionDict[puzzleKey])
-            else:
-                allComplete = False
+            #else:
+            #    allComplete = False
             puzzleSquares[puzzleKey].setEnabled(False)
-        if allComplete:
-            for squareValue in puzzleSquares.values():
-                squareValue._applyFormatting()
-                squareValue.setEnabled(False)
+        #if allComplete:
+        for squareValue in puzzleSquares.values():
+            squareValue.setEnabled(False)
+            squareValue.isValid
+        puzzleFrame._refresh()
+                

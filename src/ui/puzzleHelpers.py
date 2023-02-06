@@ -90,24 +90,24 @@ class SudokuParams:
     @cached_property
     def rows(self):
         # return list(ascii_uppercase[0:9])
-        return list(luaPy.defintions.rowNames.values())
+        return sorted(list(luaPy.defintions.rowNames.values()))
 
     @cached_property
     def columns(self):
         # return list(digits[1:10])
-        return list(luaPy.defintions.colNames.values())
+        return sorted(list(luaPy.defintions.colNames.values()))
 
     @cached_property
     def squares(self):
         # return [row+col for row in self.rows for col in self.columns]
-        return list(luaPy.defintions.allKeys.values())
+        return sorted(list(luaPy.defintions.allKeys.values()), reverse=False)
 
-    @lru_cache(maxsize=82, typed=False)
     def nextSquare(self, currentKey):
+        
         return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
 
-    @lru_cache(maxsize=82, typed=False)
     def lastSquare(self, currentKey):
+        
         return self.squares[((self.squares.index(currentKey) + -1) % len(self.squares))]
 
     @lru_cache(maxsize=82, typed=False)

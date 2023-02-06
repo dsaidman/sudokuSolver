@@ -1,21 +1,19 @@
 
 import configparser
-import os
-from functools import partial, cached_property
+import os, sys
+from functools import partial
+
 from appHelpers import (GuiPalette, SquareTypeEnum, ThemeEnum, grabPuzzleFrame,
                         grabWidget)
 from PyQt5 import QtGui, QtWidgets
 from pathlib import Path
+_fontFamily = "Segoi Ui"
+
+_basePath = str(Path(os.path.join(
+    os.path.dirname(sys.argv[0]), '..', '..')).resolve())
 
 class MenuBar(QtWidgets.QMenuBar):
-
-    @cached_property
-    def _basepath(self):
-        p = Path(__file__).resolve()
-        pparts = p.parts
-        pparts = pparts[0:pparts.index('src')]
-        return str(Path(*pparts))
-        
+    _font = QtGui.QFont(_fontFamily, 8)
 
     def __init__(self, theMainWindow):
         super(MenuBar, self).__init__(theMainWindow)
@@ -114,10 +112,11 @@ class MenuBar(QtWidgets.QMenuBar):
             partial(self.uncheckTheBox, self.setLightThemeAction))
 
     def importIni(self):
+        print(_basePath)
         fname = QtWidgets.QFileDialog.getOpenFileName(
             self,
             'Load ini file',
-            os.path.join(self._basepath, 'input'),
+            os.path.join(_basePath, 'input'),
             "Ini Files (*.ini *.txt)")
         if fname:
             puzzleFrame = grabPuzzleFrame()
@@ -128,8 +127,10 @@ class MenuBar(QtWidgets.QMenuBar):
             puzzleNames = list(puzzleIni._sections.keys())
             if len(puzzleNames) == 0:
                 return
-            puzzleName = puzzleNames[0]
+            puzzleName = puzzleNames[-1]
             puzzleIni._sections[puzzleName]
+            for squareVal in puzzleFrame.squares.values():
+                squareVal._resetAction()
             for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
                 squares[squareKey.upper()].setText(squareVal)
                 squares[squareKey.upper()].squareType = SquareTypeEnum.InputUnlocked
