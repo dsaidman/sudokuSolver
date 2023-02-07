@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 # Some gui globals with default widget vals
 
-_fontFamily = 'Segoi Ui'
+_fontFamily = 'Segoe Ui'
 
 
 # UI MainWindow
@@ -64,7 +64,7 @@ class AppMainWindow(QtWidgets.QMainWindow):
         self.titleLabel.setScaledContents(True)
         self.titleLabel.setAlignment(QtCore.Qt.AlignCenter)
         self.titleLabel.setObjectName("titleLabel")
-        self.titleLabel.setStyleSheet("font-family: Segoe Ui; font-size: 28pt")
+        self.titleLabel.setStyleSheet("font-family: Segoe Ui; font-size: 28pt; font-weight: bold")
         anotherLayout.addWidget(self.titleLabel, 0, 0,
                                 alignment=QtCore.Qt.AlignmentFlag.AlignVCenter)
 

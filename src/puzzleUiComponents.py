@@ -1,3 +1,4 @@
+
 from functools import cached_property
 from math import floor
 
@@ -8,11 +9,26 @@ from puzzleHelpers import sudokuParams as params
 from PyQt5 import QtCore, QtGui, QtWidgets
 _fontFamily = "Segoi Ui"
 
-class PuzzleFrame(QtWidgets.QFrame):
 
+class PuzzleFrame(QtWidgets.QFrame):
+    """
+    A QtWidgets QFrame superclass that contains all the widgets and methods of the sudoku puzzle and its squares.
+
+    Args:
+        QtWidgets (QtWidgets.QFrame): None, superclass of QtWidgets.QFrame parent
+
+    Returns:
+        PuzzleFrame: An initialized widget containing the puzzle interface and and other methods
+    """
     
     @property
     def squareCount(self):
+        """
+        Counts number of squares that are populated
+
+        Returns:
+            int: square count
+        """        
         cnt = 0
         for square in self.squares.values():
             cnt = cnt + 1 if len(square.text()) > 0 else cnt
@@ -20,6 +36,12 @@ class PuzzleFrame(QtWidgets.QFrame):
 
     @property
     def validSquareCount(self):
+        """
+        Counts number of squares that are populated and have values that do not violate any sudoku rules.
+
+        Returns:
+            int: square count of squares that do no violate sudoku rules
+        """
         cnt = 0
         for square in self.squares.values():
             if len(square.text()) > 0 and square.isValid == ValidityEnum.Valid:
@@ -28,6 +50,12 @@ class PuzzleFrame(QtWidgets.QFrame):
 
     @property
     def isValid(self):
+        """
+        Returns whether the current state of the sudoku puzzle violates any sudoku rules.
+
+        Returns:
+            ValidityEnum: Enumeration of square is valid
+        """        
         for square in self.squares.values():
 
             if square.isValid == ValidityEnum.Invalid:
@@ -37,6 +65,12 @@ class PuzzleFrame(QtWidgets.QFrame):
         return self._isValid
     
     def __init__(self, parent):
+        """
+        Main contructor of PuzzleFrame object that sets up all child widgets and graphic elements.
+
+        Args:
+            parent (QtWidget): Parent object of the puzzle frame, assumed the app MainWindow
+        """        
         super(PuzzleFrame, self).__init__(parent)
         self.setParent(parent)
         # self.setGeometry(QtCore.QRect(10, 130, 911, 691))
@@ -60,6 +94,12 @@ class PuzzleFrame(QtWidgets.QFrame):
         self._initBorderLines()
         
     def asString(self):
+        """
+        Returns current puzzle as string arguments that can be passed into command line version of lua solver.
+
+        Returns:
+            str: string of --Key=Value pairs representing current puzzle state
+        """        
         argList = []
         for squareKey, squareValue in self.squares.items():
             if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text()) > 0:
@@ -69,6 +109,12 @@ class PuzzleFrame(QtWidgets.QFrame):
         return ' '.join(argList)
     
     def asDict(self):
+        """
+        Returns current puzzle as a python dict
+        
+        Returns:
+            dict: Puzzle in dict
+        """        
         argList = {}
         for squareKey, squareValue in self.squares.items():
             if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text()) > 0:
@@ -374,7 +420,7 @@ class PuzzleSquare(QtWidgets.QLineEdit):
 
     def _applyFormatting(self):
         isValid = self._isValid
-        
+        bgcolor = 'rgb(51,51,50)'
         if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
@@ -403,7 +449,7 @@ class PuzzleSquare(QtWidgets.QLineEdit):
                                "font-style: regular;}")
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.Solved:
             self.setStyleSheet("QLineEdit {"
-                               "color:	rgb(0,255,0);"
+                               "color:	rgba(0,255,0,204);"
                                "font-weight: normal;"
                                "font-size: 12pt;"
                                "font-style: regular;}")

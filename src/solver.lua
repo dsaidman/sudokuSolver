@@ -319,8 +319,10 @@ function solver.solve(myStartingVals)
     local startTime = os.clock()
     local theSolution = solveTheThing( myPuzzle )
     solverInfo['runTime_seconds'] = os.clock()-startTime
+    solverInfo['difficulty'] = getDifficulty()
     --printPuzzle(theSolution)
-    print( puzzle2String(theSolution) )
+    --print( puzzle2String(theSolution) )
+    theSolution['info'] = solverInfo
     return theSolution
 end
 
