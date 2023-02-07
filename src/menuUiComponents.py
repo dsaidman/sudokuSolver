@@ -172,7 +172,7 @@ class MenuBar(QtWidgets.QMenuBar):
         #puzzleInfoLabel.setText('Solve')
         puzzleInfoLabel._refresh()
         puzzleFrame.toggleLock()
-        displayLabel._refresh()
+        displayLabel._resetAction()
         
     def setLightMode(self):
         QtGui.QGuiApplication.setPalette(GuiPalette(ThemeEnum.Light))

@@ -14,7 +14,7 @@ Returns:
 import os
 import sys
 from functools import cached_property, lru_cache
-from pathlib import Path
+from pathlib import Path, PurePath
 import lupa
 from lupa import LuaRuntime
 
@@ -81,9 +81,6 @@ class LuaPy:
         # Get the lua runtime from lupa. Try to use luajit if possible
         lua = lupa.LuaRuntime()
 
-        #lua.execute(
-        #    "package.path = package.path .. ';{relpath}/?.lua;{relpath}/?/init.lua'".format(relpath=self.luaSourcePath))
-        
         print('Initializing lua runtime...')
         self._lua = lua
         

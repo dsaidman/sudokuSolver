@@ -219,7 +219,7 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
             numOperations = runtimeInfo['numOperations']
             displayLabel = grabWidget(QtWidgets.QLabel, 'infoDisplayLabel')
             
-            displayText = f'Completed in {tDuration_ms:.2f} seconds - Difficulty: {difficultyEnum:s}\n{numRecursions} Recursions - {numOperations} Operations'
+            displayText = f'Completed in {tDuration_ms:.2f} milliseconds - Difficulty: {difficultyEnum:s}\n{numRecursions} Recursions - {numOperations} Operations'
             displayLabel.setText(displayText)
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
