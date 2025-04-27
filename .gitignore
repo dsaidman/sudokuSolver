@@ -1,5 +1,6 @@
 # Compiled Lua sources
 luac.out
+*.vert*
 *venv*
 *.vscode
 *__pycache__*
