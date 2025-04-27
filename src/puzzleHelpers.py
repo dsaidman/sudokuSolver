@@ -85,10 +85,10 @@ class LuaPy:
         self._lua = lua
         
         print('\tImporting defintions.lua as table object...')
-        self._luaDefinitionsModule = lua.require('definitions')[0]
+        self._luaDefinitionsModule = lua.require('src.definitions')[0]
         
         print('\tImporting solver.lua as table object...')
-        self._luaSolverModule = lua.require('solver')[0]
+        self._luaSolverModule = lua.require('src.solver')[0]
         
         print('\tLuaPy initialized')
 

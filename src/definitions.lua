@@ -1,5 +1,5 @@
 
-local myFuns = require "helpers"
+local myFuns = require "src.helpers"
 
 local definitions = {}
 

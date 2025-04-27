@@ -8,11 +8,11 @@ from controlUiComponents import UiPanel
 from menuUiComponents import MenuBar
 from puzzleHelpers import sudokuParams as params
 from puzzleUiComponents import PuzzleFrame
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 # Some gui globals with default widget vals
 
-_fontFamily = 'Segoe Ui'
+_fontFamily = 'Verdana'
 
 
 # UI MainWindow

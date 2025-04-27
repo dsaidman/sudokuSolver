@@ -6,7 +6,7 @@ from appHelpers import (AppStatusEnum, SquareTypeEnum, ThemeEnum, ValidityEnum,
                         grabAppInstance, grabMainWindow, grabPuzzleFrame,
                         grabPuzzleSquares, grabUiFrame, grabWidget)
 from puzzleHelpers import sudokuParams as params
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 _fontFamily = "Segoi Ui"
 
 

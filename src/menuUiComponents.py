@@ -5,7 +5,7 @@ from functools import partial
 
 from appHelpers import (GuiPalette, SquareTypeEnum, ThemeEnum, grabPuzzleFrame,
                         grabWidget)
-from PyQt5 import QtGui, QtWidgets
+from PyQt6 import QtGui, QtWidgets
 from pathlib import Path
 _fontFamily = "Segoi Ui"
 

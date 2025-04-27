@@ -5,7 +5,7 @@ from appHelpers import (ValidityEnum, SquareTypeEnum, grabPuzzleFrame, grabPuzzl
                         grabWidget)
 from puzzleHelpers import luaPy
 from puzzleHelpers import sudokuParams as params
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 _fontFamily = "Segoi Ui"
 
 class UiPanel(QtWidgets.QFrame):

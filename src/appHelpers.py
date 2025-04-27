@@ -1,7 +1,7 @@
 from enum import Enum, auto
-from PyQt5.QtGui import QPalette, QColor
-from PyQt5.QtCore import Qt
-from PyQt5 import QtWidgets
+from PyQt6.QtGui import QPalette, QColor
+from PyQt6.QtCore import Qt
+from PyQt6 import QtWidgets
 from functools import lru_cache
 
 class AppStatusEnum(Enum):

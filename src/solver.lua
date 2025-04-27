@@ -1,8 +1,8 @@
 ---@diagnostic disable: trailing-space
 -- sudoku solver in lua, at least an attempt of one
 
-local myFuns      = require("helpers")
-local defs        = require('definitions')
+local myFuns      = require("src.helpers")
+local defs        = require('src.definitions')
 
 local rowNames    = defs.rowNames
 local colNames    = defs.colNames
