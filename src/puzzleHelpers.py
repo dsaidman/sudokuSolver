@@ -15,7 +15,7 @@ import os
 import sys
 from functools import cached_property, lru_cache
 from pathlib import Path, PurePath
-import lupa 
+import lupa.luajit21 as lupa
 from lupa import LuaRuntime
 
 
@@ -85,10 +85,10 @@ class LuaPy:
         self._lua = lua
         
         print('\tImporting defintions.lua as table object...')
-        self._luaDefinitionsModule = lua.require('src.definitions')[0]
+        self._luaDefinitionsModule = lua.require('src.definitions')
         
         print('\tImporting solver.lua as table object...')
-        self._luaSolverModule = lua.require('src.solver')[0]
+        self._luaSolverModule = lua.require('src.solver')
         
         print('\tLuaPy initialized')
 
@@ -141,7 +141,7 @@ class SudokuParams:
         Returns the rows letters of the puzzle as a list of strings.
 
         Returns:
-            list: capital letters A to I 
+            list: capital let`ters A to I 
         """        
         return sorted(list(luaPy.defintions.rowNames.values()))
 
