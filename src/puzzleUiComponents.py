@@ -6,8 +6,8 @@ from appHelpers import (AppStatusEnum, SquareTypeEnum, ThemeEnum, ValidityEnum,
                         grabAppInstance, grabMainWindow, grabPuzzleFrame,
                         grabPuzzleSquares, grabUiFrame, grabWidget)
 from puzzleHelpers import sudokuParams as params
-from PyQt6 import QtCore, QtGui, QtWidgets
-_fontFamily = "Segoi Ui"
+from PyQt5 import QtCore, QtGui, QtWidgets
+_fontFamily = "Verdana"
 
 
 class PuzzleFrame(QtWidgets.QFrame):
@@ -474,4 +474,4 @@ class PuzzleHeader(QtWidgets.QLabel):
         self.setParent(parent)
         self.setText(text)
         self.setAlignment(QtCore.Qt.AlignCenter)
-        self.setStyleSheet("font-family: Segoe Ui; font-weight: bold; font-size: 14pt")
+        self.setStyleSheet("font-family: Verdana; font-weight: bold; font-size: 14pt")

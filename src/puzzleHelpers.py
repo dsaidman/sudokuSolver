@@ -15,7 +15,7 @@ import os
 import sys
 from functools import cached_property, lru_cache
 from pathlib import Path, PurePath
-import lupa
+import lupa 
 from lupa import LuaRuntime
 
 

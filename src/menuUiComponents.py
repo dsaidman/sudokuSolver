@@ -2,12 +2,11 @@
 import configparser
 import os, sys
 from functools import partial
-
 from appHelpers import (GuiPalette, SquareTypeEnum, ThemeEnum, grabPuzzleFrame,
                         grabWidget)
-from PyQt6 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from pathlib import Path
-_fontFamily = "Segoi Ui"
+_fontFamily = "Verdana"
 
 
 class MenuBar(QtWidgets.QMenuBar):
@@ -18,7 +17,7 @@ class MenuBar(QtWidgets.QMenuBar):
 
         self.setAcceptDrops(False)
         self.setObjectName("menuBar")
-        self.setStyleSheet('font-family: Segoe Ui; font-size: 10pt; font-weight: bold')
+        self.setStyleSheet('font-family: Verdana; font-size: 10pt; font-weight: bold')
 
         self.initMenuBarComponents(theMainWindow)
         self.initMenuBarActions(theMainWindow)
@@ -188,15 +187,15 @@ class MenuBar(QtWidgets.QMenuBar):
 def getBasePath():
     
     currentPath = Path(sys.argv[0]).resolve()
-    if len(currentPath._cparts)>2:
-        inputsPath = currentPath._cparts[0:-2]
+    if len(currentPath.parts)>2:
+        inputsPath = currentPath.parts[0:-2]
         inputsPath = os.path.join(*inputsPath, 'input')
     else:
-        inputsPath = currentPath._cparts[0:-1]
+        inputsPath = currentPath.parts[0:-1]
         inputsPath = os.path.join(*inputsPath, 'input')
         
     if not os.path.isdir(inputsPath):
-        inputsPath = currentPath._cparts[0:-1]
+        inputsPath = currentPath.parts[0:-1]
         inputsPath = os.path.join(*inputsPath,'input')
         
     print(f'Using input location {inputsPath:s}')

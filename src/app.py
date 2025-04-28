@@ -8,7 +8,7 @@ from controlUiComponents import UiPanel
 from menuUiComponents import MenuBar
 from puzzleHelpers import sudokuParams as params
 from puzzleUiComponents import PuzzleFrame
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 # Some gui globals with default widget vals
 
@@ -141,4 +141,5 @@ if __name__ == "__main__":
     MainWindow = AppMainWindow()
     MainWindow.setupUi()
     MainWindow.show()
+    
     sys.exit(app.exec_())

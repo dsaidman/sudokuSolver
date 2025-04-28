@@ -1,12 +1,10 @@
 
 from time import perf_counter as tictoc
-
-from appHelpers import (ValidityEnum, SquareTypeEnum, grabPuzzleFrame, grabPuzzleSquares,
-                        grabWidget)
+from appHelpers import (ValidityEnum, SquareTypeEnum, grabPuzzleFrame, grabPuzzleSquares, grabWidget)
 from puzzleHelpers import luaPy
 from puzzleHelpers import sudokuParams as params
-from PyQt6 import QtCore, QtGui, QtWidgets
-_fontFamily = "Segoi Ui"
+from PyQt5 import QtCore, QtGui, QtWidgets
+_fontFamily = "Verdana"
 
 class UiPanel(QtWidgets.QFrame):
     def __init__(self, parent, objectName='UiPanel'):
