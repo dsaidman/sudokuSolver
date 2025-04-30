@@ -79,15 +79,17 @@ class Py2Lua:
 
         # Get the lua runtime from lupa. Try to use luajit if possible
         lua = LuaRuntime()
+        lua.execute("package.path = '../luaSolver/?.lua;' .. package.path")
+        lua.execute("package.cpath = '../luaSolver/?.lua;' .. package.cpath")
 
         print('Initializing lua runtime...')
         self._lua = lua
         
         print('\tImporting defintions.lua as table object...')
-        self._luaDefinitionsModule = lua.require('src.luaSolver.definitions')
+        self._luaDefinitionsModule = lua.require('definitions')
         
         print('\tImporting solver.lua as table object...')
-        self._luaSolverModule = lua.require('src.luaSolver.solver')
+        self._luaSolverModule = lua.require('solver')
         
         print('\tPy2Lua initialized')
 
