@@ -1,21 +1,19 @@
 
 from functools import cached_property
 from math import floor
+from PyQt5.QtCore import Qt
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
+from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
+from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow
+from src.pySolver.definitions import sudokuDefs
 
-from appHelpers import (AppStatusEnum, SquareTypeEnum, ThemeEnum, ValidityEnum,
-                        grabAppInstance, grabMainWindow, grabPuzzleFrame,
-                        grabPuzzleSquares, grabUiFrame, grabWidget)
-from puzzleHelpers import sudokuParams as params
-from PyQt5 import QtCore, QtGui, QtWidgets
-_fontFamily = "Verdana"
-
-
-class PuzzleFrame(QtWidgets.QFrame):
+class PuzzleFrame(QFrame):
     """
     A QtWidgets QFrame superclass that contains all the widgets and methods of the sudoku puzzle and its squares.
 
     Args:
-        QtWidgets (QtWidgets.QFrame): None, superclass of QtWidgets.QFrame parent
+        QtWidgets (QFrame): None, superclass of QFrame parent
 
     Returns:
         PuzzleFrame: An initialized widget containing the puzzle interface and and other methods
@@ -76,17 +74,17 @@ class PuzzleFrame(QtWidgets.QFrame):
         # self.setGeometry(QtCore.QRect(10, 130, 911, 691))
 
         self.setAutoFillBackground(False)
-        self.setFrameShape(QtWidgets.QFrame.Box)
-        self.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.setFrameShape(QFrame.Box)
+        self.setFrameShadow(QFrame.Plain)
         self.setLineWidth(3)
         self.setObjectName("puzzleFrame")
 
-        self.puzzleLayout = QtWidgets.QGridLayout()
+        self.puzzleLayout = QGridLayout()
         self.puzzleLayout.setObjectName("puzzleLayout")
         self.puzzleLayout.setSpacing(0)
         self.puzzleLayout.setContentsMargins(0, 0, 0, 0)
 
-        masterLayout = grabWidget(QtWidgets.QVBoxLayout, 'masterLayout')
+        masterLayout = grabWidget(QVBoxLayout, 'masterLayout')
         masterLayout.addLayout(self.puzzleLayout)
 
         self._initSquares()
@@ -131,8 +129,8 @@ class PuzzleFrame(QtWidgets.QFrame):
         
     def toggleLock(self):
         puzzleValid = grabPuzzleFrame().isValid
-        solveBtn = grabWidget(QtWidgets.QPushButton, 'solveBtn')
-        setBtn = grabWidget(QtWidgets.QPushButton, 'setPuzzleBtn')
+        solveBtn = grabWidget(QPushButton, 'solveBtn')
+        setBtn = grabWidget(QPushButton, 'setPuzzleBtn')
         if puzzleValid == ValidityEnum.Invalid or grabMainWindow().status == AppStatusEnum.Locked:
             for square in self.squares.values():
                 square.setReadOnly(False)
@@ -182,15 +180,15 @@ class PuzzleFrame(QtWidgets.QFrame):
 
     def _initSquares(self):
         squares = {}
-        for squareKey in params.squares:
+        for squareKey in sudokuDefs.squares:
             squares[squareKey] = PuzzleSquare(self, squareKey)
 
             self.puzzleLayout.addWidget(
                 squares[squareKey],
-                3+params.rows.index(squareKey[0]) +
-                floor(params.rows.index(squareKey[0])/3.),
-                3+params.columns.index(squareKey[1]) +
-                floor(params.columns.index(squareKey[1])/3.),
+                3+sudokuDefs.rows.index(squareKey[0]) +
+                floor(sudokuDefs.rows.index(squareKey[0])/3.),
+                3+sudokuDefs.columns.index(squareKey[1]) +
+                floor(sudokuDefs.columns.index(squareKey[1])/3.),
                 1, 1)
             squares[squareKey].installEventFilter(self)
         self.squares = squares
@@ -198,24 +196,24 @@ class PuzzleFrame(QtWidgets.QFrame):
     def _initHeaders(self):
 
         rowHeaders = {}
-        for rowKey in params.rows:
+        for rowKey in sudokuDefs.rows:
 
             rowHeaders[rowKey] = PuzzleHeader(
                 self, rowKey,
                 'RowHeader' + rowKey)
             self.puzzleLayout.addWidget(
                 rowHeaders[rowKey],
-                3+params.rows.index(rowKey) + floor(params.rows.index(rowKey)/3.), 1, 1, 1)
+                3+sudokuDefs.rows.index(rowKey) + floor(sudokuDefs.rows.index(rowKey)/3.), 1, 1, 1)
         self.rowHeaders = rowHeaders
 
         colHeaders = {}
-        for colKey in params.columns:
+        for colKey in sudokuDefs.columns:
             colHeaders[colKey] = PuzzleHeader(
                 self, colKey,
                 'ColumnHeader' + colKey)
             self.puzzleLayout.addWidget(
                 colHeaders[colKey],
-                1, 3+params.columns.index(colKey) + floor(params.columns.index(colKey)/3.), 1, 1)
+                1, 3+sudokuDefs.columns.index(colKey) + floor(sudokuDefs.columns.index(colKey)/3.), 1, 1)
         self.colHeaders = colHeaders
 
     def _initBorderLines(self):
@@ -224,7 +222,7 @@ class PuzzleFrame(QtWidgets.QFrame):
         for vertLineNum in ['1', '3', '6', '9']:
             lineBorders[vertLineNum] = PuzzleBorderLine(
                 self,
-                QtWidgets.QFrame.VLine,
+                QFrame.VLine,
                 'verticalLine'+vertLineNum)
 
             self.puzzleLayout.addWidget(
@@ -234,7 +232,7 @@ class PuzzleFrame(QtWidgets.QFrame):
         for horizLineNum in ['A', 'C', 'F', 'I']:
             lineBorders[horizLineNum] = PuzzleBorderLine(
                 self,
-                QtWidgets.QFrame.HLine,
+                QFrame.HLine,
                 'horizontalLine'+horizLineNum)
             self.puzzleLayout.addWidget(
                 lineBorders[horizLineNum],
@@ -242,14 +240,14 @@ class PuzzleFrame(QtWidgets.QFrame):
 
         lineBorders['horizontalLine0'] = PuzzleBorderLine(
             self,
-            QtWidgets.QFrame.HLine,
+            QFrame.HLine,
             'horizontalLine0')
         self.puzzleLayout.addWidget(
             lineBorders['horizontalLine0'], 0, 3, 1, 11)
 
         lineBorders['verticalLine0'] = PuzzleBorderLine(
             self,
-            QtWidgets.QFrame.VLine,
+            QFrame.VLine,
             'verticalLine0')
         self.puzzleLayout.addWidget(
             lineBorders['verticalLine0'], 3, 0, 11, 1)
@@ -262,25 +260,25 @@ class PuzzleFrame(QtWidgets.QFrame):
             rowNum = sourceObjectName[0]
             colNum = sourceObjectName[1]
 
-            if event.key() == QtCore.Qt.Key_Up:
+            if event.key() == Qt.Key_Up:
                 newFocusCol = colNum
-                newFocusRow = params.rows[
-                    (params.rows.index(rowNum)-1) % len(params.rows)]
+                newFocusRow = sudokuDefs.rows[
+                    (sudokuDefs.rows.index(rowNum)-1) % len(sudokuDefs.rows)]
 
                 return self._setNewFocus(sourceObjectName, newFocusRow+newFocusCol)
-            elif event.key() == QtCore.Qt.Key_Down:
+            elif event.key() == Qt.Key_Down:
                 newFocusCol = colNum
-                newFocusRow = params.rows[
-                    (params.rows.index(rowNum)+1) % len(params.rows)]
+                newFocusRow = sudokuDefs.rows[
+                    (sudokuDefs.rows.index(rowNum)+1) % len(sudokuDefs.rows)]
                 return self._setNewFocus(sourceObjectName, newFocusRow+newFocusCol)
 
-            elif event.key() == QtCore.Qt.Key_Tab or event.key() == QtCore.Qt.Key_Right:
-                newKey = params.squares[
-                    (params.squares.index(sourceObjectName)+1) % len(params.squares)]
+            elif event.key() == Qt.Key_Tab or event.key() == Qt.Key_Right:
+                newKey = sudokuDefs.squares[
+                    (sudokuDefs.squares.index(sourceObjectName)+1) % len(sudokuDefs.squares)]
                 return self._setNewFocus(sourceObjectName, newKey)
-            elif event.key() == QtCore.Qt.Key_Left:
-                newKey = params.squares[
-                    (params.squares.index(sourceObjectName)-1) % len(params.squares)]
+            elif event.key() == Qt.Key_Left:
+                newKey = sudokuDefs.squares[
+                    (sudokuDefs.squares.index(sourceObjectName)-1) % len(sudokuDefs.squares)]
                 return self._setNewFocus(sourceObjectName, newKey)
             else:
                 return False
@@ -295,14 +293,14 @@ class PuzzleFrame(QtWidgets.QFrame):
                 return False
         return False
     
-class PuzzleSquare(QtWidgets.QLineEdit):
+class PuzzleSquare(QLineEdit):
     
     @cached_property
     def _sizePolicy(self):
         # Set the size policy so constant across all
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Ignored,
-            QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QSizePolicy(
+            QSizePolicy.Ignored,
+            QSizePolicy.Expanding)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setHeightForWidth(False)
@@ -371,24 +369,24 @@ class PuzzleSquare(QtWidgets.QLineEdit):
 
         self.setSizePolicy(self._sizePolicy)
 
-        self.setCursor(QtGui.QCursor(QtCore.Qt.IBeamCursor))
+        self.setCursor(QtGui.QCursor(Qt.IBeamCursor))
         self.setAcceptDrops(True)
 
-        self.setInputMethodHints(QtCore.Qt.ImhDigitsOnly)
+        self.setInputMethodHints(Qt.ImhDigitsOnly)
         self.setInputMask("D")
         self.setText("")
         self.setMaxLength(1)
         self.setFrame(True)
-        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setAlignment(Qt.AlignCenter)
         self.setDragEnabled(True)
         self.setPlaceholderText("")
         self.setClearButtonEnabled(False)
 
-        self._nextSquare = params.nextSquare(self.name)
-        self._lastSquare = params.lastSquare(self.name)
+        self._nextSquare = sudokuDefs.nextSquare(self.name)
+        self._lastSquare = sudokuDefs.lastSquare(self.name)
         self._isValid = ValidityEnum.Valid
         self._theme = ThemeEnum.Dark
-        self._neighborKeys = params.neighbors(self.name)
+        self._neighborKeys = sudokuDefs.neighbors(self.name)
         self._squareType = SquareTypeEnum.InputUnlocked
         self.setToolTip('Square {name}: {tip}'.format(
             name=self.name, tip=self._isValid.name))
@@ -457,21 +455,21 @@ class PuzzleSquare(QtWidgets.QLineEdit):
             name=self.name, valid=self._isValid.name, status=self._squareType.name))
 
 
-class PuzzleBorderLine(QtWidgets.QFrame):
+class PuzzleBorderLine(QFrame):
     def __init__(self, parent, frameShape, objectName=None):
         super(PuzzleBorderLine, self).__init__(parent, objectName=None)
         self.setObjectName(objectName)
         self.setParent(parent)
-        self.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.setFrameShadow(QFrame.Plain)
         self.setLineWidth(1)
         self.setFrameShape(frameShape)
 
-class PuzzleHeader(QtWidgets.QLabel):
+class PuzzleHeader(QLabel):
     def __init__(self, parent, text=None, objectName=None):
         super(PuzzleHeader, self).__init__(parent, text=None,  objectName=None)
 
         self.setObjectName(objectName)
         self.setParent(parent)
         self.setText(text)
-        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setAlignment(Qt.AlignCenter)
         self.setStyleSheet("font-family: Verdana; font-weight: bold; font-size: 14pt")

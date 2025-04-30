@@ -1,5 +1,5 @@
 from functools import cached_property, lru_cache
-
+from src.pySolver.py2lua import luaPy
 
 class definitions:
     """
@@ -87,4 +87,4 @@ class definitions:
         return list(luaPy.defintions['getNeighbors'](squareID))
 
 # Return the pre-cached SudokuParams instance to be shared across modules
-sudokuParams = definitions()
+sudokuDefs = definitions()

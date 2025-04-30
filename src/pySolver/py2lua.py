@@ -4,32 +4,31 @@ Module of helper objects that define rules of sudoku puzzles.
 
 Contains two helper class and preinitialized instances of those classes that can be imported
 as a single instance across multiple other modules. The module contains:
-    1 - LuaPy -> class to seamlessly interface the app api with functions and variables defined in lua files
-    2 - SudokuParams-> class leveraging LuaPy to define the rules of sudoku used in the app
+    1 - Py2Lua -> class to seamlessly interface the app api with functions and variables defined in lua files
+    2 - SudokuParams-> class leveraging Py2Lua to define the rules of sudoku used in the app
 
 Returns:
     None: no return values
 """
 
 import os
-import sys
-from functools import cached_property, lru_cache
+from functools import cached_property
 from pathlib import Path
 import lupa.luajit21 as lupa
 from lupa import LuaRuntime
 
 
-class LuaPy:
+class Py2Lua:
     """
     Create lua runtime instance with lua modules that evaluate sudoku rules and sudoku solving processes.
     
-    LuaPy creates a lua runtime in lupa. The lua runtime calls 'require' on the definitions.lua file
+    Py2Lua creates a lua runtime in lupa. The lua runtime calls 'require' on the definitions.lua file
     and solver.lua to import their functions and values into python as tables. The module tables are
     initialized on formation and cached in order to prevent formation of redundant lua runtimes or
     imported modules.
     
     Returns:
-        obj : LuaPy object
+        obj : Py2Lua object
     """
     
     @property
@@ -75,22 +74,22 @@ class LuaPy:
     def __init__(self):
         """Constructor method initializes lua runtime and modules."""
         print(
-            f"Using {lupa.LuaRuntime().lua_implementation} (compiled with {lupa.LUA_VERSION})")
+            f"Using {LuaRuntime().lua_implementation} (compiled with {lupa.LUA_VERSION})")
         self._version = lupa.LUA_VERSION
 
         # Get the lua runtime from lupa. Try to use luajit if possible
-        lua = lupa.LuaRuntime()
+        lua = LuaRuntime()
 
         print('Initializing lua runtime...')
         self._lua = lua
         
         print('\tImporting defintions.lua as table object...')
-        self._luaDefinitionsModule = lua.require('src.definitions')
+        self._luaDefinitionsModule = lua.require('src.luaSolver.definitions')
         
         print('\tImporting solver.lua as table object...')
-        self._luaSolverModule = lua.require('src.solver')
+        self._luaSolverModule = lua.require('src.luaSolver.solver')
         
-        print('\tLuaPy initialized')
+        print('\tPy2Lua initialized')
 
     @staticmethod
     def relPath2ImportPath(relPath):
@@ -119,8 +118,8 @@ class LuaPy:
             'function(d) local t = {} for key, value in python.iterex(d.items()) do t[key] = value end return t end')
         return tableFun(lupa.as_attrgetter(d))
 
-# Evaluate the luaPy object inside the module so it can be imported directly without making new class instances
-luaPy = LuaPy()
+# Evaluate the Py2Lua object inside the module so it can be imported directly without making new class instances
+luaPy = Py2Lua()
 
 
 

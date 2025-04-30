@@ -1,16 +1,18 @@
 
 import configparser
-import os, sys
+import os
 from functools import partial
-from appHelpers import (GuiPalette, SquareTypeEnum, ThemeEnum, grabPuzzleFrame,
-                        grabWidget)
-from PyQt5 import QtGui, QtWidgets
-from pathlib import Path
+from PyQt5.QtGui import QKeySequence, QFont, QGuiApplication
+from PyQt5.QtWidgets import QAction, QMenu, QMenuBar, QShortcut, QFileDialog, QInputDialog, QLabel
+from .uiHelpers import grabPuzzleFrame, grabWidget, getBasePath
+from .uiEnums import SquareTypeEnum
+import qdarktheme
+
 _fontFamily = "Verdana"
 
 
-class MenuBar(QtWidgets.QMenuBar):
-    _font = QtGui.QFont(_fontFamily, 8)
+class MenuBar(QMenuBar):
+    _font = QFont(_fontFamily, 8)
 
     def __init__(self, theMainWindow):
         super(MenuBar, self).__init__(theMainWindow)
@@ -32,12 +34,12 @@ class MenuBar(QtWidgets.QMenuBar):
 
     def initMenuBarComponents(self, theMainWindow):
 
-        self.fileMenu = QtWidgets.QMenu(self)
-        self.fileMenu.setTitle("FILE")
+        self.fileMenu = QMenu(self)
+        self.fileMenu.setTitle("File")
         self.fileMenu.setObjectName("fileMenu")
 
-        self.setThemeMenu = QtWidgets.QMenu(self)
-        self.setThemeMenu.setTitle("THEME")
+        self.setThemeMenu = QMenu(self)
+        self.setThemeMenu.setTitle("Theme")
         self.setThemeMenu.setObjectName("setThemeMenu")
 
         theMainWindow.setMenuBar(self)
@@ -45,41 +47,41 @@ class MenuBar(QtWidgets.QMenuBar):
     def initMenuBarActions(self, theMainWindow):
 
         puzzleFrame = grabPuzzleFrame()
-        self.importFromIniAction = QtWidgets.QAction(theMainWindow)
+        self.importFromIniAction = QAction(theMainWindow)
         self.importFromIniAction.setText("&IMPORT FROM INI")
         self.importFromIniAction.setIconText("IMPORT FROM INI")
         self.importFromIniAction.setToolTip("IMPORT FROM INI")
         self.importFromIniAction.setMenuRole(
-            QtWidgets.QAction.ApplicationSpecificRole)
-        self.importFromIniAction.shortcut = QtWidgets.QShortcut(
-            QtGui.QKeySequence("Ctrl+I"), self)
+            QAction.ApplicationSpecificRole)
+        self.importFromIniAction.shortcut = QShortcut(
+            QKeySequence("Ctrl+I"), self)
         self.importFromIniAction.setObjectName("importFromIniAction")
         self.importFromIniAction.triggered.connect(self.importIni)
         self.importFromIniAction.shortcut.activated.connect(self.importIni)
 
-        self.resetAllAction = QtWidgets.QAction(theMainWindow)
+        self.resetAllAction = QAction(theMainWindow)
         self.resetAllAction.setText("&RESET ALL")
         self.resetAllAction.setIconText("RESET ALL")
         self.resetAllAction.setToolTip("RESET ALL SQUARES")
         self.resetAllAction.setMenuRole(
-            QtWidgets.QAction.ApplicationSpecificRole)
-        self.resetAllAction.shortcut = QtWidgets.QShortcut(
-            QtGui.QKeySequence("Ctrl+R"), self)
+            QAction.ApplicationSpecificRole)
+        self.resetAllAction.shortcut = QShortcut(
+            QKeySequence("Ctrl+R"), self)
         self.resetAllAction.setObjectName("resetAction")
 
         self.resetAllAction.triggered.connect(self.resetAction)
         self.resetAllAction.shortcut.activated.connect(self.resetAction)
     
-        self.setLightThemeAction = QtWidgets.QAction(theMainWindow)
+        self.setLightThemeAction = QAction(theMainWindow)
         self.setLightThemeAction.setCheckable(True)
         self.setLightThemeAction.setChecked(False)
         self.setLightThemeAction.setEnabled(False)
         self.setLightThemeAction.setText("&LIGHT")
         self.setLightThemeAction.setIconText("LIGHT")
         self.setLightThemeAction.setToolTip("Set Light Mode")
-        self.setLightThemeAction.shortcut = QtWidgets.QShortcut(
-            QtGui.QKeySequence("Ctrl+L"), self)
-        self.setLightThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
+        self.setLightThemeAction.shortcut = QShortcut(
+            QKeySequence("Ctrl+L"), self)
+        self.setLightThemeAction.setMenuRole(QAction.PreferencesRole)
         self.setLightThemeAction.setShortcutVisibleInContextMenu(False)
         self.setLightThemeAction.setObjectName("setLightThemeAction")
         self.setLightThemeAction.triggered.connect(self.setLightMode)
@@ -89,15 +91,15 @@ class MenuBar(QtWidgets.QMenuBar):
             puzzleFrame._refresh)
 
 
-        self.setDarkThemeAction = QtWidgets.QAction(theMainWindow)
+        self.setDarkThemeAction = QAction(theMainWindow)
         self.setDarkThemeAction.setCheckable(True)
         self.setDarkThemeAction.setChecked(True)
         self.setDarkThemeAction.setText("&DARK")
         self.setDarkThemeAction.setIconText("DARK")
-        self.setDarkThemeAction.shortcut = QtWidgets.QShortcut(
-            QtGui.QKeySequence("Ctrl+D"), self)
+        self.setDarkThemeAction.shortcut = QShortcut(
+            QKeySequence("Ctrl+D"), self)
         self.setDarkThemeAction.setToolTip("Set Dark Mode")
-        self.setDarkThemeAction.setMenuRole(QtWidgets.QAction.PreferencesRole)
+        self.setDarkThemeAction.setMenuRole(QAction.PreferencesRole)
         self.setDarkThemeAction.setObjectName("setDarkThemeAction")
         self.setDarkThemeAction.setEnabled(False)
         self.setDarkThemeAction.triggered.connect(self.setDarkMode)
@@ -115,14 +117,14 @@ class MenuBar(QtWidgets.QMenuBar):
     def importIni(self):
         
         _basePath = getBasePath()
-        fname = QtWidgets.QFileDialog.getOpenFileName(
+        fname = QFileDialog.getOpenFileName(
             self,
             'Load ini file',
             os.path.join(_basePath, 'input'),
             "Ini Files (*.ini *.txt)")
         if fname:
             puzzleFrame = grabPuzzleFrame()
-            infoLabel = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
+            infoLabel = grabWidget(QLabel, 'puzzleInfoLabel')
             
             squares = puzzleFrame.squares
             puzzleIni = configparser.ConfigParser()
@@ -148,7 +150,7 @@ class MenuBar(QtWidgets.QMenuBar):
     def _choosePuzzle(self,puzzleNames):
         if not puzzleNames:
             return False
-        selectedValue, isSelected = QtWidgets.QInputDialog.getItem(
+        selectedValue, isSelected = QInputDialog.getItem(
             self, 
             'Import Puzzle', 
             'Select Puzzle to Import:', 
@@ -163,8 +165,8 @@ class MenuBar(QtWidgets.QMenuBar):
 
         puzzleFrame = grabPuzzleFrame()
         squares = puzzleFrame.squares
-        puzzleInfoLabel = grabWidget(QtWidgets.QLabel, 'puzzleInfoLabel')
-        displayLabel = grabWidget(QtWidgets.QLabel, 'infoDisplayLabel')
+        puzzleInfoLabel = grabWidget(QLabel, 'puzzleInfoLabel')
+        displayLabel = grabWidget(QLabel, 'infoDisplayLabel')
         for square in squares.values():
             square._resetAction()
 
@@ -174,30 +176,11 @@ class MenuBar(QtWidgets.QMenuBar):
         displayLabel._resetAction()
         
     def setLightMode(self):
-        QtGui.QGuiApplication.setPalette(GuiPalette(ThemeEnum.Light))
-        grabPuzzleFrame()._refresh()
+        qdarktheme.setup_theme("light")
 
     def setDarkMode(self):
-        QtGui.QGuiApplication.setPalette(GuiPalette(ThemeEnum.Dark))
-        grabPuzzleFrame()._refresh()
+        qdarktheme.setup_theme("dark")
 
     def uncheckTheBox(self, otherBox):
         otherBox.setChecked(False)
 
-def getBasePath():
-    
-    currentPath = Path(sys.argv[0]).resolve()
-    if len(currentPath.parts)>2:
-        inputsPath = currentPath.parts[0:-2]
-        inputsPath = os.path.join(*inputsPath, 'input')
-    else:
-        inputsPath = currentPath.parts[0:-1]
-        inputsPath = os.path.join(*inputsPath, 'input')
-        
-    if not os.path.isdir(inputsPath):
-        inputsPath = currentPath.parts[0:-1]
-        inputsPath = os.path.join(*inputsPath,'input')
-        
-    print(f'Using input location {inputsPath:s}')
-    return inputsPath
-   

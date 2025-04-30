@@ -1,12 +1,15 @@
 
 from time import perf_counter as tictoc
-from appHelpers import (ValidityEnum, SquareTypeEnum, grabPuzzleFrame, grabPuzzleSquares, grabWidget)
-from puzzleHelpers import luaPy
-from puzzleHelpers import sudokuParams as params
-from PyQt5 import QtCore, QtGui, QtWidgets
-_fontFamily = "Verdana"
+from PyQt5 import  QtGui
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButton
+from .uiHelpers import grabPuzzleFrame, grabWidget, grabPuzzleSquares
+from .uiEnums import ValidityEnum, SquareTypeEnum
+from src.pySolver.definitions import sudokuDefs
+from src.pySolver.py2lua import luaPy
+_fontFamily =  'Verdana'
 
-class UiPanel(QtWidgets.QFrame):
+class UiPanel(QFrame):
     def __init__(self, parent, objectName='UiPanel'):
         super(UiPanel, self).__init__(parent, objectName='UiPanel')
 
@@ -21,30 +24,29 @@ class UiPanel(QtWidgets.QFrame):
         self.setPuzzleBtn = SetPuzzleBtn(parent=self)
         self.infoDisplayLabel = InfoDisplayLabel(parent=self)
         
-        uiFrameLayout = QtWidgets.QGridLayout()
+        uiFrameLayout = QGridLayout()
         uiFrameLayout.setObjectName('uiFrameLayout')
         uiFrameLayout.setSpacing(0)
         uiFrameLayout.setContentsMargins(0, 0, 0, 0)
 
-        masterLayout = grabWidget(QtWidgets.QVBoxLayout, 'masterLayout')
+        masterLayout = grabWidget(QVBoxLayout, 'masterLayout')
 
         masterLayout.addLayout(uiFrameLayout)
 
         uiFrameLayout.addWidget(self.puzzleInfoLabel, 0,
-                                1, 1, 3, QtCore.Qt.AlignmentFlag.AlignRight)
+                                1, 1, 3, Qt.AlignmentFlag.AlignRight)
         uiFrameLayout.addWidget(self.setPuzzleBtn, 0, 0,
-                                1, 1, QtCore.Qt.AlignmentFlag.AlignVCenter)
+                                1, 1, Qt.AlignmentFlag.AlignVCenter)
         uiFrameLayout.addWidget(self.solvePuzzleBtn, 1,
-                                0, 1, 1, QtCore.Qt.AlignmentFlag.AlignVCenter)
+                                0, 1, 1, Qt.AlignmentFlag.AlignVCenter)
         uiFrameLayout.addWidget(self.infoDisplayLabel, 1,
-                                1, 1, 3, QtCore.Qt.AlignmentFlag.AlignVCenter)
+                                1, 1, 3, Qt.AlignmentFlag.AlignVCenter)
     def _setCompleted(self):
         
         self.setPuzzleBtn._disableMe()
         self.setPuzzleBtn.setEnabled(False)
         
         grabPuzzleFrame()._refresh()
-        #self.setEnabled(False)
         self.puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
         self.puzzleInfoLabel._refresh()
         
@@ -52,7 +54,7 @@ class UiPanel(QtWidgets.QFrame):
         self.solvePuzzleBtn.setEnabled(False)
         self.solvePuzzleBtn.setText('SOLVED')
 
-class InfoDisplayLabel(QtWidgets.QLabel):
+class InfoDisplayLabel(QLabel):
     def __init__(self, parent, objectName="infoDisplayLabel"):
         super(InfoDisplayLabel, self).__init__(
             parent, objectName="infoDisplayLabel")
@@ -62,12 +64,13 @@ class InfoDisplayLabel(QtWidgets.QLabel):
         self.setText("")
         self.setStyleSheet("font-family: Segoe Ui; font-size: 14px;")
         self.setAlignment(
-            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+            Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
         self.setEnabled(False)
 
     def _resetAction(self):
         self.setText("")
-class PuzzleInfoLabel(QtWidgets.QLabel):
+
+class PuzzleInfoLabel(QLabel):
     
     def __init__(self, parent, objectName="puzzleInfoLabel"):
         super(PuzzleInfoLabel, self).__init__(
@@ -79,25 +82,22 @@ class PuzzleInfoLabel(QtWidgets.QLabel):
         puzzleLabelFont = QtGui.QFont(_fontFamily, 14)
         puzzleLabelFont.setBold(False)
         puzzleLabelFont.setItalic(False)
-
-        # self.setGeometry(QtCore.QRect(391, 851, 531, 38))  # Change this
         self.setText("0 OF 17 SQUARES SET")
         self.setAlignment(
-            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+            Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
 
         # Connect the puzzle squares to update text when changed. Cant do before because this class didnt exist yet
-
         for theSquare in grabPuzzleSquares().values():
             theSquare.textEdited.connect(self._refresh)
 
     def _refresh(self):
 
-        puzzleFrame = grabWidget(QtWidgets.QFrame, 'puzzleFrame')
+        puzzleFrame = grabWidget(QFrame, 'puzzleFrame')
         numFilledSquares = puzzleFrame.validSquareCount
         theText = str(numFilledSquares) + " OF 17 SQUARES SET"
         puzzleIsValid = puzzleFrame.isValid
 
-        setPuzzleBtn = grabWidget(QtWidgets.QPushButton, 'setPuzzleBtn')
+        setPuzzleBtn = grabWidget(QPushButton, 'setPuzzleBtn')
 
         if puzzleIsValid == ValidityEnum.Invalid:
             self.setStyleSheet(
@@ -120,7 +120,7 @@ class PuzzleInfoLabel(QtWidgets.QLabel):
         self.setText(theText)
 
 
-class SetPuzzleBtn(QtWidgets.QPushButton):
+class SetPuzzleBtn(QPushButton):
     def __init__(self, parent, objectName='setPuzzleBtn'):
         super(SetPuzzleBtn, self).__init__(
             parent, objectName='setPuzzleBtn')
@@ -160,7 +160,7 @@ class SetPuzzleBtn(QtWidgets.QPushButton):
         self.setDisabled(True)
 
 
-class SolvePuzzleButton(QtWidgets.QPushButton):
+class SolvePuzzleButton(QPushButton):
     def __init__(self, parent, objectName='solveBtn'):
         super(SolvePuzzleButton, self).__init__(
             parent, objectName='solveBtn')
@@ -209,13 +209,13 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
                 theSolution[squareKey] = squareValue
 
             self.setSolution(theSolution)
-            uiPanel = grabWidget(QtWidgets.QFrame, 'UiPanel')
+            uiPanel = grabWidget(QFrame, 'UiPanel')
             uiPanel._setCompleted()
             
             difficultyEnum = runtimeInfo['difficulty']
             numRecursions = runtimeInfo['numRecursions']
             numOperations = runtimeInfo['numOperations']
-            displayLabel = grabWidget(QtWidgets.QLabel, 'infoDisplayLabel')
+            displayLabel = grabWidget(QLabel, 'infoDisplayLabel')
             
             displayText = f'Completed in {tDuration_ms:.2f} milliseconds - Difficulty: {difficultyEnum:s}\n{numRecursions} Recursions - {numOperations} Operations'
             displayLabel.setText(displayText)
@@ -226,7 +226,7 @@ class SolvePuzzleButton(QtWidgets.QPushButton):
         puzzleFrame = grabPuzzleFrame()
         puzzleSquares = puzzleFrame.squares
         allComplete = True
-        for puzzleKey in params.squares:
+        for puzzleKey in sudokuDefs.squares:
             if puzzleSquares[puzzleKey].squareType is SquareTypeEnum.UserSet:
                 puzzleSquares[puzzleKey].squareType = SquareTypeEnum.Solved
                 puzzleSquares[puzzleKey].setText(theSolutionDict[puzzleKey])
