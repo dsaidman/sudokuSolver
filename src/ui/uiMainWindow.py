@@ -1,11 +1,13 @@
 from functools import lru_cache
 from math import floor
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QFrame, QApplication, QMainWindow
-from PyQt5.QtCore import Qt, QMetaObject
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QFrame, QApplication, QMainWindow
+from PyQt6.QtCore import Qt, QMetaObject
+from PyQt6.QtGui import QGuiApplication
 from .uiEnums import AppStatusEnum
+from .uiPuzzleComponents import PuzzleFrame
+from .uiControlComponents import UiPanel
+from pySolver.py2lua import luaPy as sudokuDefs
 from .uiMenuComponents import MenuBar
-from .uiPuzzleComponents import PuzzleFrame, UiPanel
-from src.pySolver.py2lua import luaPy as sudokuDefs
 
 class AppMainWindow(QMainWindow):
     
@@ -24,12 +26,11 @@ class AppMainWindow(QMainWindow):
     def setupUi(self):
 
         self.setObjectName("MainWindow")
-        self.setWindowModality(Qt.NonModal)
+        self.setWindowModality(Qt.WindowModality.NonModal)
         self.setWindowTitle("SudokuSolverApp")
         self.setDockNestingEnabled(True)
         self._status = AppStatusEnum.Unlocked
         self.resizeApp()
-        self.setStyleSheet('* {font-family: Segoe Ui; font-size: 12pt}')
 
         self.centralWidget = QWidget(parent=self)
         self.centralWidget.setObjectName("centralWidget")
@@ -48,18 +49,16 @@ class AppMainWindow(QMainWindow):
         # Title Label
         self.titleLabel = QLabel(self.centralWidget)
         self.titleLabel.setAutoFillBackground(True)
-        self.titleLabel.setFrameShadow(QFrame.Plain)
-        self.titleLabel.setText("SUDOKU SOLVER")
+        self.titleLabel.setFrameShadow(QFrame.Shadow.Plain)
+        self.titleLabel.setText("Sudoku Solver")
         self.titleLabel.setScaledContents(True)
-        self.titleLabel.setAlignment(Qt.AlignCenter)
+        self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.titleLabel.setObjectName("titleLabel")
-        self.titleLabel.setStyleSheet("font-family: Segoe Ui; font-size: 28pt; font-weight: bold")
+        self.titleLabel.setStyleSheet("font-size: 14pt; font-weight: bold")
         anotherLayout.addWidget(self.titleLabel, 0, 0,
                                 alignment=Qt.AlignmentFlag.AlignVCenter)
-
         self.puzzleFrame = PuzzleFrame(self.centralWidget)
         self.uiFrame = UiPanel(self.centralWidget)
-
         # make master layout widget for nestthig the layouts
         anotherLayout.addWidget(self.titleLabel, 0, 0,
                                 alignment=Qt.AlignmentFlag.AlignVCenter)
@@ -70,30 +69,19 @@ class AppMainWindow(QMainWindow):
         self.uiFrame.raise_()
         self.puzzleFrame.raise_()
         self.titleLabel.raise_()
-
         self.setCentralWidget(self.centralWidget)
-
         self.menuBar = MenuBar(self)
         w = self.windowHandle()
         self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
 
-    @property
-    def screenSize(self):
-        appDesktop = QApplication.desktop()
-
-        screenRect = appDesktop.screenGeometry()
-        self._heightPx = screenRect.height()
-        self._widthPx = screenRect.width()
-        return self._heightPx, self._widthPx
-
     def resizeApp(self):
         
-        heightPx, widthPx = self.screenSize
+        _height, _weight = getScreenSize()
         
         self.resize(
-            int(floor(self._heightPx/2)),
-            floor(int(self._widthPx/4)))
+            int(floor(float(_height)/3)),
+            floor(int(float(_weight)/4)))
 
     def orderTabs(self):
         for idx in range(len(sudokuDefs.squares)-1):
@@ -107,22 +95,7 @@ class AppMainWindow(QMainWindow):
     def retranslateUi(self, MainWindow):
         pass
 
-
-
 @lru_cache(typed=False)
 def getScreenSize():
-    appDesktop = QApplication.desktop()
-
-    screenRect = appDesktop.screenGeometry()
-    height = screenRect.height()
-    width = screenRect.width()
-    return height, width
-
-
-
-
-def changeQtLineEditProp(widget, prop, newVal):
-    widget.setProperty(prop, newVal)
-    widget.style().unpolish(widget)
-    widget.style().polish(widget)
-    widget.update()
+    cp = QGuiApplication.primaryScreen().availableGeometry().size()
+    return cp.height(), cp.width()

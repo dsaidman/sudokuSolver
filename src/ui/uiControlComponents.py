@@ -1,13 +1,12 @@
 
 from time import perf_counter as tictoc
-from PyQt5 import  QtGui
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButton
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButton
 from .uiHelpers import grabPuzzleFrame, grabWidget, grabPuzzleSquares
 from .uiEnums import ValidityEnum, SquareTypeEnum
-from src.pySolver.definitions import sudokuDefs
-from src.pySolver.py2lua import luaPy
-_fontFamily =  'Verdana'
+from pySolver.definitions import sudokuDefs
+from pySolver.py2lua import luaPy
 
 class UiPanel(QFrame):
     def __init__(self, parent, objectName='UiPanel'):
@@ -62,9 +61,9 @@ class InfoDisplayLabel(QLabel):
         self.setParent(parent)
         self.setObjectName(objectName)
         self.setText("")
-        self.setStyleSheet("font-family: Segoe Ui; font-size: 14px;")
+        self.setStyleSheet("font-size: 14px;")
         self.setAlignment(
-            Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.setEnabled(False)
 
     def _resetAction(self):
@@ -78,13 +77,13 @@ class PuzzleInfoLabel(QLabel):
 
         self.setParent(parent)
         self.setObjectName(objectName)
-
-        puzzleLabelFont = QtGui.QFont(_fontFamily, 14)
+        puzzleLabelFont = QFont()
+        puzzleLabelFont.setPointSize(14)
         puzzleLabelFont.setBold(False)
         puzzleLabelFont.setItalic(False)
         self.setText("0 OF 17 SQUARES SET")
         self.setAlignment(
-            Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
 
         # Connect the puzzle squares to update text when changed. Cant do before because this class didnt exist yet
         for theSquare in grabPuzzleSquares().values():
@@ -101,21 +100,21 @@ class PuzzleInfoLabel(QLabel):
 
         if puzzleIsValid == ValidityEnum.Invalid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(255, 0, 0); font-style: italic;font-weight: regular;font-size: 14pt;}")
+                "QLabel{ color: rgb(255, 0, 0); font-style: italic;font-weight: regular}")
             setPuzzleBtn._disableMe()
         elif numFilledSquares >= 17 and numFilledSquares < 81 and puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(255, 140, 0); font-style: regular;font-weight: bold;font-size: 14pt;}")
+                "QLabel{ color: rgb(255, 140, 0); font-style: regular;font-weight: bold}")
             theText = theText + ': READY'
             setPuzzleBtn._enableMe()
         elif numFilledSquares == 81 and puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(0, 255, 0); font-style: regular;font-weight: bold;font-size: 14pt;}")
+                "QLabel{ color: rgb(0, 255, 0); font-style: regular;font-weight: bold}")
             theText = theText + ': COMPLETE'
             setPuzzleBtn._enableMe()
         elif numFilledSquares < 17 or puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(212,212,200); font-style: normal;font-weight: regular;font-size: 14pt;}")
+                "QLabel{ color: rgb(212,212,200); font-style: normal;font-weight: regular}")
             setPuzzleBtn._disableMe()
         self.setText(theText)
 
@@ -127,17 +126,15 @@ class SetPuzzleBtn(QPushButton):
 
         self.setParent(parent)
         self.setObjectName(objectName)
-        # self.setGeometry(QtCore.QRect(10, 850, 361, 41))
-        self.setFont(QtGui.QFont(_fontFamily, 14))
-
-        self.setText("LOCK PUZZLE")
+        self.setText("Lock")
         self.setShortcut("")
-
         self.clicked.connect(grabPuzzleFrame().toggleLock)
         self._disableMe()
 
     def _enableMe(self):
+        self.setEnabled(False)
         self.setEnabled(True)
+
         self.setStyleSheet(
             "QPushButton {color : rgb(255,140,0); font-weight: bold;}")
         self.setToolTip(
@@ -145,7 +142,7 @@ class SetPuzzleBtn(QPushButton):
 
     def _disableMe(self):
         self.setStyleSheet(
-            "QPushButton { color: white; font-weight : bold;}")
+            "QPushButton { color: rgb(140,140,140);}")
         self.setToolTip(
             'The puzzle can be solved once the minimum number of squares required for a unique solution have been entered')
         self.setEnabled(False)
@@ -166,8 +163,7 @@ class SolvePuzzleButton(QPushButton):
             parent, objectName='solveBtn')
 
         self.setParent(parent)
-        self.setFont(QtGui.QFont(_fontFamily, 14))
-        self.setText("SOLVE")
+        self.setText("Solve")
         self.setShortcut("")
         self.setObjectName("solveBtn")
         self._disableMe()
@@ -175,16 +171,18 @@ class SolvePuzzleButton(QPushButton):
         self.clicked.connect(self._disableMe)
 
     def _enableMe(self):
+        self.setDisabled(False)
         self.setEnabled(True)
         self.setStyleSheet(
             "QPushButton {color: rgb(0,255,0); font-weight: bold;}")
         self.setToolTip('Im enabled and ready to go')
 
     def _disableMe(self):
-        self.setStyleSheet(
-            "QPushButton {color:  white; font-weight: regular;}")
         self.setEnabled(False)
         self.setDisabled(True)
+        self.setStyleSheet(
+            "QPushButton {color:  rgb(140,140,140); font-weight: regular;}")
+        self.setText("Solve")
         self.setToolTip('Im disabled because couldnt lock the puzzle that was given')
 
     def solveIt(self):
@@ -195,7 +193,7 @@ class SolvePuzzleButton(QPushButton):
             return False
         else:
             puzzleArg = luaPy.dict2Table(puzzleFrame.asDict())
-            solveFun = luaPy.sovler['solve']
+            solveFun = luaPy.solver['solve']
             
             # Everything is ready to call
             tStart = tictoc()

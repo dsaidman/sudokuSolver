@@ -1,12 +1,16 @@
 
+import sys, os.path
 from functools import cached_property
 from math import floor
-from PyQt5.QtCore import Qt
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
+from PyQt6.QtCore import Qt, QEvent
+from PyQt6.QtGui import QCursor
+from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
-from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow
-from src.pySolver.definitions import sudokuDefs
+from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares
+
+#Until i figure out how to do this properly, path hack
+sys.path.append(os.path.abspath('..'))
+from pySolver.definitions import sudokuDefs
 
 class PuzzleFrame(QFrame):
     """
@@ -73,9 +77,9 @@ class PuzzleFrame(QFrame):
         self.setParent(parent)
         # self.setGeometry(QtCore.QRect(10, 130, 911, 691))
 
-        self.setAutoFillBackground(False)
-        self.setFrameShape(QFrame.Box)
-        self.setFrameShadow(QFrame.Plain)
+        self.setAutoFillBackground(True)
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+        self.setFrameShadow(QFrame.Shadow.Plain)
         self.setLineWidth(3)
         self.setObjectName("puzzleFrame")
 
@@ -139,7 +143,7 @@ class PuzzleFrame(QFrame):
                     square.setReadOnly(False)
             grabMainWindow().status = AppStatusEnum.Unlocked
             solveBtn._disableMe()
-            setBtn.setText("LOCK PUZZLE")
+            setBtn.setText("Lock")
         elif grabMainWindow().status == AppStatusEnum.Unlocked and puzzleValid == ValidityEnum.Valid:
             for square in self.squares.values():
                 if len(square.text()) > 0 and square.squareType == SquareTypeEnum.InputUnlocked:
@@ -149,7 +153,7 @@ class PuzzleFrame(QFrame):
                     square.squareType = SquareTypeEnum.UserSet
             grabMainWindow().status = AppStatusEnum.Locked
             solveBtn._enableMe()
-            setBtn.setText("LOCKED")
+            setBtn.setText("Locked")
         self._refresh()
         
     def _setNewFocus(self, oldKey, newKey):
@@ -175,8 +179,6 @@ class PuzzleFrame(QFrame):
         if key == None:
             key = self.objectName()
         self.squares[key].setCursorPosition(0)
-        self.squares[key].end(False)
-        self.squares[key].home(True)
 
     def _initSquares(self):
         squares = {}
@@ -222,7 +224,7 @@ class PuzzleFrame(QFrame):
         for vertLineNum in ['1', '3', '6', '9']:
             lineBorders[vertLineNum] = PuzzleBorderLine(
                 self,
-                QFrame.VLine,
+                QFrame.Shape.VLine,
                 'verticalLine'+vertLineNum)
 
             self.puzzleLayout.addWidget(
@@ -232,7 +234,7 @@ class PuzzleFrame(QFrame):
         for horizLineNum in ['A', 'C', 'F', 'I']:
             lineBorders[horizLineNum] = PuzzleBorderLine(
                 self,
-                QFrame.HLine,
+                QFrame.Shape.HLine,
                 'horizontalLine'+horizLineNum)
             self.puzzleLayout.addWidget(
                 lineBorders[horizLineNum],
@@ -240,49 +242,46 @@ class PuzzleFrame(QFrame):
 
         lineBorders['horizontalLine0'] = PuzzleBorderLine(
             self,
-            QFrame.HLine,
+            QFrame.Shape.HLine,
             'horizontalLine0')
         self.puzzleLayout.addWidget(
             lineBorders['horizontalLine0'], 0, 3, 1, 11)
 
         lineBorders['verticalLine0'] = PuzzleBorderLine(
             self,
-            QFrame.VLine,
+            QFrame.Shape.VLine,
             'verticalLine0')
         self.puzzleLayout.addWidget(
             lineBorders['verticalLine0'], 3, 0, 11, 1)
         self.lineBorders = lineBorders
 
     def eventFilter(self, source, event):
-
-        if isinstance(source, PuzzleSquare) and event.type() == QtGui.QKeyEvent.KeyPress:
+        if isinstance(source, PuzzleSquare) and event.type() == event.Type.KeyPress:
             sourceObjectName = source.objectName()
             rowNum = sourceObjectName[0]
             colNum = sourceObjectName[1]
-
-            if event.key() == Qt.Key_Up:
+            if event.key() == Qt.Key.Key_Up:
                 newFocusCol = colNum
                 newFocusRow = sudokuDefs.rows[
                     (sudokuDefs.rows.index(rowNum)-1) % len(sudokuDefs.rows)]
-
                 return self._setNewFocus(sourceObjectName, newFocusRow+newFocusCol)
-            elif event.key() == Qt.Key_Down:
+            elif event.key() == Qt.Key.Key_Down:
                 newFocusCol = colNum
                 newFocusRow = sudokuDefs.rows[
                     (sudokuDefs.rows.index(rowNum)+1) % len(sudokuDefs.rows)]
                 return self._setNewFocus(sourceObjectName, newFocusRow+newFocusCol)
-
-            elif event.key() == Qt.Key_Tab or event.key() == Qt.Key_Right:
+            elif event.key() == Qt.Key.Key_Tab or event.key() == Qt.Key.Key_Right:
                 newKey = sudokuDefs.squares[
                     (sudokuDefs.squares.index(sourceObjectName)+1) % len(sudokuDefs.squares)]
                 return self._setNewFocus(sourceObjectName, newKey)
-            elif event.key() == Qt.Key_Left:
+            elif event.key() == Qt.Key.Key_Left:
                 newKey = sudokuDefs.squares[
                     (sudokuDefs.squares.index(sourceObjectName)-1) % len(sudokuDefs.squares)]
                 return self._setNewFocus(sourceObjectName, newKey)
             else:
                 return False
-        elif isinstance(source, PuzzleSquare) and ((event.type() == QtCore.QEvent.Type.FocusIn) or (event.type() == QtCore.QEvent.Type.MouseButtonRelease)):
+        elif isinstance(source, PuzzleSquare) and ((event.type() == QEvent.Type.FocusIn) 
+                                                   or (event.type() == QEvent.Type.MouseButtonRelease)):
            
             if source.isEnabled() == True:
                 sourceObjectName = source.objectName()
@@ -366,26 +365,21 @@ class PuzzleSquare(QLineEdit):
 
         self.setObjectName(objectName)
         self.setParent(parent)
-
-        self.setSizePolicy(self._sizePolicy)
-
-        self.setCursor(QtGui.QCursor(Qt.IBeamCursor))
+        self.setSizePolicy(self.sizePolicy())
+        self.setCursor(QCursor(Qt.CursorShape.IBeamCursor))
         self.setAcceptDrops(True)
-
-        self.setInputMethodHints(Qt.ImhDigitsOnly)
-        self.setInputMask("D")
+        self.setInputMethodHints(Qt.InputMethodHint.ImhDigitsOnly)
+        self.setInputMask("d")
         self.setText("")
         self.setMaxLength(1)
         self.setFrame(True)
-        self.setAlignment(Qt.AlignCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setDragEnabled(True)
         self.setPlaceholderText("")
         self.setClearButtonEnabled(False)
-
         self._nextSquare = sudokuDefs.nextSquare(self.name)
         self._lastSquare = sudokuDefs.lastSquare(self.name)
         self._isValid = ValidityEnum.Valid
-        self._theme = ThemeEnum.Dark
         self._neighborKeys = sudokuDefs.neighbors(self.name)
         self._squareType = SquareTypeEnum.InputUnlocked
         self.setToolTip('Square {name}: {tip}'.format(
@@ -400,14 +394,13 @@ class PuzzleSquare(QLineEdit):
         if not _newTextStr:
             self.setText("")
             _nextKey = self.lastSquare
-
         else:
             self.setText(newTextStr[0])
             _nextKey = self.nextSquare
+        
+        #Jump to next square in tab order
         grabPuzzleFrame()._setNewFocus(self.objectName(),_nextKey)
-        #theNextSquare = grabWidget(QtWidgets.QLineEdit, _nextKey)
-        
-        
+
     def _resetAction(self):
         self.setEnabled(True)
         self.setText('') 
@@ -417,25 +410,20 @@ class PuzzleSquare(QLineEdit):
 
 
     def _applyFormatting(self):
-        isValid = self._isValid
-        bgcolor = 'rgb(51,51,50)'
+        isValid = self.isValid
         if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
                                "font-weight: bold;"
-                               "font-size: 14pt;"
                                "font-style: regular;}")
         elif isValid == ValidityEnum.Invalid and self.squareType == SquareTypeEnum.InputUnlocked:
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,0,0);"
-                               "font-weight: bold;"
-                               "font-size: 14pt;"
                                "font-style: italic;}")
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputLocked:
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
                                "font-weight: bold;"
-                               "font-size: 14pt;"
                                "font-style: normal;"
                                "background-color: rgb(30,30,30);"
                                "border-color: rgb(255,140,0);}")
@@ -443,13 +431,11 @@ class PuzzleSquare(QLineEdit):
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(212,255,200);"
                                "font-weight: normal;"
-                               "font-size: 12pt;"
                                "font-style: regular;}")
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.Solved:
             self.setStyleSheet("QLineEdit {"
                                "color:	rgba(0,255,0,204);"
                                "font-weight: normal;"
-                               "font-size: 12pt;"
                                "font-style: regular;}")
         self.setToolTip('Square {name}: {valid} - {status}'.format(
             name=self.name, valid=self._isValid.name, status=self._squareType.name))
@@ -460,8 +446,7 @@ class PuzzleBorderLine(QFrame):
         super(PuzzleBorderLine, self).__init__(parent, objectName=None)
         self.setObjectName(objectName)
         self.setParent(parent)
-        self.setFrameShadow(QFrame.Plain)
-        self.setLineWidth(1)
+        self.setLineWidth(3)
         self.setFrameShape(frameShape)
 
 class PuzzleHeader(QLabel):
@@ -471,5 +456,4 @@ class PuzzleHeader(QLabel):
         self.setObjectName(objectName)
         self.setParent(parent)
         self.setText(text)
-        self.setAlignment(Qt.AlignCenter)
-        self.setStyleSheet("font-family: Verdana; font-weight: bold; font-size: 14pt")
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)

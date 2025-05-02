@@ -1,5 +1,5 @@
 from functools import cached_property, lru_cache
-from src.pySolver.py2lua import luaPy
+from pySolver.py2lua import luaPy
 
 class definitions:
     """
@@ -21,7 +21,7 @@ class definitions:
         Returns:
             list: capital let`ters A to I 
         """        
-        return sorted(list(luaPy.defintions.rowNames.values()))
+        return sorted(list(luaPy.defintions[0].rowNames.values()))
 
     @cached_property
     def columns(self):
@@ -32,7 +32,7 @@ class definitions:
             list: capital letters A to I 
         """
         # return list(digits[1:10])
-        return sorted(list(luaPy.defintions.colNames.values()))
+        return sorted(list(luaPy.defintions[0].colNames.values()))
 
     @cached_property
     def squares(self):
@@ -42,7 +42,7 @@ class definitions:
         Returns:
             list: cached list of keys
         """        
-        return sorted(list(luaPy.defintions.allKeys.values()), reverse=False)
+        return sorted(list(luaPy.defintions[0].allKeys.values()), reverse=False)
 
     def nextSquare(self, currentKey):
         """
@@ -84,7 +84,7 @@ class definitions:
         Returns:
             list: Unique list of strings of squares that cannot share same value
         """       
-        return list(luaPy.defintions['getNeighbors'](squareID))
+        return list(luaPy.defintions[0]['getNeighbors'](squareID))
 
 # Return the pre-cached SudokuParams instance to be shared across modules
 sudokuDefs = definitions()

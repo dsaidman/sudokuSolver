@@ -13,7 +13,6 @@ Returns:
 
 import os
 from functools import cached_property
-from pathlib import Path
 import lupa.luajit21 as lupa
 from lupa import LuaRuntime
 
@@ -57,7 +56,7 @@ class Py2Lua:
         return self._luaDefinitionsModule
 
     @cached_property
-    def sovler(self):
+    def solver(self):
         """
         Returns ./solver.lua as a lupa table.
 
@@ -69,7 +68,7 @@ class Py2Lua:
         Returns:
             table : lua table object containing functions and variables that define sudoku puzzles
         """
-        return self._luaSolverModule
+        return self._luaSolverModule[0]
 
     def __init__(self):
         """Constructor method initializes lua runtime and modules."""
@@ -86,10 +85,10 @@ class Py2Lua:
         self._lua = lua
         
         print('\tImporting defintions.lua as table object...')
-        self._luaDefinitionsModule = lua.require('definitions')
+        self._luaDefinitionsModule = lua.require('src.luaSolver.definitions')
         
         print('\tImporting solver.lua as table object...')
-        self._luaSolverModule = lua.require('solver')
+        self._luaSolverModule = lua.require('src.luaSolver.solver')
         
         print('\tPy2Lua initialized')
 
@@ -116,9 +115,16 @@ class Py2Lua:
         lua = self._lua
 
         # Evaluate a function that can iterate over a python key so it can be put into a table
-        tableFun = lua.eval(
-            'function(d) local t = {} for key, value in python.iterex(d.items()) do t[key] = value end return t end')
-        return tableFun(lupa.as_attrgetter(d))
+        #tableFun = lua.eval(
+        #    'function(d) ' \
+        #    'local t = {}'
+        #    'for key, value in python.iterex(d.items()) ' \
+        #    'do t[key] = value ' \
+        #    'end ' \
+        #    'return t ' \
+        #    'end')
+        #return tableFun(lupa.as_attrgetter(d))
+        return lua.table_from(d)
 
 # Evaluate the Py2Lua object inside the module so it can be imported directly without making new class instances
 luaPy = Py2Lua()
