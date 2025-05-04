@@ -1,13 +1,14 @@
 from functools import lru_cache
 from math import floor
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QWidget, QFrame, QMainWindow
-from PyQt6.QtCore import Qt, QMetaObject
-from PyQt6.QtGui import QGuiApplication, QFont
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QWidget, QFrame, QMainWindow, QSizePolicy, QStyle
+from PyQt6.QtCore import Qt, QMetaObject, QSize
+from PyQt6.QtGui import QGuiApplication, QFont, QIcon, QPixmap
 from .uiEnums import AppStatusEnum
 from .uiPuzzleComponents import PuzzleFrame
 from .uiControlComponents import UiPanel
 from pySolver.py2lua import luaPy as sudokuDefs
 from .uiMenuComponents import MenuBar
+import inspect, os
 
 
 class AppMainWindow(QMainWindow):
@@ -29,11 +30,27 @@ class AppMainWindow(QMainWindow):
         self.setObjectName("MainWindow")
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.setWindowTitle("SudokuSolverApp")
-        self.setDockNestingEnabled(True)
+
+        filename = inspect.getframeinfo(inspect.currentframe()).filename
+        path     = os.path.dirname(os.path.abspath(filename))
+        iconpath = os.path.join(os.path.dirname(os.path.dirname(path)),'resources','icon.ico')
+        appIcon = QIcon()
+        appIcon.addPixmap(QPixmap(iconpath), QIcon.Mode.Normal, QIcon.State.Off)
+        self.setWindowIcon(appIcon)
+        #self.setDockNestingEnabled(True)
         self._status = AppStatusEnum.Unlocked
 
         self.centralWidget = QWidget()
         self.centralWidget.setObjectName("centralWidget")
+
+
+        theSizePolicy = QSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding)
+        theSizePolicy.setVerticalStretch(0)
+        theSizePolicy.setHorizontalStretch(0)
+        theSizePolicy.setHeightForWidth(False)
+        self.setSizePolicy(theSizePolicy)
 
         # Master Layout
         masterLayout = QVBoxLayout()
@@ -45,13 +62,14 @@ class AppMainWindow(QMainWindow):
         self.titleLabel = QLabel()
         self.titleLabel.setParent(self.centralWidget)
         self.titleLabel.setAutoFillBackground(True)
-        self.titleLabel.setFrameShadow(QFrame.Shadow.Plain)
+        self.titleLabel.setFrameShadow(QFrame.Shadow.Raised)
         self.titleLabel.setText("Sudoku Solver")
         self.titleLabel.setScaledContents(True)
         self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.titleLabel.setObjectName("titleLabel")
-        self.titleLabel.setStyleSheet("background-color: rgb(30,30,30);")
+        self.titleLabel.setStyleSheet("background-color: rgb(100,100,100);")
         self.setContentsMargins(0, 0, 0, 0)
+
         titleFont = QFont()
         titleFont.setBold(True)
         titleFont.setPointSize(14)

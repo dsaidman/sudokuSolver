@@ -84,6 +84,12 @@ class PuzzleFrame(QFrame):
         self.setFrameShadow(QFrame.Shadow.Plain)
         self.setLineWidth(3)
         self.setObjectName("puzzleFrame")
+        
+        self.setSizePolicy(
+            QSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding,
+            QSizePolicy.Policy.MinimumExpanding)
+        )
 
         self.puzzleLayout = QGridLayout()
         self.puzzleLayout.setObjectName("puzzleLayout")
@@ -284,10 +290,11 @@ class PuzzleSquare(QLineEdit):
     def _sizePolicy(self):
         # Set the size policy so constant across all
         sizePolicy = QSizePolicy(
-            QSizePolicy.Ignored,
-            QSizePolicy.Expanding)
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHorizontalStretch(0)
+
         sizePolicy.setHeightForWidth(False)
         return sizePolicy
 
@@ -449,3 +456,7 @@ class PuzzleHeader(QLabel):
         self.setScaledContents(True)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setFont(headerFont)
+        self.setStyleSheet("QLabel {" 
+            "background-color: rgb(70,70,70);" \
+            "border-color: rgb(70,70,70)}")
+
