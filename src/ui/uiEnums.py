@@ -1,9 +1,11 @@
 from enum import Enum, auto
 
+
 class ValidityEnum(Enum):
     NoStatement = -1
     Valid = auto()
     Invalid = auto()
+
 
 class AppStatusEnum(Enum):
     NotReady = auto()
@@ -12,6 +14,7 @@ class AppStatusEnum(Enum):
     Unlocked = auto()
     Solving = auto()
     Solved = auto()
+
 
 class SquareTypeEnum(Enum):
     Unset = -1

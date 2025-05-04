@@ -1,10 +1,11 @@
 from functools import cached_property, lru_cache
 from pySolver.py2lua import luaPy
 
+
 class definitions:
     """
     A class with properties and methods that collectively define the rules of a lua puzzle.
-    
+
     SudokuParams behaves as in interface the definitions.lua lua module imported in 
     LuaPy to utilize the lightweight and very fast cached variables and methods in
     a familiar python container
@@ -12,7 +13,7 @@ class definitions:
     Returns:
         object: SudokuParams object with cached methods and properties that define the rules of sudoku
     """
-    
+
     @cached_property
     def rows(self):
         """
@@ -20,7 +21,7 @@ class definitions:
 
         Returns:
             list: capital let`ters A to I 
-        """        
+        """
         return sorted(list(luaPy.defintions[0].rowNames.values()))
 
     @cached_property
@@ -41,7 +42,7 @@ class definitions:
 
         Returns:
             list: cached list of keys
-        """        
+        """
         return sorted(list(luaPy.defintions[0].allKeys.values()), reverse=False)
 
     def nextSquare(self, currentKey):
@@ -53,7 +54,7 @@ class definitions:
 
         Returns:
             str: The key of the next tile in order A1->I9. For example, nextSquare('A2') returns A3. nextSquare('I9') returns A1
-        """        
+        """
         return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
 
     def lastSquare(self, currentKey):
@@ -72,7 +73,7 @@ class definitions:
     def neighbors(self, squareID):
         """
         Returns list of squareID that cannot share the same value.
-        
+
         The cached helper function returns a list of square tile IDs that cannot share the same value as the input tile.
         A neighbor is definited as another square tile in the same row, column, or cell. 
         The function returns a unique list containing all the squares tiles sharing the same row, column or cell.
@@ -83,8 +84,9 @@ class definitions:
 
         Returns:
             list: Unique list of strings of squares that cannot share same value
-        """       
+        """
         return list(luaPy.defintions[0]['getNeighbors'](squareID))
+
 
 # Return the pre-cached SudokuParams instance to be shared across modules
 sudokuDefs = definitions()

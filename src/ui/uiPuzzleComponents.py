@@ -1,5 +1,7 @@
 
-import sys, os.path
+from pySolver.definitions import sudokuDefs
+import sys
+import os.path
 from functools import cached_property
 from math import floor
 from PyQt6.QtCore import Qt, QEvent
@@ -8,9 +10,9 @@ from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabe
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
 from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares
 
-#Until i figure out how to do this properly, path hack
+# Until i figure out how to do this properly, path hack
 sys.path.append(os.path.abspath('..'))
-from pySolver.definitions import sudokuDefs
+
 
 class PuzzleFrame(QFrame):
     """
@@ -22,7 +24,7 @@ class PuzzleFrame(QFrame):
     Returns:
         PuzzleFrame: An initialized widget containing the puzzle interface and and other methods
     """
-    
+
     @property
     def squareCount(self):
         """
@@ -30,7 +32,7 @@ class PuzzleFrame(QFrame):
 
         Returns:
             int: square count
-        """        
+        """
         cnt = 0
         for square in self.squares.values():
             cnt = cnt + 1 if len(square.text()) > 0 else cnt
@@ -57,7 +59,7 @@ class PuzzleFrame(QFrame):
 
         Returns:
             ValidityEnum: Enumeration of square is valid
-        """        
+        """
         for square in self.squares.values():
 
             if square.isValid == ValidityEnum.Invalid:
@@ -65,14 +67,14 @@ class PuzzleFrame(QFrame):
                 return self._isValid
         self._isValid = ValidityEnum.Valid
         return self._isValid
-    
+
     def __init__(self, parent):
         """
         Main contructor of PuzzleFrame object that sets up all child widgets and graphic elements.
 
         Args:
             parent (QtWidget): Parent object of the puzzle frame, assumed the app MainWindow
-        """        
+        """
         super(PuzzleFrame, self).__init__(parent)
         self.setParent(parent)
         # self.setGeometry(QtCore.QRect(10, 130, 911, 691))
@@ -94,14 +96,14 @@ class PuzzleFrame(QFrame):
         self._initSquares()
         self._initHeaders()
         self._initBorderLines()
-        
+
     def asString(self):
         """
         Returns current puzzle as string arguments that can be passed into command line version of lua solver.
 
         Returns:
             str: string of --Key=Value pairs representing current puzzle state
-        """        
+        """
         argList = []
         for squareKey, squareValue in self.squares.items():
             if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text()) > 0:
@@ -109,25 +111,24 @@ class PuzzleFrame(QFrame):
                 argList.append(
                     '--{key}={val}'.format(key=squareKey, val=squareValue.text()))
         return ' '.join(argList)
-    
+
     def asDict(self):
         """
         Returns current puzzle as a python dict
-        
+
         Returns:
             dict: Puzzle in dict
-        """        
+        """
         argList = {}
         for squareKey, squareValue in self.squares.items():
             if squareValue.squareType is SquareTypeEnum.InputLocked and len(squareValue.text()) > 0:
                 argList[squareKey] = squareValue.text()
         return argList
-        
-    
+
     def puzzleContentChangedFcn(self):
         for puzzleSquares in self.squares.values():
             puzzleSquares._refresh()
-        
+
     def toggleLock(self):
         puzzleValid = grabPuzzleFrame().isValid
         solveBtn = grabWidget(QPushButton, 'solveBtn')
@@ -152,7 +153,7 @@ class PuzzleFrame(QFrame):
             solveBtn._enableMe()
             setBtn.setText("Locked")
         self.puzzleContentChangedFcn()
-        
+
     def _setNewFocus(self, oldKey, newKey):
 
         returnVal = False
@@ -236,7 +237,7 @@ class PuzzleFrame(QFrame):
             self.puzzleLayout.addWidget(
                 lineBorders[horizLineNum],
                 2+(4*['A', 'C', 'F', 'I'].index(horizLineNum)), 1, 1, 13)
-       
+
         self.lineBorders = lineBorders
 
     def eventFilter(self, source, event):
@@ -264,9 +265,9 @@ class PuzzleFrame(QFrame):
                 return self._setNewFocus(sourceObjectName, newKey)
             else:
                 return False
-        elif isinstance(source, PuzzleSquare) and ((event.type() == QEvent.Type.FocusIn) 
+        elif isinstance(source, PuzzleSquare) and ((event.type() == QEvent.Type.FocusIn)
                                                    or (event.type() == QEvent.Type.MouseButtonRelease)):
-           
+
             if source.isEnabled() == True:
                 sourceObjectName = source.objectName()
                 returnVal = self._setNewFocus(None, sourceObjectName)
@@ -275,9 +276,10 @@ class PuzzleFrame(QFrame):
             else:
                 return False
         return False
-    
+
+
 class PuzzleSquare(QLineEdit):
-    
+
     @cached_property
     def _sizePolicy(self):
         # Set the size policy so constant across all
@@ -310,7 +312,7 @@ class PuzzleSquare(QLineEdit):
 
     @property
     def neighbors(self):
-        
+
         squares = grabPuzzleSquares()
         outArg = {}
         for squareKey in self.neighborKeys:
@@ -381,17 +383,16 @@ class PuzzleSquare(QLineEdit):
         else:
             self.setText(newTextStr[0])
             _nextKey = self.nextSquare
-        
-        #Jump to next square in tab order
-        grabPuzzleFrame()._setNewFocus(self.objectName(),_nextKey)
+
+        # Jump to next square in tab order
+        grabPuzzleFrame()._setNewFocus(self.objectName(), _nextKey)
 
     def _resetAction(self):
         self.setEnabled(True)
-        self.setText('') 
+        self.setText('')
         self.squareType = SquareTypeEnum.InputUnlocked
         self._isValid = ValidityEnum.Valid
         self.setStyleSheet("")
-
 
     def _refresh(self):
         isValid = self.isValid
@@ -432,6 +433,7 @@ class PuzzleBorderLine(QFrame):
         self.setParent(parent)
         self.setLineWidth(3)
         self.setFrameShape(frameShape)
+
 
 class PuzzleHeader(QLabel):
     def __init__(self, parent, text=None, objectName=None):

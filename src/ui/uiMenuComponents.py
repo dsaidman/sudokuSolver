@@ -1,6 +1,7 @@
 
 import configparser
-import os, sys
+import os
+import sys
 from PyQt6.QtGui import QKeySequence, QAction, QShortcut
 from PyQt6.QtWidgets import QMenu, QMenuBar, QFileDialog, QInputDialog, QLabel, QPushButton
 from .uiHelpers import grabPuzzleFrame, grabWidget, getBasePath, grabMainWindow
@@ -14,7 +15,6 @@ class MenuBar(QMenuBar):
 
         self.setAcceptDrops(False)
         self.setObjectName("menuBar")
-
 
         self.initMenuBarComponents(theMainWindow)
         self.initMenuBarActions(theMainWindow)
@@ -31,7 +31,7 @@ class MenuBar(QMenuBar):
 
     def initMenuBarActions(self, theMainWindow):
 
-        #puzzleFrame = grabPuzzleFrame()
+        # puzzleFrame = grabPuzzleFrame()
         self.importFromIniAction = QAction(theMainWindow)
         self.importFromIniAction.setText("&Import")
         self.importFromIniAction.setIconText("Import")
@@ -58,20 +58,27 @@ class MenuBar(QMenuBar):
             self.resetAllAction.triggered.connect(square._resetAction)
             self.resetAllAction.shortcut.activated.connect(square._resetAction)
 
-        self.resetAllAction.triggered.connect(grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
-        self.resetAllAction.shortcut.activated.connect(grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
+        self.resetAllAction.triggered.connect(
+            grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
+        self.resetAllAction.shortcut.activated.connect(
+            grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
 
-        self.resetAllAction.triggered.connect(grabWidget(QLabel, 'infoDisplayLabel')._resetAction)
-        self.resetAllAction.shortcut.activated.connect(grabWidget(QLabel, 'infoDisplayLabel')._resetAction)  
+        self.resetAllAction.triggered.connect(
+            grabWidget(QLabel, 'infoDisplayLabel')._resetAction)
+        self.resetAllAction.shortcut.activated.connect(
+            grabWidget(QLabel, 'infoDisplayLabel')._resetAction)
 
-        self.resetAllAction.triggered.connect(grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
-        self.resetAllAction.shortcut.activated.connect(grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
+        self.resetAllAction.triggered.connect(
+            grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
+        self.resetAllAction.shortcut.activated.connect(
+            grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
 
         self.resetAllAction.triggered.connect(grabMainWindow().resizeApp)
-        self.resetAllAction.shortcut.activated.connect(grabMainWindow().resizeApp)
+        self.resetAllAction.shortcut.activated.connect(
+            grabMainWindow().resizeApp)
 
     def importIni(self):
-        
+
         _basePath = getBasePath()
         fname = QFileDialog.getOpenFileName(
             self,
@@ -81,7 +88,7 @@ class MenuBar(QMenuBar):
         if fname:
             puzzleFrame = grabPuzzleFrame()
             infoLabel = grabWidget(QLabel, 'puzzleInfoLabel')
-            
+
             squares = puzzleFrame.squares
             puzzleIni = configparser.ConfigParser()
             puzzleIni.read(fname)
@@ -102,22 +109,20 @@ class MenuBar(QMenuBar):
             puzzleFrame.toggleLock()
             puzzleFrame.puzzleContentChangedFcn()
             infoLabel._refresh()
-    
-    def _choosePuzzle(self,puzzleNames):
+
+    def _choosePuzzle(self, puzzleNames):
         if not puzzleNames:
             return False
         selectedValue, isSelected = QInputDialog.getItem(
-            self, 
-            'Import Puzzle', 
-            'Select Puzzle to Import:', 
+            self,
+            'Import Puzzle',
+            'Select Puzzle to Import:',
             puzzleNames)
-        
+
         if isSelected:
-             return selectedValue
+            return selectedValue
         else:
-             return False
-    
+            return False
 
     def uncheckTheBox(self, otherBox):
         otherBox.setChecked(False)
-

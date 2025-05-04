@@ -1,5 +1,2 @@
-## Import functions directly from the package
+# Import functions directly from the package
 # Convenience imports
-
-
-

@@ -16,5 +16,5 @@ if __name__ == "__main__":
     MainWindow.setupUi()
     MainWindow.resizeApp()
     MainWindow.show()
-    
+
     sys.exit(app.exec())
