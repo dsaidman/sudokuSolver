@@ -3,7 +3,7 @@ import sys, os.path
 from functools import cached_property
 from math import floor
 from PyQt6.QtCore import Qt, QEvent
-from PyQt6.QtGui import QCursor
+from PyQt6.QtGui import QCursor, QFont
 from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
 from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares
@@ -85,7 +85,7 @@ class PuzzleFrame(QFrame):
 
         self.puzzleLayout = QGridLayout()
         self.puzzleLayout.setObjectName("puzzleLayout")
-        self.puzzleLayout.setSpacing(0)
+        self.puzzleLayout.setSpacing(1)
         self.puzzleLayout.setContentsMargins(0, 0, 0, 0)
 
         masterLayout = grabWidget(QVBoxLayout, 'masterLayout')
@@ -124,12 +124,9 @@ class PuzzleFrame(QFrame):
         return argList
         
     
-    def _refresh(self):
-        self._applyFormatting()
-
-    def _applyFormatting(self):
+    def puzzleContentChangedFcn(self):
         for puzzleSquares in self.squares.values():
-            puzzleSquares._applyFormatting()
+            puzzleSquares._refresh()
         
     def toggleLock(self):
         puzzleValid = grabPuzzleFrame().isValid
@@ -154,7 +151,7 @@ class PuzzleFrame(QFrame):
             grabMainWindow().status = AppStatusEnum.Locked
             solveBtn._enableMe()
             setBtn.setText("Locked")
-        self._refresh()
+        self.puzzleContentChangedFcn()
         
     def _setNewFocus(self, oldKey, newKey):
 
@@ -239,20 +236,7 @@ class PuzzleFrame(QFrame):
             self.puzzleLayout.addWidget(
                 lineBorders[horizLineNum],
                 2+(4*['A', 'C', 'F', 'I'].index(horizLineNum)), 1, 1, 13)
-
-        lineBorders['horizontalLine0'] = PuzzleBorderLine(
-            self,
-            QFrame.Shape.HLine,
-            'horizontalLine0')
-        self.puzzleLayout.addWidget(
-            lineBorders['horizontalLine0'], 0, 3, 1, 11)
-
-        lineBorders['verticalLine0'] = PuzzleBorderLine(
-            self,
-            QFrame.Shape.VLine,
-            'verticalLine0')
-        self.puzzleLayout.addWidget(
-            lineBorders['verticalLine0'], 3, 0, 11, 1)
+       
         self.lineBorders = lineBorders
 
     def eventFilter(self, source, event):
@@ -385,7 +369,7 @@ class PuzzleSquare(QLineEdit):
         self.setToolTip('Square {name}: {tip}'.format(
             name=self.name, tip=self._isValid.name))
         self.textEdited.connect(self._onTextChange)
-        self.textEdited.connect(grabPuzzleFrame()._refresh)
+        self.textEdited.connect(grabPuzzleFrame().puzzleContentChangedFcn)
 
     def _onTextChange(self, newTextStr):
         _prevText = self.text()
@@ -406,10 +390,10 @@ class PuzzleSquare(QLineEdit):
         self.setText('') 
         self.squareType = SquareTypeEnum.InputUnlocked
         self._isValid = ValidityEnum.Valid
-        self._applyFormatting()
+        self.setStyleSheet("")
 
 
-    def _applyFormatting(self):
+    def _refresh(self):
         isValid = self.isValid
         if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
             self.setStyleSheet("QLineEdit {"
@@ -453,7 +437,13 @@ class PuzzleHeader(QLabel):
     def __init__(self, parent, text=None, objectName=None):
         super(PuzzleHeader, self).__init__(parent, text=None,  objectName=None)
 
+        headerFont = QFont()
+        headerFont.setPointSize(12)
+        headerFont.setBold(True)
+
         self.setObjectName(objectName)
         self.setParent(parent)
-        self.setText(text)
+        self.setText('  ' + text + '  ')
+        self.setScaledContents(True)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setFont(headerFont)

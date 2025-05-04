@@ -1,9 +1,9 @@
 
 import configparser
-import os
+import os, sys
 from PyQt6.QtGui import QKeySequence, QAction, QShortcut
 from PyQt6.QtWidgets import QMenu, QMenuBar, QFileDialog, QInputDialog, QLabel, QPushButton
-from .uiHelpers import grabPuzzleFrame, grabWidget, getBasePath
+from .uiHelpers import grabPuzzleFrame, grabWidget, getBasePath, grabMainWindow
 from .uiEnums import SquareTypeEnum
 
 
@@ -14,6 +14,7 @@ class MenuBar(QMenuBar):
 
         self.setAcceptDrops(False)
         self.setObjectName("menuBar")
+
 
         self.initMenuBarComponents(theMainWindow)
         self.initMenuBarActions(theMainWindow)
@@ -53,8 +54,21 @@ class MenuBar(QMenuBar):
             QKeySequence("Ctrl+R"), self)
         self.resetAllAction.setObjectName("resetAction")
 
-        self.resetAllAction.triggered.connect(self.resetAction)
-        self.resetAllAction.shortcut.activated.connect(self.resetAction)
+        for square in grabPuzzleFrame().squares.values():
+            self.resetAllAction.triggered.connect(square._resetAction)
+            self.resetAllAction.shortcut.activated.connect(square._resetAction)
+
+        self.resetAllAction.triggered.connect(grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
+        self.resetAllAction.shortcut.activated.connect(grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
+
+        self.resetAllAction.triggered.connect(grabWidget(QLabel, 'infoDisplayLabel')._resetAction)
+        self.resetAllAction.shortcut.activated.connect(grabWidget(QLabel, 'infoDisplayLabel')._resetAction)  
+
+        self.resetAllAction.triggered.connect(grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
+        self.resetAllAction.shortcut.activated.connect(grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
+
+        self.resetAllAction.triggered.connect(grabMainWindow().resizeApp)
+        self.resetAllAction.shortcut.activated.connect(grabMainWindow().resizeApp)
 
     def importIni(self):
         
@@ -84,9 +98,9 @@ class MenuBar(QMenuBar):
             for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
                 squares[squareKey.upper()].setText(squareVal)
                 squares[squareKey.upper()].squareType = SquareTypeEnum.InputUnlocked
-                squares[squareKey.upper()]._applyFormatting()
+                squares[squareKey.upper()]._refresh()
             puzzleFrame.toggleLock()
-            puzzleFrame._refresh()
+            puzzleFrame.puzzleContentChangedFcn()
             infoLabel._refresh()
     
     def _choosePuzzle(self,puzzleNames):
@@ -103,21 +117,6 @@ class MenuBar(QMenuBar):
         else:
              return False
     
-    def resetAction(self):
-
-        puzzleFrame     = grabPuzzleFrame()
-        squares         = puzzleFrame.squares
-        puzzleInfoLabel = grabWidget(QLabel, 'puzzleInfoLabel')
-        displayLabel    = grabWidget(QLabel, 'infoDisplayLabel')
-        setPuzzleButton = grabWidget(QPushButton, 'setPuzzleBtn')
-        for square in squares.values():
-            square._resetAction()
-
-        #puzzleInfoLabel.setText('Solve')
-        puzzleInfoLabel._refresh()
-        setPuzzleButton._disableMe()
-        #puzzleFrame.toggleLock()
-        displayLabel._resetAction()
 
     def uncheckTheBox(self, otherBox):
         otherBox.setChecked(False)

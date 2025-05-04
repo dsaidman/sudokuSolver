@@ -14,7 +14,6 @@ class UiPanel(QFrame):
 
         self.setParent(parent)
         self.setObjectName(objectName)
-
         self.setupUiPanel()
 
     def setupUiPanel(self):
@@ -45,7 +44,7 @@ class UiPanel(QFrame):
         self.setPuzzleBtn._disableMe()
         self.setPuzzleBtn.setEnabled(False)
         
-        grabPuzzleFrame()._refresh()
+        grabPuzzleFrame().puzzleContentChangedFcn()
         self.puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
         self.puzzleInfoLabel._refresh()
         
@@ -81,7 +80,9 @@ class PuzzleInfoLabel(QLabel):
         puzzleLabelFont.setPointSize(14)
         puzzleLabelFont.setBold(False)
         puzzleLabelFont.setItalic(False)
+        puzzleLabelFont.setFamily("Lucida Console")
         self.setText("0 OF 17 SQUARES SET")
+        self.setFont(puzzleLabelFont)
         self.setAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
 
@@ -130,6 +131,9 @@ class SetPuzzleBtn(QPushButton):
         self.setShortcut("")
         self.clicked.connect(grabPuzzleFrame().toggleLock)
         self._disableMe()
+        btnFont = QFont()
+        btnFont.setFamily("Lucida Console")
+        self.setFont(btnFont)
 
     def _enableMe(self):
         self.setEnabled(False)
@@ -167,6 +171,9 @@ class SolvePuzzleButton(QPushButton):
         self.setShortcut("")
         self.setObjectName("solveBtn")
         self._disableMe()
+        btnFont = QFont()
+        btnFont.setFamily("Lucida Console")
+        self.setFont(btnFont)
         self.clicked.connect(self.solveIt)
         self.clicked.connect(self._disableMe)
 
@@ -235,5 +242,5 @@ class SolvePuzzleButton(QPushButton):
         for squareValue in puzzleSquares.values():
             squareValue.setEnabled(False)
             squareValue.isValid
-        puzzleFrame._refresh()
+        puzzleFrame.puzzleContentChangedFcn()
                 
