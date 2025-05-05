@@ -1,7 +1,7 @@
 
 from pySolver.definitions import sudokuDefs
 import sys
-import os.path
+import os
 from functools import cached_property
 from math import floor
 from PyQt6.QtCore import Qt, QEvent
@@ -9,6 +9,7 @@ from PyQt6.QtGui import QCursor, QFont
 from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
 from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares
+import inspect
 
 # Until i figure out how to do this properly, path hack
 sys.path.append(os.path.abspath('..'))
@@ -142,9 +143,13 @@ class PuzzleFrame(QFrame):
         if puzzleValid == ValidityEnum.Invalid or grabMainWindow().status == AppStatusEnum.Locked:
             for square in self.squares.values():
                 square.setReadOnly(False)
-                if square.squareType == SquareTypeEnum.InputLocked:
-                    square.squareType = SquareTypeEnum.InputUnlocked
-                    square.setReadOnly(False)
+                square.squareType = SquareTypeEnum.InputUnlocked
+                square.setReadOnly(False)
+                square.setProperty('squareType','InputUnlockedAndValid')
+                self.style().polish(self)
+                self.style().unpolish(self)
+                self.update()
+                      
             grabMainWindow().status = AppStatusEnum.Unlocked
             solveBtn._disableMe()
             setBtn.setText("Lock")
@@ -370,16 +375,28 @@ class PuzzleSquare(QLineEdit):
         self.setDragEnabled(True)
         self.setPlaceholderText("")
         self.setClearButtonEnabled(False)
+        
         self._nextSquare = sudokuDefs.nextSquare(self.name)
         self._lastSquare = sudokuDefs.lastSquare(self.name)
         self._isValid = ValidityEnum.Valid
         self._neighborKeys = sudokuDefs.neighbors(self.name)
         self._squareType = SquareTypeEnum.InputUnlocked
+
+        self.setProperty('squareType','InputUnlockedAndValid')
+
+        filename = inspect.getframeinfo(inspect.currentframe()).filename
+        path     = os.path.dirname(os.path.abspath(filename))
+        qssPath = os.path.join(os.path.dirname(os.path.dirname(path)),'resources','puzzleSquare.qss')
+
+        with open(qssPath,"r") as fh:
+            self.setStyleSheet(fh.read())
+
         self.setToolTip('Square {name}: {tip}'.format(
             name=self.name, tip=self._isValid.name))
         self.textEdited.connect(self._onTextChange)
         self.textEdited.connect(grabPuzzleFrame().puzzleContentChangedFcn)
 
+        
     def _onTextChange(self, newTextStr):
         _prevText = self.text()
         _newText = newTextStr
@@ -399,36 +416,59 @@ class PuzzleSquare(QLineEdit):
         self.setText('')
         self.squareType = SquareTypeEnum.InputUnlocked
         self._isValid = ValidityEnum.Valid
-        self.setStyleSheet("")
+        self.setProperty('squareType',"InputUnlockedAndValid")
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+        #self.setStyleSheet("")
 
     def _refresh(self):
         isValid = self.isValid
         if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
+            self.setProperty('squareType',"InputUnlockedAndValid")
+            '''
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
                                "font-weight: bold;"
                                "font-style: regular;}")
+                               '''
         elif isValid == ValidityEnum.Invalid and self.squareType == SquareTypeEnum.InputUnlocked:
+            self.setProperty('squareType',"InputUnlockedAndInvalid")
+            '''
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,0,0);"
                                "font-style: italic;}")
+            '''
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputLocked:
+            self.setProperty('squareType',"InputLockedAndValid")
+            '''
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
                                "font-weight: bold;"
                                "font-style: normal;"
                                "background-color: rgb(30,30,30);"
                                "border-color: rgb(255,140,0);}")
+            '''
         elif (isValid == ValidityEnum.Valid or isValid == ValidityEnum.NoStatement) and self.squareType == SquareTypeEnum.UserSet:
+            self.setProperty('squareType',"UserSetAndValid")
+            '''
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(212,255,200);"
                                "font-weight: normal;"
                                "font-style: regular;}")
+            '''
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.Solved:
+            self.setProperty('squareType',"SolvedAndValid")
+            '''
             self.setStyleSheet("QLineEdit {"
                                "color:	rgba(0,255,0,204);"
                                "font-weight: normal;"
                                "font-style: regular;}")
+            '''
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.update()
+        
         self.setToolTip('Square {name}: {valid} - {status}'.format(
             name=self.name, valid=self._isValid.name, status=self._squareType.name))
 

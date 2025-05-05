@@ -81,7 +81,6 @@ class PuzzleInfoLabel(QLabel):
         self.setParent(parent)
         self.setObjectName(objectName)
         puzzleLabelFont = QFont()
-        puzzleLabelFont.setPointSize(14)
         puzzleLabelFont.setBold(False)
         puzzleLabelFont.setItalic(False)
         puzzleLabelFont.setFamily("Lucida Console")
@@ -97,6 +96,7 @@ class PuzzleInfoLabel(QLabel):
     def _refresh(self):
 
         puzzleFrame = grabWidget(QFrame, 'puzzleFrame')
+
         numFilledSquares = puzzleFrame.validSquareCount
         theText = str(numFilledSquares) + " OF 17 SQUARES SET"
         puzzleIsValid = puzzleFrame.isValid
@@ -105,21 +105,33 @@ class PuzzleInfoLabel(QLabel):
 
         if puzzleIsValid == ValidityEnum.Invalid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(255, 0, 0); font-style: italic;font-weight: regular}")
+                "QLabel{ " \
+                "color: rgb(255, 0, 0); " \
+                "font-style: italic;" \
+                "font-weight: regular}")
             setPuzzleBtn._disableMe()
         elif numFilledSquares >= 17 and numFilledSquares < 81 and puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(255, 140, 0); font-style: regular;font-weight: bold}")
+                "QLabel{ " \
+                "color: rgb(255, 140, 0);" \
+                " font-style: regular;" \
+                "font-weight: bold}")
             theText = theText + ': READY'
             setPuzzleBtn._enableMe()
         elif numFilledSquares == 81 and puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(0, 255, 0); font-style: regular;font-weight: bold}")
+                "QLabel{ " \
+                "color: rgb(0, 255, 0); " \
+                "font-style: regular;" \
+                "font-weight: bold}")
             theText = theText + ': COMPLETE'
             setPuzzleBtn._enableMe()
         elif numFilledSquares < 17 or puzzleIsValid == ValidityEnum.Valid:
             self.setStyleSheet(
-                "QLabel{ color: rgb(212,212,200); font-style: normal;font-weight: regular}")
+                "QLabel{ " \
+                "color: rgb(212,212,200); " \
+                "font-style: normal;" \
+                "font-weight: regular}")
             setPuzzleBtn._disableMe()
         self.setText(theText)
 
