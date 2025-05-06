@@ -46,7 +46,7 @@ class UiPanel(QFrame):
         self.setPuzzleBtn._disableMe()
         self.setPuzzleBtn.setEnabled(False)
 
-        grabPuzzleFrame().puzzleContentChangedFcn()
+        grabPuzzleFrame().onSquareChangeEvent()
         self.puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
         self.puzzleInfoLabel._refresh()
 
@@ -261,4 +261,4 @@ class SolvePuzzleButton(QPushButton):
         for squareValue in puzzleSquares.values():
             squareValue.setEnabled(False)
             squareValue.isValid
-        puzzleFrame.puzzleContentChangedFcn()
+        puzzleFrame.onSquareChangeEvent()

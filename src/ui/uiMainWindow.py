@@ -33,11 +33,10 @@ class AppMainWindow(QMainWindow):
 
         filename = inspect.getframeinfo(inspect.currentframe()).filename
         path     = os.path.dirname(os.path.abspath(filename))
-        iconpath = os.path.join(os.path.dirname(os.path.dirname(path)),'resources','icon.ico')
+        iconpath = os.path.join(os.path.dirname(os.path.dirname(path)),'res','icon.ico')
         appIcon = QIcon()
         appIcon.addPixmap(QPixmap(iconpath), QIcon.Mode.Normal, QIcon.State.Off)
         self.setWindowIcon(appIcon)
-        #self.setDockNestingEnabled(True)
         self._status = AppStatusEnum.Unlocked
 
         self.centralWidget = QWidget()

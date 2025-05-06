@@ -107,7 +107,7 @@ class MenuBar(QMenuBar):
                 squares[squareKey.upper()].squareType = SquareTypeEnum.InputUnlocked
                 squares[squareKey.upper()]._refresh()
             puzzleFrame.toggleLock()
-            puzzleFrame.puzzleContentChangedFcn()
+            puzzleFrame.onSquareChangeEvent()
             infoLabel._refresh()
 
     def _choosePuzzle(self, puzzleNames):

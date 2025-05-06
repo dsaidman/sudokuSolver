@@ -132,7 +132,7 @@ class PuzzleFrame(QFrame):
                 argList[squareKey] = squareValue.text()
         return argList
 
-    def puzzleContentChangedFcn(self):
+    def onSquareChangeEvent(self):
         for puzzleSquares in self.squares.values():
             puzzleSquares._refresh()
 
@@ -163,7 +163,7 @@ class PuzzleFrame(QFrame):
             grabMainWindow().status = AppStatusEnum.Locked
             solveBtn._enableMe()
             setBtn.setText("Locked")
-        self.puzzleContentChangedFcn()
+        self.onSquareChangeEvent()
 
     def _setNewFocus(self, oldKey, newKey):
 
@@ -384,17 +384,40 @@ class PuzzleSquare(QLineEdit):
         self._squareType = SquareTypeEnum.InputUnlocked
         self.setProperty('squareType','InputUnlockedAndValid')
 
-        filename = inspect.getframeinfo(inspect.currentframe()).filename
-        path     = os.path.dirname(os.path.abspath(filename))
-        qssPath = os.path.join(os.path.dirname(os.path.dirname(path)),'resources','puzzleSquare.qss')
-
-        with open(qssPath,"r") as fh:
-            self.setStyleSheet(fh.read())
+        self.setStyleSheet(
+            """
+            QLineEdit[squareType="InputUnlockedAndValid"]{
+                color:	rgb(255,140,0);
+                font-weight: bold;
+                font-style: normal;
+                background-color: rgb(30, 30, 30);
+                border-color: rgb(255, 140, 0)}
+            QLineEdit[squareType="InputUnlockedAndInvalid"] {
+                color: rgb(255, 0, 0);
+                font-weight: normal;
+                font-style: italic}
+            QLineEdit[squareType="InputLockedAndValid"]{
+                color: rgb(255, 140, 0);
+                font-weight: bold;
+                font-style: normal;
+                background-color: rgb(30, 30, 30);}
+            QLineEdit[squareType="UserSetAndValid"]{
+                color:	rgb(212,255,200);
+                font-weight: normal;
+                font-style: regular}
+            QLineEdit[squareType="SolvedAndValid"] {
+                color: rgba(0, 255, 0,204);
+                font-weight: normal;
+                font-style: regular}
+            QLineEdit[isNeighbor="true"]{
+                background-color: rgba(90, 3, 114, 0.3)};
+            """
+        )
 
         self.setToolTip('Square {name}: {tip}'.format(
             name=self.name, tip=self._isValid.name))
         self.textEdited.connect(self.onChanged)
-        self.textEdited.connect(grabPuzzleFrame().puzzleContentChangedFcn)
+        self.textEdited.connect(grabPuzzleFrame().onSquareChangeEvent)
 
     def focusInEvent(self, evnt):
         currentSquare = grabCurrentSquare()
