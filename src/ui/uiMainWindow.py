@@ -1,6 +1,6 @@
 from functools import lru_cache
 from math import floor
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QWidget, QFrame, QMainWindow, QSizePolicy, QStyle
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QWidget, QFrame, QMainWindow, QSizePolicy, QStyle, QStatusBar
 from PyQt6.QtCore import Qt, QMetaObject, QSize
 from PyQt6.QtGui import QGuiApplication, QFont, QIcon, QPixmap
 from .uiEnums import AppStatusEnum
@@ -90,6 +90,9 @@ class AppMainWindow(QMainWindow):
 
         self.setCentralWidget(self.centralWidget)
         self.menuBar = MenuBar(self)
+
+        self.uiStatusBar = self.statusBar()
+        self.uiStatusBar.showMessage('A1')
 
         w = self.windowHandle()
         self.retranslateUi(self)

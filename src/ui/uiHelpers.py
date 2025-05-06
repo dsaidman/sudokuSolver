@@ -30,6 +30,12 @@ def grabUiFrame():
 def grabPuzzleSquares():
     return grabPuzzleFrame().squares
 
+def grabCurrentSquare():
+    for psquare in grabPuzzleSquares().values():
+        if psquare.hasFocus()==True:
+            break
+    return psquare
+
 
 def getAppStatus():
     return grabMainWindow().status

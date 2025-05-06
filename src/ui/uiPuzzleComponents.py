@@ -6,9 +6,9 @@ from functools import cached_property
 from math import floor
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QCursor, QFont
-from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
+from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit, QStatusBar
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
-from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares
+from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares, grabCurrentSquare
 import inspect
 
 # Until i figure out how to do this properly, path hack
@@ -283,7 +283,7 @@ class PuzzleFrame(QFrame):
                 sourceObjectName = source.objectName()
                 returnVal = self._setNewFocus(None, sourceObjectName)
                 self._setFocusCursor(sourceObjectName)
-                return returnVal
+                return False
             else:
                 return False
         return False
@@ -375,13 +375,13 @@ class PuzzleSquare(QLineEdit):
         self.setDragEnabled(True)
         self.setPlaceholderText("")
         self.setClearButtonEnabled(False)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         
         self._nextSquare = sudokuDefs.nextSquare(self.name)
         self._lastSquare = sudokuDefs.lastSquare(self.name)
         self._isValid = ValidityEnum.Valid
         self._neighborKeys = sudokuDefs.neighbors(self.name)
         self._squareType = SquareTypeEnum.InputUnlocked
-
         self.setProperty('squareType','InputUnlockedAndValid')
 
         filename = inspect.getframeinfo(inspect.currentframe()).filename
@@ -393,11 +393,24 @@ class PuzzleSquare(QLineEdit):
 
         self.setToolTip('Square {name}: {tip}'.format(
             name=self.name, tip=self._isValid.name))
-        self.textEdited.connect(self._onTextChange)
+        self.textEdited.connect(self.onChanged)
         self.textEdited.connect(grabPuzzleFrame().puzzleContentChangedFcn)
 
+    def focusInEvent(self, evnt):
+        currentSquare = grabCurrentSquare()
+        allSquares    = grabPuzzleSquares()
+        grabMainWindow().uiStatusBar.showMessage(currentSquare.objectName())
+        for neighborKey in currentSquare.neighborKeys:
+            allSquares[neighborKey].setProperty("isNeighbor","true")
+            allSquares[neighborKey].style().polish(allSquares[neighborKey])
+            allSquares[neighborKey].style().unpolish(allSquares[neighborKey])
+        for nonNeighborKey in list(set(allSquares.keys())-set(currentSquare.neighborKeys)-set(currentSquare.objectName())):
+            allSquares[nonNeighborKey].setProperty("isNeighbor","false")
+            allSquares[nonNeighborKey].style().polish(allSquares[nonNeighborKey])
+            allSquares[nonNeighborKey].style().unpolish(allSquares[nonNeighborKey])
+        return super().focusInEvent(evnt)
         
-    def _onTextChange(self, newTextStr):
+    def onChanged(self, newTextStr):
         _prevText = self.text()
         _newText = newTextStr
         _newTextStr = list([val for val in _newText if val.isnumeric()])

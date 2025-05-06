@@ -84,7 +84,7 @@ class PuzzleInfoLabel(QLabel):
         puzzleLabelFont.setBold(False)
         puzzleLabelFont.setItalic(False)
         puzzleLabelFont.setFamily("Lucida Console")
-        self.setText("0 OF 17 SQUARES SET")
+        self.setText("0 OF 17 Squares Set")
         self.setFont(puzzleLabelFont)
         self.setAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
@@ -92,6 +92,8 @@ class PuzzleInfoLabel(QLabel):
         # Connect the puzzle squares to update text when changed. Cant do before because this class didnt exist yet
         for theSquare in grabPuzzleSquares().values():
             theSquare.textEdited.connect(self._refresh)
+
+        grabPuzzleFrame
 
     def _refresh(self):
 
