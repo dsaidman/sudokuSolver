@@ -3,11 +3,10 @@ from time import perf_counter as tictoc
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButton
-from .uiHelpers import grabPuzzleFrame, grabWidget, grabPuzzleSquares
+from .uiHelpers import grabPuzzleFrame, grabWidget, grabStatusBar
 from .uiEnums import ValidityEnum, SquareTypeEnum
 from pySolver.definitions import sudokuDefs
 from pySolver.py2lua import luaPy
-
 
 class UiPanel(QFrame):
     def __init__(self, parent, objectName='UiPanel'):
@@ -19,7 +18,6 @@ class UiPanel(QFrame):
 
     def setupUiPanel(self):
         self.solvePuzzleBtn = SolvePuzzleButton(parent=self)
-        self.puzzleInfoLabel = PuzzleInfoLabel(parent=self)
         self.setPuzzleBtn = SetPuzzleBtn(parent=self)
         self.infoDisplayLabel = InfoDisplayLabel(parent=self)
 
@@ -32,14 +30,11 @@ class UiPanel(QFrame):
 
         masterLayout.addLayout(uiFrameLayout)
 
-        uiFrameLayout.addWidget(self.puzzleInfoLabel, 0,
-                                1, 1, 3, Qt.AlignmentFlag.AlignRight)
         uiFrameLayout.addWidget(self.setPuzzleBtn, 0, 0,
                                 1, 1, Qt.AlignmentFlag.AlignVCenter)
-        uiFrameLayout.addWidget(self.solvePuzzleBtn, 1,
-                                0, 1, 1, Qt.AlignmentFlag.AlignVCenter)
-        uiFrameLayout.addWidget(self.infoDisplayLabel, 1,
-                                1, 1, 3, Qt.AlignmentFlag.AlignVCenter)
+        uiFrameLayout.addWidget(self.solvePuzzleBtn, 0, 1,
+                                1, 1, Qt.AlignmentFlag.AlignVCenter)
+        uiFrameLayout.addWidget(self.infoDisplayLabel, 1, 0, 1, 2, Qt.AlignmentFlag.AlignVCenter)
 
     def _setCompleted(self):
 
@@ -47,8 +42,8 @@ class UiPanel(QFrame):
         self.setPuzzleBtn.setEnabled(False)
 
         grabPuzzleFrame().onSquareChangeEvent()
-        self.puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
-        self.puzzleInfoLabel._refresh()
+        grabStatusBar().puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
+        grabStatusBar().puzzleInfoLabel.update()
 
         self.solvePuzzleBtn._disableMe()
         self.solvePuzzleBtn.setEnabled(False)
@@ -70,73 +65,6 @@ class InfoDisplayLabel(QLabel):
 
     def _resetAction(self):
         self.setText("")
-
-
-class PuzzleInfoLabel(QLabel):
-
-    def __init__(self, parent, objectName="puzzleInfoLabel"):
-        super(PuzzleInfoLabel, self).__init__(
-            parent, objectName="puzzleInfoLabel")
-
-        self.setParent(parent)
-        self.setObjectName(objectName)
-        puzzleLabelFont = QFont()
-        puzzleLabelFont.setBold(False)
-        puzzleLabelFont.setItalic(False)
-        puzzleLabelFont.setFamily("Lucida Console")
-        self.setText("0 OF 17 Squares Set")
-        self.setFont(puzzleLabelFont)
-        self.setAlignment(
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
-
-        # Connect the puzzle squares to update text when changed. Cant do before because this class didnt exist yet
-        for theSquare in grabPuzzleSquares().values():
-            theSquare.textEdited.connect(self._refresh)
-
-        grabPuzzleFrame
-
-    def _refresh(self):
-
-        puzzleFrame = grabWidget(QFrame, 'puzzleFrame')
-
-        numFilledSquares = puzzleFrame.validSquareCount
-        theText = str(numFilledSquares) + " OF 17 SQUARES SET"
-        puzzleIsValid = puzzleFrame.isValid
-
-        setPuzzleBtn = grabWidget(QPushButton, 'setPuzzleBtn')
-
-        if puzzleIsValid == ValidityEnum.Invalid:
-            self.setStyleSheet(
-                "QLabel{ " \
-                "color: rgb(255, 0, 0); " \
-                "font-style: italic;" \
-                "font-weight: regular}")
-            setPuzzleBtn._disableMe()
-        elif numFilledSquares >= 17 and numFilledSquares < 81 and puzzleIsValid == ValidityEnum.Valid:
-            self.setStyleSheet(
-                "QLabel{ " \
-                "color: rgb(255, 140, 0);" \
-                " font-style: regular;" \
-                "font-weight: bold}")
-            theText = theText + ': READY'
-            setPuzzleBtn._enableMe()
-        elif numFilledSquares == 81 and puzzleIsValid == ValidityEnum.Valid:
-            self.setStyleSheet(
-                "QLabel{ " \
-                "color: rgb(0, 255, 0); " \
-                "font-style: regular;" \
-                "font-weight: bold}")
-            theText = theText + ': COMPLETE'
-            setPuzzleBtn._enableMe()
-        elif numFilledSquares < 17 or puzzleIsValid == ValidityEnum.Valid:
-            self.setStyleSheet(
-                "QLabel{ " \
-                "color: rgb(212,212,200); " \
-                "font-style: normal;" \
-                "font-weight: regular}")
-            setPuzzleBtn._disableMe()
-        self.setText(theText)
-
 
 class SetPuzzleBtn(QPushButton):
     def __init__(self, parent, objectName='setPuzzleBtn'):

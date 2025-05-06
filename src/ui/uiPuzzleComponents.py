@@ -287,8 +287,12 @@ class PuzzleFrame(QFrame):
             else:
                 return False
         return False
-
-
+    
+    def resetPuzzle(self):
+        puzzleFrame = grabPuzzleFrame()
+        for squareVal in puzzleFrame.squares.values():
+            squareVal._onResetAction()
+        
 class PuzzleSquare(QLineEdit):
 
     @cached_property
@@ -432,7 +436,7 @@ class PuzzleSquare(QLineEdit):
             allSquares[nonNeighborKey].style().polish(allSquares[nonNeighborKey])
             allSquares[nonNeighborKey].style().unpolish(allSquares[nonNeighborKey])
         return super().focusInEvent(evnt)
-        
+
     def onChanged(self, newTextStr):
         _prevText = self.text()
         _newText = newTextStr
@@ -447,7 +451,7 @@ class PuzzleSquare(QLineEdit):
         # Jump to next square in tab order
         grabPuzzleFrame()._setNewFocus(self.objectName(), _nextKey)
 
-    def _resetAction(self):
+    def _onResetAction(self):
         self.setEnabled(True)
         self.setText('')
         self.squareType = SquareTypeEnum.InputUnlocked
@@ -455,8 +459,6 @@ class PuzzleSquare(QLineEdit):
         self.setProperty('squareType',"InputUnlockedAndValid")
         self.style().unpolish(self)
         self.style().polish(self)
-        self.update()
-        #self.setStyleSheet("")
 
     def _refresh(self):
         isValid = self.isValid
@@ -503,7 +505,6 @@ class PuzzleSquare(QLineEdit):
             '''
         self.style().unpolish(self)
         self.style().polish(self)
-        self.update()
         
         self.setToolTip('Square {name}: {valid} - {status}'.format(
             name=self.name, valid=self._isValid.name, status=self._squareType.name))

@@ -1,13 +1,15 @@
 from functools import lru_cache
 from math import floor
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QWidget, QFrame, QMainWindow, QSizePolicy, QStyle, QStatusBar
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QFrame, QMainWindow, QSizePolicy, QStyle, QStatusBar
 from PyQt6.QtCore import Qt, QMetaObject, QSize
 from PyQt6.QtGui import QGuiApplication, QFont, QIcon, QPixmap
 from .uiEnums import AppStatusEnum
 from .uiPuzzleComponents import PuzzleFrame
 from .uiControlComponents import UiPanel
+from .uiStatusBarComponents import PuzzleInfoLabel
 from pySolver.py2lua import luaPy as sudokuDefs
 from .uiMenuComponents import MenuBar
+from .uiHelpers import grabWidget
 import inspect, os
 
 
@@ -41,7 +43,6 @@ class AppMainWindow(QMainWindow):
 
         self.centralWidget = QWidget()
         self.centralWidget.setObjectName("centralWidget")
-
 
         theSizePolicy = QSizePolicy(
             QSizePolicy.Policy.Expanding,
@@ -87,15 +88,32 @@ class AppMainWindow(QMainWindow):
         self.uiFrame.raise_()
         self.puzzleFrame.raise_()
 
+        self.uiStatusBar = self.statusBar()
+        self.uiStatusBar.setObjectName('uiStatusBar')
+        self.uiStatusBar.showMessage('Starting Up')
+        self.uiStatusBar.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar)
+        self.uiStatusBar.addPermanentWidget(self.uiStatusBar.puzzleInfoLabel)
+
         self.setCentralWidget(self.centralWidget)
         self.menuBar = MenuBar(self)
-
-        self.uiStatusBar = self.statusBar()
-        self.uiStatusBar.showMessage('A1')
 
         w = self.windowHandle()
         self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
+
+    def _resetMainWindow(self):
+        self.uiStatusBar.puzzleInfoLabel.reset()
+        self.puzzleFrame.resetPuzzle()
+        grabWidget(QLabel, 'infoDisplayLabel')._resetAction()
+        grabWidget(QPushButton, 'setPuzzleBtn')._disableMe()
+        
+
+    def _updateWindow(self):
+        self.uiStatusBar.puzzleInfoLabel.update()
+        self.puzzleFrame.onSquareChangeEvent()
+        
+
+
 
     def resizeApp(self):
 

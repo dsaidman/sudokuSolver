@@ -1,10 +1,9 @@
 
 import configparser
 import os
-import sys
 from PyQt6.QtGui import QKeySequence, QAction, QShortcut
-from PyQt6.QtWidgets import QMenu, QMenuBar, QFileDialog, QInputDialog, QLabel, QPushButton
-from .uiHelpers import grabPuzzleFrame, grabWidget, getBasePath, grabMainWindow
+from PyQt6.QtWidgets import QMenu, QMenuBar, QFileDialog, QInputDialog, QPushButton
+from .uiHelpers import grabPuzzleSquares,grabPuzzleFrame, grabWidget, getBasePath, grabMainWindow, grabStatusBar
 from .uiEnums import SquareTypeEnum
 
 
@@ -46,36 +45,17 @@ class MenuBar(QMenuBar):
 
         self.resetAllAction = QAction(theMainWindow)
         self.resetAllAction.setText("&Reset")
-        self.resetAllAction.setIconText("Reset")
+        self.resetAllAction.setIconText("&Reset")
         self.resetAllAction.setToolTip("Reset Squares")
         self.resetAllAction.setMenuRole(
             QAction.MenuRole.ApplicationSpecificRole)
         self.resetAllAction.shortcut = QShortcut(
             QKeySequence("Ctrl+R"), self)
         self.resetAllAction.setObjectName("resetAction")
-
-        for square in grabPuzzleFrame().squares.values():
-            self.resetAllAction.triggered.connect(square._resetAction)
-            self.resetAllAction.shortcut.activated.connect(square._resetAction)
-
         self.resetAllAction.triggered.connect(
-            grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
+            grabMainWindow()._resetMainWindow)
         self.resetAllAction.shortcut.activated.connect(
-            grabWidget(QLabel, 'puzzleInfoLabel')._refresh)
-
-        self.resetAllAction.triggered.connect(
-            grabWidget(QLabel, 'infoDisplayLabel')._resetAction)
-        self.resetAllAction.shortcut.activated.connect(
-            grabWidget(QLabel, 'infoDisplayLabel')._resetAction)
-
-        self.resetAllAction.triggered.connect(
-            grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
-        self.resetAllAction.shortcut.activated.connect(
-            grabWidget(QPushButton, 'setPuzzleBtn')._disableMe)
-
-        self.resetAllAction.triggered.connect(grabMainWindow().resizeApp)
-        self.resetAllAction.shortcut.activated.connect(
-            grabMainWindow().resizeApp)
+            grabMainWindow()._resetMainWindow)
 
     def importIni(self):
 
@@ -86,10 +66,8 @@ class MenuBar(QMenuBar):
             os.path.join(_basePath, 'input'),
             "Ini Files (*.ini *.txt)")
         if fname:
-            puzzleFrame = grabPuzzleFrame()
-            infoLabel = grabWidget(QLabel, 'puzzleInfoLabel')
-
-            squares = puzzleFrame.squares
+            grabMainWindow()._resetMainWindow()
+            
             puzzleIni = configparser.ConfigParser()
             puzzleIni.read(fname)
             puzzleNames = list(puzzleIni._sections.keys())
@@ -98,17 +76,16 @@ class MenuBar(QMenuBar):
             puzzleName = self._choosePuzzle(puzzleNames)
             if not puzzleName:
                 return
-
+            squares = grabPuzzleSquares()
             puzzleIni._sections[puzzleName]
-            for squareVal in puzzleFrame.squares.values():
-                squareVal._resetAction()
             for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
                 squares[squareKey.upper()].setText(squareVal)
                 squares[squareKey.upper()].squareType = SquareTypeEnum.InputUnlocked
                 squares[squareKey.upper()]._refresh()
-            puzzleFrame.toggleLock()
-            puzzleFrame.onSquareChangeEvent()
-            infoLabel._refresh()
+            
+            grabMainWindow()._updateWindow()
+            grabPuzzleFrame().toggleLock()
+            grabWidget(QPushButton,'setPuzzleBtn')._enableMe()
 
     def _choosePuzzle(self, puzzleNames):
         if not puzzleNames:

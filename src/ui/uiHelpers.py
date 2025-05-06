@@ -22,7 +22,6 @@ def grabMainWindow():
 def grabPuzzleFrame():
     return grabWidget(QFrame, 'puzzleFrame')
 
-
 def grabUiFrame():
     return grabWidget(QFrame, 'UIPanel')
 
@@ -36,6 +35,8 @@ def grabCurrentSquare():
             break
     return psquare
 
+def grabStatusBar():
+    return grabMainWindow().uiStatusBar
 
 def getAppStatus():
     return grabMainWindow().status
