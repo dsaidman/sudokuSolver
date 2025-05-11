@@ -15,11 +15,15 @@ def grabAppInstance():
 
 @lru_cache(typed=False)
 def grabMainWindow():
-    return [widget for widget in QApplication.topLevelWidgets() if isinstance(widget, QMainWindow)][0]
+    return [
+        widget for widget in QApplication.topLevelWidgets() if isinstance(
+            widget,
+            QMainWindow)][0]
 
 
 def grabPuzzleFrame():
     return grabWidget(QFrame, 'puzzleFrame')
+
 
 def grabUiFrame():
     return grabWidget(QFrame, 'UIPanel')
@@ -28,14 +32,17 @@ def grabUiFrame():
 def grabPuzzleSquares():
     return grabPuzzleFrame().squares
 
+
 def grabCurrentSquare():
     for psquare in grabPuzzleSquares().values():
-        if psquare.hasFocus()==True:
+        if psquare.hasFocus():
             break
     return psquare
 
+
 def grabStatusBar():
     return grabMainWindow().uiStatusBar
+
 
 def getAppStatus():
     return grabMainWindow().status

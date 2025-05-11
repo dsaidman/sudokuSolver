@@ -3,7 +3,7 @@ import configparser
 import os
 from PyQt6.QtGui import QKeySequence, QAction, QShortcut
 from PyQt6.QtWidgets import QMenu, QMenuBar, QFileDialog, QInputDialog, QPushButton
-from .uiHelpers import grabPuzzleSquares,grabPuzzleFrame, grabWidget, getBasePath, grabMainWindow, grabStatusBar
+from .uiHelpers import grabPuzzleSquares, grabPuzzleFrame, grabWidget, getBasePath, grabMainWindow, grabStatusBar
 from .uiEnums import SquareTypeEnum
 
 
@@ -52,8 +52,10 @@ class MenuBar(QMenuBar):
         self.resetAllAction.shortcut = QShortcut(
             QKeySequence("Ctrl+R"), self)
         self.resetAllAction.setObjectName("resetAction")
-        self.resetAllAction.triggered.connect( grabMainWindow()._resetMainWindow)
-        self.resetAllAction.shortcut.activated.connect( grabMainWindow()._resetMainWindow)
+        self.resetAllAction.triggered.connect(
+            grabMainWindow()._resetMainWindow)
+        self.resetAllAction.shortcut.activated.connect(
+            grabMainWindow()._resetMainWindow)
 
     def importIni(self):
 
@@ -65,7 +67,7 @@ class MenuBar(QMenuBar):
             "Ini Files (*.ini *.txt)")
         if fname:
             grabMainWindow()._resetMainWindow()
-            
+
             puzzleIni = configparser.ConfigParser()
             puzzleIni.read(fname)
             puzzleNames = list(puzzleIni._sections.keys())
@@ -76,14 +78,15 @@ class MenuBar(QMenuBar):
                 return
             squares = grabPuzzleSquares()
             puzzleIni._sections[puzzleName]
-            for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
+            for squareKey, squareVal in puzzleIni._sections[puzzleName].items(
+            ):
                 squares[squareKey.upper()].setText(squareVal)
                 squares[squareKey.upper()].squareType = SquareTypeEnum.InputUnlocked
                 squares[squareKey.upper()]._refresh()
-            
+
             grabMainWindow()._updateWindow()
             grabPuzzleFrame().toggleLock()
-            grabWidget(QPushButton,'setPuzzleBtn')._enableMe()
+            grabWidget(QPushButton, 'setPuzzleBtn')._enableMe()
 
     def _choosePuzzle(self, puzzleNames):
         if not puzzleNames:

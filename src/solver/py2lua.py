@@ -73,7 +73,9 @@ class Py2Lua:
     def __init__(self):
         """Constructor method initializes lua runtime and modules."""
         print(
-            f"Using {LuaRuntime().lua_implementation} (compiled with {lupa.LUA_VERSION})")
+            f"Using {
+                LuaRuntime().lua_implementation} (compiled with {
+                lupa.LUA_VERSION})")
         self._version = lupa.LUA_VERSION
 
         # Get the lua runtime from lupa. Try to use luajit if possible
@@ -127,5 +129,6 @@ class Py2Lua:
         return lua.table_from(d)
 
 
-# Evaluate the Py2Lua object inside the module so it can be imported directly without making new class instances
+# Evaluate the Py2Lua object inside the module so it can be imported
+# directly without making new class instances
 luaPy = Py2Lua()

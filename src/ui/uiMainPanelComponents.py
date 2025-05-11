@@ -17,7 +17,6 @@ class UiMainPanel(QFrame):
         self.setParent(parent)
         self.setupUi()
 
-
     def setupUi(self):
 
         # Master Layout
@@ -40,13 +39,14 @@ class UiMainPanel(QFrame):
         self.puzzleFrame.raise_()
 
     def orderTabs(self):
-        for idx in range(len(sudokuDefs.squares)-1):
+        for idx in range(len(sudokuDefs.squares) - 1):
             QMainWindow.setTabOrder(
                 self.puzzleFrame.squares[sudokuDefs.squares[idx]],
-                self.puzzleFrame.squares[sudokuDefs.squares[idx+1]])
+                self.puzzleFrame.squares[sudokuDefs.squares[idx + 1]])
         QMainWindow.setTabOrder(
             self.puzzleFrame.squares[sudokuDefs.squares[-1]],
             self.puzzleFrame.squares[sudokuDefs.squares[0]])
+
 
 class UiTitleFrame(QFrame):
     def __init__(self, parent):
@@ -55,14 +55,12 @@ class UiTitleFrame(QFrame):
         self.setObjectName("uiTitleFrame")
         self.setParent(parent)
         self.setFrameShadow(QFrame.Shadow.Plain)
-        self.setContentsMargins(0,0,0,0)
-
+        self.setContentsMargins(0, 0, 0, 0)
 
         self.titleFrameLayout = QHBoxLayout()
         self.titleFrameLayout.setObjectName('uiTitleFrameLayout')
         self.titleFrameLayout.setParent(self)
         self.setLayout(self.titleFrameLayout)
-        
 
         self.titleLabel = QLabel(self)
         self.titleLabel.setObjectName("titleLabel")
@@ -75,11 +73,8 @@ class UiTitleFrame(QFrame):
         self.titleLabel.setStyleSheet("background-color: rgb(100,100,100);")
         self.setContentsMargins(0, 0, 0, 0)
 
-      
-
         titleFont = QFont()
         titleFont.setBold(True)
         titleFont.setPointSize(14)
         self.titleLabel.setFont(titleFont)
-        self.titleFrameLayout.addWidget(self.titleLabel,stretch=1)
-        
+        self.titleFrameLayout.addWidget(self.titleLabel, stretch=1)

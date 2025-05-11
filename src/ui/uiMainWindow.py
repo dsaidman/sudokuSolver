@@ -9,7 +9,8 @@ from .uiHelpers import grabWidget, grabPuzzleFrame
 from .uiEnums import AppStatusEnum
 from functools import lru_cache
 from math import floor
-import inspect, os
+import inspect
+import os
 
 
 class AppMainWindow(QMainWindow):
@@ -31,11 +32,18 @@ class AppMainWindow(QMainWindow):
         self.setWindowTitle("SudokuSolverApp")
 
         filename = inspect.getframeinfo(inspect.currentframe()).filename
-        path     = os.path.dirname(os.path.abspath(filename))
-        iconpath = os.path.join(os.path.dirname(os.path.dirname(path)),'res','icon.ico')
+        path = os.path.dirname(os.path.abspath(filename))
+        iconpath = os.path.join(
+            os.path.dirname(
+                os.path.dirname(path)),
+            'res',
+            'icon.ico')
 
         appIcon = QIcon()
-        appIcon.addPixmap(QPixmap(iconpath), QIcon.Mode.Normal, QIcon.State.Off)
+        appIcon.addPixmap(
+            QPixmap(iconpath),
+            QIcon.Mode.Normal,
+            QIcon.State.Off)
         self.setWindowIcon(appIcon)
         self._status = AppStatusEnum.Unlocked
 
@@ -45,9 +53,9 @@ class AppMainWindow(QMainWindow):
 
         self.masterAppLayout = QHBoxLayout()
         self.masterAppLayout.setObjectName('masterAppLayout')
-        self.centralWidget.setLayout( self.masterAppLayout)
+        self.centralWidget.setLayout(self.masterAppLayout)
 
-        self.setStyleSheet("QWidget {font-family: 'Segoe ui';}");
+        self.setStyleSheet("QWidget {font-family: 'Segoe ui';}")
 
         '''
         theSizePolicy = QSizePolicy(
@@ -70,7 +78,6 @@ class AppMainWindow(QMainWindow):
         self.uiStatusBar.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar)
         self.uiStatusBar.addPermanentWidget(self.uiStatusBar.puzzleInfoLabel)
 
-        
         self.menuBar = MenuBar(self)
 
         QMetaObject.connectSlotsByName(self)
@@ -80,21 +87,19 @@ class AppMainWindow(QMainWindow):
         self.uiMainPanel.puzzleFrame.resetPuzzle()
         grabWidget(QLabel, 'infoDisplayLabel')._resetAction()
         grabWidget(QPushButton, 'setPuzzleBtn')._disableMe()
-        
 
     def _updateWindow(self):
         self.uiStatusBar.puzzleInfoLabel.update()
         grabPuzzleFrame().onSquareChangeEvent()
-        
 
-    
     def resizeApp(self):
 
         _height, _width = getScreenSize()
 
         self.resize(
-            int(floor(float(_height)/6)),
-            floor(int(float(_width)/12)))
+            int(floor(float(_height) / 6)),
+            floor(int(float(_width) / 12)))
+
 
 @lru_cache(typed=False)
 def getScreenSize():

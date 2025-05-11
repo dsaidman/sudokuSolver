@@ -8,6 +8,7 @@ from .uiEnums import ValidityEnum, SquareTypeEnum
 from solver.definitions import sudokuDefs
 from solver.py2lua import luaPy
 
+
 class UiPanel(QFrame):
     def __init__(self, parent, objectName='UiPanel'):
         super(UiPanel, self).__init__(parent, objectName='UiPanel')
@@ -34,7 +35,13 @@ class UiPanel(QFrame):
                                 1, 1, Qt.AlignmentFlag.AlignVCenter)
         uiFrameLayout.addWidget(self.solvePuzzleBtn, 0, 1,
                                 1, 1, Qt.AlignmentFlag.AlignVCenter)
-        uiFrameLayout.addWidget(self.infoDisplayLabel, 1, 0, 1, 2, Qt.AlignmentFlag.AlignVCenter)
+        uiFrameLayout.addWidget(
+            self.infoDisplayLabel,
+            1,
+            0,
+            1,
+            2,
+            Qt.AlignmentFlag.AlignVCenter)
 
     def _setCompleted(self):
 
@@ -59,12 +66,13 @@ class InfoDisplayLabel(QLabel):
         self.setObjectName(objectName)
         self.setText("")
         self.setStyleSheet("font-size: 14px;")
-        self.setAlignment(
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight |
+                          Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.setEnabled(False)
 
     def _resetAction(self):
         self.setText("")
+
 
 class SetPuzzleBtn(QPushButton):
     def __init__(self, parent, objectName='setPuzzleBtn'):
@@ -150,7 +158,7 @@ class SolvePuzzleButton(QPushButton):
             # Everything is ready to call
             tStart = tictoc()
             result = solveFun(puzzleArg)
-            tDuration_ms = (tictoc()-tStart)*1000
+            tDuration_ms = (tictoc() - tStart) * 1000
             print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
 
             runtimeInfo = dict(result['info'])
@@ -167,7 +175,9 @@ class SolvePuzzleButton(QPushButton):
             numOperations = runtimeInfo['numOperations']
             displayLabel = grabWidget(QLabel, 'infoDisplayLabel')
 
-            displayText = f'Completed in {tDuration_ms:.2f} milliseconds - Difficulty: {difficultyEnum:s}\n{numRecursions} Recursions - {numOperations} Operations'
+            displayText = f'Completed in {
+                tDuration_ms:.2f} milliseconds - Difficulty: {
+                difficultyEnum:s}\n{numRecursions} Recursions - {numOperations} Operations'
             displayLabel.setText(displayText)
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
