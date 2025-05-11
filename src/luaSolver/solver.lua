@@ -88,7 +88,7 @@ local function importPuzzle(startingValues)
     local startingPuzzle = initEmptyPuzzle()
     for gridID, gridValue in pairs(startingValues)
     do
-        print(gridID .. ' = ' .. gridValue)
+        -- print(gridID .. ' = ' .. gridValue)
         startingPuzzle[gridID] = tostring(gridValue)
     end
     return startingPuzzle
@@ -97,7 +97,6 @@ end
 --local previousKey
 local function getNextEntryPoint(thePuzzle)
     local occuranceCount    = myFuns.countOccurances(thePuzzle)
-
     local maxOccuranceValue = tostring(select(2,myFuns.max(occuranceCount)))
     local filteredPuzzle = {}
     for theGridKey, theGridValue in pairs(thePuzzle) do
