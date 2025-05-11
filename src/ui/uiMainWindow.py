@@ -1,15 +1,14 @@
+
+from PyQt6.QtWidgets import QWidget, QMainWindow, QSizePolicy, QLabel, QPushButton, QHBoxLayout
+from PyQt6.QtCore import Qt, QMetaObject
+from PyQt6.QtGui import QIcon, QPixmap, QGuiApplication
+from .uiMainPanelComponents import UiMainPanel
+from .uiStatusBarComponents import PuzzleInfoLabel
+from .uiMenuComponents import MenuBar
+from .uiHelpers import grabWidget, grabPuzzleFrame
+from .uiEnums import AppStatusEnum
 from functools import lru_cache
 from math import floor
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QPushButton, QWidget, QFrame, QMainWindow, QSizePolicy, QStyle, QStatusBar
-from PyQt6.QtCore import Qt, QMetaObject, QSize
-from PyQt6.QtGui import QGuiApplication, QFont, QIcon, QPixmap
-from .uiEnums import AppStatusEnum
-from .uiPuzzleComponents import PuzzleFrame
-from .uiControlComponents import UiPanel
-from .uiStatusBarComponents import PuzzleInfoLabel
-from pySolver.py2lua import luaPy as sudokuDefs
-from .uiMenuComponents import MenuBar
-from .uiHelpers import grabWidget
 import inspect, os
 
 
@@ -27,8 +26,6 @@ class AppMainWindow(QMainWindow):
     def __init__(self):
         super(AppMainWindow, self).__init__()
 
-    def setupUi(self):
-
         self.setObjectName("MainWindow")
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.setWindowTitle("SudokuSolverApp")
@@ -36,6 +33,7 @@ class AppMainWindow(QMainWindow):
         filename = inspect.getframeinfo(inspect.currentframe()).filename
         path     = os.path.dirname(os.path.abspath(filename))
         iconpath = os.path.join(os.path.dirname(os.path.dirname(path)),'res','icon.ico')
+
         appIcon = QIcon()
         appIcon.addPixmap(QPixmap(iconpath), QIcon.Mode.Normal, QIcon.State.Off)
         self.setWindowIcon(appIcon)
@@ -43,7 +41,15 @@ class AppMainWindow(QMainWindow):
 
         self.centralWidget = QWidget()
         self.centralWidget.setObjectName("centralWidget")
+        self.setCentralWidget(self.centralWidget)
 
+        self.masterAppLayout = QHBoxLayout()
+        self.masterAppLayout.setObjectName('masterAppLayout')
+        self.centralWidget.setLayout( self.masterAppLayout)
+
+        self.setStyleSheet("QWidget {font-family: 'Segoe ui';}");
+
+        '''
         theSizePolicy = QSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding)
@@ -51,42 +57,12 @@ class AppMainWindow(QMainWindow):
         theSizePolicy.setHorizontalStretch(0)
         theSizePolicy.setHeightForWidth(False)
         self.setSizePolicy(theSizePolicy)
+        '''
 
-        # Master Layout
-        masterLayout = QVBoxLayout()
-        masterLayout.setParent(self.centralWidget)
-        masterLayout.setObjectName('masterLayout')
-        self.centralWidget.setLayout(masterLayout)
+    def setupUi(self):
 
-        # Title Label
-        self.titleLabel = QLabel()
-        self.titleLabel.setParent(self.centralWidget)
-        self.titleLabel.setAutoFillBackground(True)
-        self.titleLabel.setFrameShadow(QFrame.Shadow.Raised)
-        self.titleLabel.setText("Sudoku Solver")
-        self.titleLabel.setScaledContents(True)
-        self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.titleLabel.setObjectName("titleLabel")
-        self.titleLabel.setStyleSheet("background-color: rgb(100,100,100);")
-        self.setContentsMargins(0, 0, 0, 0)
-
-        titleFont = QFont()
-        titleFont.setBold(True)
-        titleFont.setPointSize(14)
-        titleFont.setFamily("Lucida Console")
-        self.titleLabel.setFont(titleFont)
-
-        self.puzzleFrame = PuzzleFrame(self.centralWidget)
-        self.uiFrame = UiPanel(self.centralWidget)
-
-        # make master layout widget for nestthig the layouts
-        masterLayout.insertWidget(0, self.titleLabel)
-        masterLayout.insertWidget(1, self.puzzleFrame)
-        masterLayout.insertWidget(2, self.uiFrame)
-
-        self.titleLabel.raise_()
-        self.uiFrame.raise_()
-        self.puzzleFrame.raise_()
+        self.uiMainPanel = UiMainPanel(self)
+        self.masterAppLayout.addWidget(self.uiMainPanel)
 
         self.uiStatusBar = self.statusBar()
         self.uiStatusBar.setObjectName('uiStatusBar')
@@ -94,27 +70,24 @@ class AppMainWindow(QMainWindow):
         self.uiStatusBar.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar)
         self.uiStatusBar.addPermanentWidget(self.uiStatusBar.puzzleInfoLabel)
 
-        self.setCentralWidget(self.centralWidget)
+        
         self.menuBar = MenuBar(self)
 
-        w = self.windowHandle()
-        self.retranslateUi(self)
         QMetaObject.connectSlotsByName(self)
 
     def _resetMainWindow(self):
         self.uiStatusBar.puzzleInfoLabel.reset()
-        self.puzzleFrame.resetPuzzle()
+        self.uiMainPanel.puzzleFrame.resetPuzzle()
         grabWidget(QLabel, 'infoDisplayLabel')._resetAction()
         grabWidget(QPushButton, 'setPuzzleBtn')._disableMe()
         
 
     def _updateWindow(self):
         self.uiStatusBar.puzzleInfoLabel.update()
-        self.puzzleFrame.onSquareChangeEvent()
+        grabPuzzleFrame().onSquareChangeEvent()
         
 
-
-
+    
     def resizeApp(self):
 
         _height, _width = getScreenSize()
@@ -122,19 +95,6 @@ class AppMainWindow(QMainWindow):
         self.resize(
             int(floor(float(_height)/6)),
             floor(int(float(_width)/12)))
-
-    def orderTabs(self):
-        for idx in range(len(sudokuDefs.squares)-1):
-            QMainWindow.setTabOrder(
-                self.puzzleFrame.squares[sudokuDefs.squares[idx]],
-                self.puzzleFrame.squares[sudokuDefs.squares[idx+1]])
-        QMainWindow.setTabOrder(
-            self.puzzleFrame.squares[sudokuDefs.squares[-1]],
-            self.puzzleFrame.squares[sudokuDefs.squares[0]])
-
-    def retranslateUi(self, MainWindow):
-        pass
-
 
 @lru_cache(typed=False)
 def getScreenSize():

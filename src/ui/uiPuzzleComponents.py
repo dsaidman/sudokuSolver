@@ -97,8 +97,8 @@ class PuzzleFrame(QFrame):
         self.puzzleLayout.setSpacing(1)
         self.puzzleLayout.setContentsMargins(0, 0, 0, 0)
 
-        masterLayout = grabWidget(QVBoxLayout, 'masterLayout')
-        masterLayout.addLayout(self.puzzleLayout)
+        mainPanelLayout = grabWidget(QVBoxLayout, 'mainPanelLayout')
+        mainPanelLayout.addLayout(self.puzzleLayout)
 
         self._initSquares()
         self._initHeaders()

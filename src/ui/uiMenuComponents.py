@@ -52,10 +52,8 @@ class MenuBar(QMenuBar):
         self.resetAllAction.shortcut = QShortcut(
             QKeySequence("Ctrl+R"), self)
         self.resetAllAction.setObjectName("resetAction")
-        self.resetAllAction.triggered.connect(
-            grabMainWindow()._resetMainWindow)
-        self.resetAllAction.shortcut.activated.connect(
-            grabMainWindow()._resetMainWindow)
+        self.resetAllAction.triggered.connect( grabMainWindow()._resetMainWindow)
+        self.resetAllAction.shortcut.activated.connect( grabMainWindow()._resetMainWindow)
 
     def importIni(self):
 

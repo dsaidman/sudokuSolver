@@ -6,8 +6,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QFrame
 
 
 def grabWidget(widgetType, widgetName):
-    centralWidget = grabMainWindow().centralWidget
-    return centralWidget.findChildren(widgetType, widgetName)[0]
+    return grabMainWindow().findChildren(widgetType, widgetName)[0]
 
 
 def grabAppInstance():

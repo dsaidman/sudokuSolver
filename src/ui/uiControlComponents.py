@@ -26,9 +26,9 @@ class UiPanel(QFrame):
         uiFrameLayout.setSpacing(0)
         uiFrameLayout.setContentsMargins(0, 0, 0, 0)
 
-        masterLayout = grabWidget(QVBoxLayout, 'masterLayout')
+        mainPanelLayout = grabWidget(QVBoxLayout, 'mainPanelLayout')
 
-        masterLayout.addLayout(uiFrameLayout)
+        mainPanelLayout.addLayout(uiFrameLayout)
 
         uiFrameLayout.addWidget(self.setPuzzleBtn, 0, 0,
                                 1, 1, Qt.AlignmentFlag.AlignVCenter)
@@ -78,7 +78,6 @@ class SetPuzzleBtn(QPushButton):
         self.clicked.connect(grabPuzzleFrame().toggleLock)
         self._disableMe()
         btnFont = QFont()
-        btnFont.setFamily("Lucida Console")
         self.setFont(btnFont)
 
     def _enableMe(self):
@@ -118,7 +117,6 @@ class SolvePuzzleButton(QPushButton):
         self.setObjectName("solveBtn")
         self._disableMe()
         btnFont = QFont()
-        btnFont.setFamily("Lucida Console")
         self.setFont(btnFont)
         self.clicked.connect(self.solveIt)
         self.clicked.connect(self._disableMe)
