@@ -1,15 +1,13 @@
 
-from pySolver.definitions import sudokuDefs
-import sys
-import os
-from functools import cached_property
-from math import floor
+from solver.definitions import sudokuDefs
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QCursor, QFont
-from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit, QStatusBar
+from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
 from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares, grabCurrentSquare
-import inspect
+import sys, os
+from math import floor
+from functools import cached_property
 
 # Until i figure out how to do this properly, path hack
 sys.path.append(os.path.abspath('..'))

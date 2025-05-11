@@ -5,8 +5,8 @@ from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButton
 from .uiHelpers import grabPuzzleFrame, grabWidget, grabStatusBar
 from .uiEnums import ValidityEnum, SquareTypeEnum
-from pySolver.definitions import sudokuDefs
-from pySolver.py2lua import luaPy
+from solver.definitions import sudokuDefs
+from solver.py2lua import luaPy
 
 class UiPanel(QFrame):
     def __init__(self, parent, objectName='UiPanel'):

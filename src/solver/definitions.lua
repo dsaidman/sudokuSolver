@@ -1,5 +1,5 @@
 
-local myFuns = require "src.luaSolver.helperLib"
+local myFuns = require "src.solver.helperLib"
 
 local definitions = {}
 

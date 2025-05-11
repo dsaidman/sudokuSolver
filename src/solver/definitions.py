@@ -1,5 +1,5 @@
 from functools import cached_property, lru_cache
-from pySolver.py2lua import luaPy
+from solver.py2lua import luaPy
 
 
 class definitions:

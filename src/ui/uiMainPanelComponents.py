@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from .uiPuzzleComponents import PuzzleFrame
 from .uiControlComponents import UiPanel
-from pySolver.py2lua import luaPy as sudokuDefs
+from solver.py2lua import luaPy as sudokuDefs
 
 
 class UiMainPanel(QFrame):
@@ -15,8 +15,6 @@ class UiMainPanel(QFrame):
 
         self.setObjectName('uiMainPanel')
         self.setParent(parent)
-        
-        
         self.setupUi()
 
 
