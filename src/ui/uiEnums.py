@@ -1,6 +1,5 @@
 from enum import Enum, auto
 
-
 class ValidityEnum(Enum):
     NoStatement = -1
     Valid = auto()

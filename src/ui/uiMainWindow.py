@@ -9,9 +9,10 @@ from .uiHelpers import grabWidget, grabPuzzleFrame
 from .uiEnums import AppStatusEnum
 from functools import lru_cache
 from math import floor
-import inspect
+import inspect, logging
 import os
-
+__all__ = ['AppMainWindow']
+uiLogger = logging.getLogger('uiLogger')
 
 class AppMainWindow(QMainWindow):
 
@@ -27,10 +28,12 @@ class AppMainWindow(QMainWindow):
     def __init__(self):
         super(AppMainWindow, self).__init__()
 
+        uiLogger.debug('Entered AppMainWindow')
         self.setObjectName("MainWindow")
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.setWindowTitle("SudokuSolverApp")
 
+        uiLogger.debug('Setting app icon')
         filename = inspect.getframeinfo(inspect.currentframe()).filename
         path = os.path.dirname(os.path.abspath(filename))
         iconpath = os.path.join(
@@ -47,6 +50,7 @@ class AppMainWindow(QMainWindow):
         self.setWindowIcon(appIcon)
         self._status = AppStatusEnum.Unlocked
 
+        uiLogger.debug('Setting Central Widget')
         self.centralWidget = QWidget()
         self.centralWidget.setObjectName("centralWidget")
         self.setCentralWidget(self.centralWidget)
@@ -69,6 +73,7 @@ class AppMainWindow(QMainWindow):
 
     def setupUi(self):
 
+        uiLogger.debug('Entered AppMainWindow setup')
         self.uiMainPanel = UiMainPanel(self)
         self.masterAppLayout.addWidget(self.uiMainPanel)
 
