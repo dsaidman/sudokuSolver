@@ -12,7 +12,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     MainWindow = AppMainWindow()
-    MainWindow.setFont(QFont("Lucida Console"))
     MainWindow.setupUi()
     MainWindow.resizeApp()
     MainWindow.show()

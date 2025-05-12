@@ -1,6 +1,9 @@
 from functools import cached_property, lru_cache
 from solver.py2lua import luaPy
-
+_lang = 'lua'
+if _lang is "python":
+    from string import ascii_uppercase 
+    from string import digits
 
 class definitions:
     """
@@ -22,7 +25,10 @@ class definitions:
         Returns:
             list: capital let`ters A to I
         """
-        return sorted(list(luaPy.defintions[0].rowNames.values()))
+        if _lang is "lua":
+            return sorted(list(luaPy.defintions[0].rowNames.values()))
+        else:
+            return sorted(list(ascii_uppercase[0:9]))
 
     @cached_property
     def columns(self):
@@ -33,7 +39,11 @@ class definitions:
             list: capital letters A to I
         """
         # return list(digits[1:10])
-        return sorted(list(luaPy.defintions[0].colNames.values()))
+        if _lang is "lua":
+            return sorted(list(luaPy.defintions[0].colNames.values()))
+        else:
+            return list(digits[1:])
+
 
     @cached_property
     def squares(self):
@@ -43,10 +53,13 @@ class definitions:
         Returns:
             list: cached list of keys
         """
-        return sorted(
-            list(
-                luaPy.defintions[0].allKeys.values()),
-            reverse=False)
+        if _lang is "lua":
+            return sorted(
+                list(
+                    luaPy.defintions[0].allKeys.values()),
+                    reverse=False)
+        elif _lang is "python":
+            return sorted(list([row+col for row in self.rows for col in self.columns]))
 
     def nextSquare(self, currentKey):
         """
