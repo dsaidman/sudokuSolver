@@ -7,12 +7,12 @@ from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
 from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares, grabCurrentSquare
 import sys
 import os
+import logging
 from math import floor
 from functools import cached_property
-
 # Until i figure out how to do this properly, path hack
 sys.path.append(os.path.abspath('..'))
-
+uiLogger = logging.getLogger('uiLogger')
 
 class PuzzleFrame(QFrame):
     """
