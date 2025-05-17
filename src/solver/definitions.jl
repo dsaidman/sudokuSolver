@@ -1,7 +1,5 @@
 module Definitions
 
-using Memoize
-
 export rowNames, columnNames, squares, neighbors, cellRows, cellColumns, puzzle0, families
 
 const rowNames::String = "ABCDEFGHI"
@@ -10,17 +8,17 @@ const squares::Vector{String} = unique([string(row, col) for row in rowNames for
 const cellRows::Vector{String} = ["ABC", "DEF", "GHI"]
 const cellColumns::Vector{String} = ["123", "456", "789"]
 
-@memoize _getRowNeighbors(sq)::Vector{String} = sq[1] .* collect(columnNames)
-@memoize _getColumnNeighbors(sq)::Vector{String} = collect(rowNames) .* sq[2]
+_getRowNeighbors(sq)::Vector{String} = sq[1] .* collect(columnNames)
+_getColumnNeighbors(sq)::Vector{String} = collect(rowNames) .* sq[2]
 
-@memoize function _getCellNeighbors(sq::String)::Vector{String}
+function _getCellNeighbors(sq::String)::Vector{String}
     _rows = cellRows[findfirst(x -> occursin(sq[1], x), cellRows)]
     _cols = cellColumns[findfirst(x -> occursin(sq[2], x), cellColumns)]
     return [r * c for r in _rows for c in _cols]
 end
 
 # All neigbhors of a
-@memoize function _neighborsOf(sq::String)::Vector{String}
+function _neighborsOf(sq::String)::Vector{String}
     return filter!(!=(sq), sort(unique(vcat(_getRowNeighbors(sq),
         _getColumnNeighbors(sq),
         _getCellNeighbors(sq)))))
