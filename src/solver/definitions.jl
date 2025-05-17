@@ -1,31 +1,52 @@
 module Definitions
 
-export rowNames, columnNames, allKeys, neighbors, cellRows, cellColumns, puzzle0
+using Memoize
 
-const rowNames::String             = "ABCDEFGHI"
-const columnNames::String         = "123456789"
-const allKeys::Vector{String}     = unique([string(row, col) for row in rowNames for col in columnNames])
-const squares::Vector{String}     = allKeys
-cellRows    = ["ABC", "DEF", "GHI"]
-cellColumns = ["123", "456", "789"]
+export rowNames, columnNames, squares, neighbors, cellRows, cellColumns, puzzle0, families
 
+const rowNames::String = "ABCDEFGHI"
+const columnNames::String = "123456789"
+const squares::Vector{String} = unique([string(row, col) for row in rowNames for col in columnNames])
+const cellRows::Vector{String} = ["ABC", "DEF", "GHI"]
+const cellColumns::Vector{String} = ["123", "456", "789"]
 
-function _neighborsOf(sq::String)
-    local _colCell = cellColumns[(first(findfirst(sq[2], columnNames))%3)+1]
-    local _rowCell = cellRows[(first(findfirst(sq[1], rowNames))%3)+1]
+@memoize _getRowNeighbors(sq)::Vector{String} = sq[1] .* collect(columnNames)
+@memoize _getColumnNeighbors(sq)::Vector{String} = collect(rowNames) .* sq[2]
 
-    local _neighborCells = [string(row, col) for row in _rowCell for col in _colCell]
-    local _neighborrowNames = [string(sq[1], col) for col in columnNames]
-    local _neighborCols = [string(row, sq[2]) for row in rowNames]
-
-    return filter!(!=(sq),sort(unique(vcat(_neighborCells, _neighborrowNames, _neighborCols))))
-
+@memoize function _getCellNeighbors(sq::String)::Vector{String}
+    _rows = cellRows[findfirst(x -> occursin(sq[1], x), cellRows)]
+    _cols = cellColumns[findfirst(x -> occursin(sq[2], x), cellColumns)]
+    return [r * c for r in _rows for c in _cols]
 end
 
-# Get all the neighbors for every square
-const neighbors = Dict{String,Vector{String}}(sq => _neighborsOf(sq) for sq in squares)
+# All neigbhors of a
+@memoize function _neighborsOf(sq::String)::Vector{String}
+    return filter!(!=(sq), sort(unique(vcat(_getRowNeighbors(sq),
+        _getColumnNeighbors(sq),
+        _getCellNeighbors(sq)))))
+end
 
-# Default empty puzzle
-puzzle0 = Dict{String,String}(sq => "123456789" for sq in squares)
+# Get the neighbors of each square
+const neighbors::Dict{String,Vector{String}} = Dict(sq => _neighborsOf(sq) for sq in squares)
+
+# All families
+begin
+    tmp = Dict{Int,Vector{String}}()
+    for rowName in rowNames
+        tmp[length(tmp)+1] = _getRowNeighbors(string(rowName, columnNames[1]))
+    end
+    for colName in columnNames
+        tmp[length(tmp)+1] = _getColumnNeighbors(string(rowNames[1], colName))
+    end
+    for cellRow in cellRows
+        for cellCol in cellColumns
+            tmp[length(tmp)+1] = _getCellNeighbors(string(cellRow[1], cellCol[1]))
+        end
+    end
+    const families::Dict{Int,Vector{String}} = tmp
+    tmp = nothing
+end
+
+puzzle0::Dict{String,String} = Dict(sq => "123456789" for sq in squares)
 
 end
