@@ -11,7 +11,7 @@ def main():
     FORMAT = '%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s'
     logging.basicConfig(
         format=FORMAT,
-        level=logging.INFO)
+        level=logging.DEBUG)
     uiLogger.info('Starting Application')
     app = QApplication(sys.argv)
     app.setStyle('Fusion')

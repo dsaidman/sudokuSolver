@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from .uiPuzzleComponents import PuzzleFrame
 from .uiControlComponents import UiPanel
-from solver.py2lua import luaPy as sudokuDefs
+from solver import definitions as sudokuDefs
 import logging
 uiLogger = logging.getLogger('uiLogger')
 

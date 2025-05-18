@@ -1,4 +1,8 @@
-include("definitions.jl")
+module Solver
+
+include("Definitions.jl")
+
+export isPuzzleComplete, isPuzzleSolved, isFamilyCorrect, solveTheThing
 
 isPuzzleComplete(pzl::Dict{String,String})::Bool = all([length(v) == 1 for v in values(pzl)])
 
@@ -52,18 +56,23 @@ function solveTheThing(puzzle::Dict{String,String})::Union{Bool,Dict{String,Stri
 				nextPuzzleGuess = copy(puzzle)
 				nextPuzzleGuess[nextEntry] = string(nextValue)
 				nextPuzzleGuess = solveTheThing(nextPuzzleGuess)
-				if isPuzzleSolved(nextPuzzleGuess)
+				
+				if typeof(nextPuzzleGuess) == Bool && !nextPuzzleGuess 
+					continue
+				elseif isPuzzleSolved(nextPuzzleGuess)
 					return nextPuzzleGuess
 				end
 			end
 		end
-
+	
 	else
 		return puzzle
 	end
 end
 
+end
 
+#=
 function importPuzzle(filePath::String)::Dict{String,String}
     puzzle = copy(Definitions.puzzle0)
     open(filePath, "r") do file
@@ -76,8 +85,10 @@ function importPuzzle(filePath::String)::Dict{String,String}
 end
 
 
+
 puzzleFile = "C:\\Users\\david\\Projects\\sudokuSolver\\input\\mediumSample.ini"
 puzzle = importPuzzle(puzzleFile)
 soln   = solveTheThing(copy(puzzle))
 
 soln
+=#

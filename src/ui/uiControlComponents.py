@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButto
 from .uiHelpers import grabPuzzleFrame, grabWidget, grabStatusBar
 from .uiEnums import ValidityEnum, SquareTypeEnum
 from solver.definitions import sudokuDefs
-from solver.py2lua import luaPy
+from solver.py2runtime import RuntimePy
 
 
 class UiPanel(QFrame):
@@ -152,8 +152,17 @@ class SolvePuzzleButton(QPushButton):
             print('\tPuzzle not valid condition, returning')
             return False
         else:
-            puzzleArg = luaPy.dict2Table(puzzleFrame.asDict())
-            solveFun = luaPy.solver['solve']
+            if RuntimePy.lang == "lua":
+                puzzleArg = RuntimePy.dict2Table(puzzleFrame.asDict())
+                solveFun = RuntimePy.solver['solve']
+            elif RuntimePy.lang == "julia":
+                #puzzleArg = RuntimePy.runtime.convert( 
+                #                                      RuntimePy.runtime.Dict[RuntimePy.runtime.String,RuntimePy.runtime.String], 
+                #                                      puzzleFrame.asDict()) # Ensure typed correctly
+                puzzleArg = RuntimePy.defintions.puzzle0
+                for k,v in  puzzleFrame.asDict().items():
+                    puzzleArg[k] = v
+                solveFun  = RuntimePy.solver.solveTheThing
 
             # Everything is ready to call
             tStart = tictoc()
@@ -161,7 +170,7 @@ class SolvePuzzleButton(QPushButton):
             tDuration_ms = (tictoc() - tStart) * 1000
             print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
 
-            runtimeInfo = dict(result['info'])
+            #runtimeInfo = dict(result['info'])
             theSolution = {}
             for squareKey, squareValue in result.items():
                 theSolution[squareKey] = squareValue
@@ -170,15 +179,17 @@ class SolvePuzzleButton(QPushButton):
             uiPanel = grabWidget(QFrame, 'UiPanel')
             uiPanel._setCompleted()
 
-            difficultyEnum = runtimeInfo['difficulty']
-            numRecursions = runtimeInfo['numRecursions']
-            numOperations = runtimeInfo['numOperations']
+            difficultyEnum = "NONE" #runtimeInfo['difficulty']
+            numRecursions = 0 #runtimeInfo['numRecursions']
+            numOperations = 0 #runtimeInfo['numOperations']
+            
             displayLabel = grabWidget(QLabel, 'infoDisplayLabel')
 
             displayText = f'Completed in {
                 tDuration_ms:.2f} milliseconds - Difficulty: {
                 difficultyEnum:s}\n{numRecursions} Recursions - {numOperations} Operations'
             displayLabel.setText(displayText)
+
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
 

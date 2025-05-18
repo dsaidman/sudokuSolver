@@ -134,6 +134,7 @@ class PuzzleFrame(QFrame):
         return argList
 
     def onSquareChangeEvent(self):
+        uiLogger.debug('Square change event called')
         for puzzleSquares in self.squares.values():
             puzzleSquares._refresh()
 
@@ -195,7 +196,7 @@ class PuzzleFrame(QFrame):
         squares = {}
         for squareKey in sudokuDefs.squares:
             squares[squareKey] = PuzzleSquare(self, squareKey)
-
+            
             self.puzzleLayout.addWidget(
                 squares[squareKey],
                 3 + sudokuDefs.rows.index(squareKey[0]) +

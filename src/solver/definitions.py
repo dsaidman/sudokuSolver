@@ -1,9 +1,13 @@
 from functools import cached_property, lru_cache
-from solver.py2lua import luaPy
-_lang = 'lua'
-if _lang is "python":
+import logging
+_lang = "julia"
+if _lang == "python":
     from string import ascii_uppercase 
     from string import digits
+else:
+    from solver.py2runtime import RuntimePy
+uiLogger = logging.getLogger('uiLogger')
+
 
 class definitions:
     """
@@ -25,9 +29,11 @@ class definitions:
         Returns:
             list: capital let`ters A to I
         """
-        if _lang is "lua":
-            return sorted(list(luaPy.defintions[0].rowNames.values()))
-        else:
+        if self.lang == "lua":
+            return sorted(list(RuntimePy.defintions.rowNames.values()))
+        elif self.lang == "julia":
+            return sorted(list(RuntimePy.defintions.rowNames)) 
+        elif self.lang == "python":
             return sorted(list(ascii_uppercase[0:9]))
 
     @cached_property
@@ -39,9 +45,11 @@ class definitions:
             list: capital letters A to I
         """
         # return list(digits[1:10])
-        if _lang is "lua":
-            return sorted(list(luaPy.defintions[0].colNames.values()))
-        else:
+        if self.lang == "lua":
+            return sorted(list(RuntimePy.defintions.colNames.values()))
+        elif self.lang == "julia":
+            return sorted(list(RuntimePy.defintions.columnNames)) 
+        elif self.lang == "python":
             return list(digits[1:])
 
 
@@ -53,12 +61,17 @@ class definitions:
         Returns:
             list: cached list of keys
         """
-        if _lang is "lua":
+        if self.lang == "lua":
             return sorted(
                 list(
-                    luaPy.defintions[0].allKeys.values()),
+                    RuntimePy.defintions.allKeys.values()),
                     reverse=False)
-        elif _lang is "python":
+        elif self.lang == "julia":
+            return sorted(
+                list(
+                    RuntimePy.defintions.squares),
+                    reverse=False)
+        elif self.lang == "python":
             return sorted(list([row+col for row in self.rows for col in self.columns]))
 
     def nextSquare(self, currentKey):
@@ -87,7 +100,7 @@ class definitions:
         return self.squares[(
             (self.squares.index(currentKey) + -1) % len(self.squares))]
 
-    @lru_cache(maxsize=82, typed=False)
+    @lru_cache(maxsize=82)
     def neighbors(self, squareID):
         """
         Returns list of squareID that cannot share the same value.
@@ -103,8 +116,20 @@ class definitions:
         Returns:
             list: Unique list of strings of squares that cannot share same value
         """
-        return list(luaPy.defintions[0]['getNeighbors'](squareID))
+        if self.lang == "lua":
+            return list(RuntimePy.defintions['getNeighbors'](squareID))
+        elif self.lang == "julia":
+            return list(RuntimePy.defintions.neighbors[squareID])
+        elif self.lang == "python":
+            print("not yet implimented")
+            return
+            
+    
+    def __init__(self,lang=_lang):
+        self.lang = lang
+        uiLogger.info("Using %s runtime", self.lang)
+        
 
 
 # Return the pre-cached SudokuParams instance to be shared across modules
-sudokuDefs = definitions()
+sudokuDefs = definitions(_lang)
