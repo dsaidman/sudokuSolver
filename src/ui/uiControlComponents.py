@@ -159,7 +159,7 @@ class SolvePuzzleButton(QPushButton):
                 #puzzleArg = RuntimePy.runtime.convert( 
                 #                                      RuntimePy.runtime.Dict[RuntimePy.runtime.String,RuntimePy.runtime.String], 
                 #                                      puzzleFrame.asDict()) # Ensure typed correctly
-                puzzleArg = RuntimePy.defintions.puzzle0
+                puzzleArg = RuntimePy.runtime.copy(RuntimePy.defintions.puzzle0)
                 for k,v in  puzzleFrame.asDict().items():
                     puzzleArg[k] = v
                 solveFun  = RuntimePy.solver.solveTheThing
