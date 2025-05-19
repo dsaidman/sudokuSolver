@@ -40,7 +40,7 @@ function getNextEntryPoint(puzzle::Dict{String,String})::String
 
 end
 
-function solveTheThing(puzzle::Dict{String,String})::Union{Bool,Dict{String,String}}
+function solveTheThing(puzzle::Dict{String,String})
 
 	if ~isPuzzleSolved(puzzle)
 		# Make a guess
@@ -63,6 +63,7 @@ function solveTheThing(puzzle::Dict{String,String})::Union{Bool,Dict{String,Stri
 					return nextPuzzleGuess
 				end
 			end
+			return false
 		end
 	
 	else
@@ -72,9 +73,9 @@ end
 
 end
 
-#=
+
 function importPuzzle(filePath::String)::Dict{String,String}
-    puzzle = copy(Definitions.puzzle0)
+    puzzle = copy(Solver.Definitions.puzzle0)
     open(filePath, "r") do file
         for line in eachline(file)
             line = filter(x -> !isspace(x), line)
@@ -86,9 +87,8 @@ end
 
 
 
-puzzleFile = "C:\\Users\\david\\Projects\\sudokuSolver\\input\\mediumSample.ini"
+puzzleFile = "C:\\Users\\david\\Projects\\sudokuSolver\\input\\hardSample.ini"
 puzzle = importPuzzle(puzzleFile)
-soln   = solveTheThing(copy(puzzle))
+soln   = Solver.solveTheThing(copy(puzzle))
 
 soln
-=#
