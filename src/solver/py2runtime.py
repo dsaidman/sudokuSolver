@@ -10,14 +10,14 @@ as a single instance across multiple other modules. The module contains:
 Returns:
     None: no return values
 """
-_lang = "julia"
+_lang = "lua"
 import os
 from functools import cached_property
 if _lang == "lua":
     import lupa.luajit21 as lupa
     from lupa import LuaRuntime
 elif _lang == "julia":
-    from juliacall import Main as jl, convert as jlconvert
+    from juliacall import Main as jl
 import logging
 uiLogger = logging.getLogger('uiLogger')
 
@@ -37,17 +37,17 @@ class Py2Runtime:
 
     def __init__(self, lang=_lang):
         """Constructor method initializes runtime and modules."""
-        
         self.lang = lang
         if lang == "lua":
-            uiLogger.info(
-                f"Using {
-                    lua().lua_implementation} (compiled with {
-                    lupa.LUA_VERSION})")
-            self._version = lupa.LUA_VERSION
-
+            
             # Get the lua runtime from lupa. Try to use luajit if possible
             lua = LuaRuntime()
+            uiLogger.info(
+                f"Using {
+                    lua.lua_implementation} (compiled with {
+                    lupa.LUA_VERSION})")
+            self._version = lupa.LUA_VERSION
+            
             lua.execute("package.path = '../solver/?.lua;' .. package.path")
             lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
 
@@ -55,6 +55,7 @@ class Py2Runtime:
             self._runtime = lua
 
             uiLogger.debug('\tImporting defintions.lua as table object...')
+            
             self._definitionsModule = lua.require('src.solver.definitions')[0]
 
             uiLogger.debug('\tImporting solver.lua as table object...')

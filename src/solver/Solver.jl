@@ -89,6 +89,8 @@ end
 
 puzzleFile = "C:\\Users\\david\\Projects\\sudokuSolver\\input\\hardSample.ini"
 puzzle = importPuzzle(puzzleFile)
-soln   = Solver.solveTheThing(copy(puzzle))
 
-soln
+using Profile
+@profile Solver.solveTheThing(copy(puzzle))
+Profile.print()
+

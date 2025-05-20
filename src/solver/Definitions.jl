@@ -28,7 +28,7 @@ end
 const neighbors::Dict{String,Vector{String}} = Dict(sq => _neighborsOf(sq) for sq in squares)
 
 # All families
-begin
+let families
     tmp = Dict{Int,Vector{String}}()
     for rowName in rowNames
         tmp[length(tmp)+1] = _getRowNeighbors(string(rowName, columnNames[1]))
@@ -42,7 +42,6 @@ begin
         end
     end
     const families::Dict{Int,Vector{String}} = tmp
-    tmp = nothing
 end
 
 puzzle0::Dict{String,String} = Dict(sq => "123456789" for sq in squares)

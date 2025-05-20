@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButto
 from .uiHelpers import grabPuzzleFrame, grabWidget, grabStatusBar
 from .uiEnums import ValidityEnum, SquareTypeEnum
 from solver.definitions import sudokuDefs
-from solver.py2runtime import RuntimePy
+from solver.py2runtime import RuntimePy as rt
 
 
 class UiPanel(QFrame):
@@ -152,17 +152,17 @@ class SolvePuzzleButton(QPushButton):
             print('\tPuzzle not valid condition, returning')
             return False
         else:
-            if RuntimePy.lang == "lua":
-                puzzleArg = RuntimePy.dict2Table(puzzleFrame.asDict())
-                solveFun = RuntimePy.solver['solve']
-            elif RuntimePy.lang == "julia":
-                #puzzleArg = RuntimePy.runtime.convert( 
-                #                                      RuntimePy.runtime.Dict[RuntimePy.runtime.String,RuntimePy.runtime.String], 
+            if rt.lang == "lua":
+                puzzleArg = rt.dict2Table(puzzleFrame.asDict())
+                solveFun = rt.solver['solve']
+            elif rt.lang == "julia":
+                #puzzleArg = rt.runtime.convert( 
+                #                                      rt.runtime.Dict[rt.runtime.String,rt.runtime.String], 
                 #                                      puzzleFrame.asDict()) # Ensure typed correctly
-                puzzleArg = RuntimePy.runtime.copy(RuntimePy.defintions.puzzle0)
+                puzzleArg = rt.runtime.copy(rt.defintions.puzzle0)
                 for k,v in  puzzleFrame.asDict().items():
                     puzzleArg[k] = v
-                solveFun  = RuntimePy.solver.solveTheThing
+                solveFun  = rt.solver.solveTheThing
 
             # Everything is ready to call
             tStart = tictoc()
@@ -170,7 +170,8 @@ class SolvePuzzleButton(QPushButton):
             tDuration_ms = (tictoc() - tStart) * 1000
             print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
 
-            #runtimeInfo = dict(result['info'])
+            
+            
             theSolution = {}
             for squareKey, squareValue in result.items():
                 theSolution[squareKey] = squareValue
@@ -179,10 +180,16 @@ class SolvePuzzleButton(QPushButton):
             uiPanel = grabWidget(QFrame, 'UiPanel')
             uiPanel._setCompleted()
 
-            difficultyEnum = "NONE" #runtimeInfo['difficulty']
-            numRecursions = 0 #runtimeInfo['numRecursions']
-            numOperations = 0 #runtimeInfo['numOperations']
-            
+            if rt.lang == "lua":
+                runtimeInfo = dict(result['info'])
+                difficultyEnum = runtimeInfo['difficulty']
+                numRecursions = runtimeInfo['numRecursions']
+                numOperations = runtimeInfo['numOperations']
+            else:
+                difficultyEnum = "UNSET"
+                numRecursions  = "UNSET"
+                numOperations  = "UNSET"
+                
             displayLabel = grabWidget(QLabel, 'infoDisplayLabel')
 
             displayText = f'Completed in {

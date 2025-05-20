@@ -1,13 +1,12 @@
 from functools import cached_property, lru_cache
 import logging
-_lang = "julia"
+from solver.py2runtime import _lang
 if _lang == "python":
     from string import ascii_uppercase 
     from string import digits
 else:
-    from solver.py2runtime import RuntimePy
+    from solver.py2runtime import RuntimePy as rt
 uiLogger = logging.getLogger('uiLogger')
-
 
 class definitions:
     """
@@ -30,9 +29,9 @@ class definitions:
             list: capital let`ters A to I
         """
         if self.lang == "lua":
-            return sorted(list(RuntimePy.defintions.rowNames.values()))
+            return sorted(list(rt.defintions.rowNames.values()))
         elif self.lang == "julia":
-            return sorted(list(RuntimePy.defintions.rowNames)) 
+            return sorted(list(rt.defintions.rowNames)) 
         elif self.lang == "python":
             return sorted(list(ascii_uppercase[0:9]))
 
@@ -46,9 +45,9 @@ class definitions:
         """
         # return list(digits[1:10])
         if self.lang == "lua":
-            return sorted(list(RuntimePy.defintions.colNames.values()))
+            return sorted(list(rt.defintions.colNames.values()))
         elif self.lang == "julia":
-            return sorted(list(RuntimePy.defintions.columnNames)) 
+            return sorted(list(rt.defintions.columnNames)) 
         elif self.lang == "python":
             return list(digits[1:])
 
@@ -64,12 +63,12 @@ class definitions:
         if self.lang == "lua":
             return sorted(
                 list(
-                    RuntimePy.defintions.allKeys.values()),
+                    rt.defintions.allKeys.values()),
                     reverse=False)
         elif self.lang == "julia":
             return sorted(
                 list(
-                    RuntimePy.defintions.squares),
+                    rt.defintions.squares),
                     reverse=False)
         elif self.lang == "python":
             return sorted(list([row+col for row in self.rows for col in self.columns]))
@@ -117,9 +116,9 @@ class definitions:
             list: Unique list of strings of squares that cannot share same value
         """
         if self.lang == "lua":
-            return list(RuntimePy.defintions['getNeighbors'](squareID))
+            return list(rt.defintions['getNeighbors'](squareID))
         elif self.lang == "julia":
-            return list(RuntimePy.defintions.neighbors[squareID])
+            return list(rt.defintions.neighbors[squareID])
         elif self.lang == "python":
             print("not yet implimented")
             return
