@@ -10,7 +10,7 @@ as a single instance across multiple other modules. The module contains:
 Returns:
     None: no return values
 """
-_lang = "lua"
+_lang = "julia"
 import os
 from functools import cached_property
 if _lang == "lua":

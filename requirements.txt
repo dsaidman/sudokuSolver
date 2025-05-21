@@ -1,4 +1,12 @@
+filelock==3.18.0
+humanfriendly==10.0
+juliacall==0.9.25
+juliapkg==0.1.17
+logger==1.4
 lupa==2.4
-PyQt5==5.15.11
-PyQt5-Qt5==5.15.2
-PyQt5_sip==12.17.0
+PyQt6==6.9.0
+PyQt6-Qt6==6.9.0
+PyQt6_sip==13.10.0
+pyqtdarktheme==0.1.7
+pyreadline3==3.5.4
+semver==3.0.4

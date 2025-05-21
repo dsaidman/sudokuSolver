@@ -8,6 +8,7 @@ import logging
 uiLogger = logging.getLogger('uiLogger')
 
 def main():
+    # temporary
     FORMAT = '%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s'
     logging.basicConfig(
         format=FORMAT,

@@ -1,3 +1,4 @@
+
 module Solver
 
 include("Definitions.jl")
@@ -31,12 +32,31 @@ function eliminationPass(puzzle::Dict{String,String})::Dict{String,String}
 	return puzzle
 end
 
+# Could use StatsBase, kinda like histcounts to get how often each value appears
+function countOccurances(puzzle::Dict{String,String})::Dict{Char,Int}
+	# Collect all values in the puzzle together
+	allPuzzleVals::String = join(values(puzzle),"")
+	occurances = Dict{Char,Int}()
+	for val::Char in "123456789"
+		occurances[val] = count(==(val), allPuzzleVals)
+	end
+	return occurances
+end
+
+findFirstDictKey(inDict::Dict, matchedValue::Int) = first([k for (k,v) in inDict if v==matchedValue])
+
 function getNextEntryPoint(puzzle::Dict{String,String})::String
 
-	nCounts = map(length,values(puzzle))
-	minCounts = minimum(nCounts[nCounts .> 1])
-    maxKey = [item.first for item in puzzle if length(item.second) == minCounts]
-	return maxKey[1]
+	# Of all unknowns, find the unknown value that occurs most often
+	unsolvedCount::Dict{Char,Int}   = countOccurances(puzzle)
+    mostFrequentUnsolved::Char      = findFirstDictKey(unsolvedCount, maximum(values(unsolvedCount)))
+
+	# With the value that occurs most often (mostFrequentUnsolved), find the square 
+	# with mostFrequentUnsolved with fewest remaining possible values. 
+	# The selection will eliminate the most possible paths
+    nextSquareChoices::Dict{String,Int} = Dict{String,Int}(k => length(v) for (k, v) in puzzle if (occursin(mostFrequentUnsolved, v) && length(v)>1))
+	nextSquareChoiceKey = findFirstDictKey(nextSquareChoices, minimum(values(nextSquareChoices)))
+	return nextSquareChoiceKey
 
 end
 
@@ -71,6 +91,7 @@ function solveTheThing(puzzle::Dict{String,String})
 	end
 end
 
+
 end
 
 
@@ -89,8 +110,8 @@ end
 
 puzzleFile = "C:\\Users\\david\\Projects\\sudokuSolver\\input\\hardSample.ini"
 puzzle = importPuzzle(puzzleFile)
-
-using Profile
-@profile Solver.solveTheThing(copy(puzzle))
-Profile.print()
+Solver.solveTheThing(copy(puzzle))
+#using Profile
+#@profile Solver.solveTheThing(copy(puzzle))
+#Profile.print()
 
