@@ -82,6 +82,7 @@ class SetPuzzleBtn(QPushButton):
         self.setParent(parent)
         self.setObjectName(objectName)
         self.setText("Lock")
+        self.setFlat(True)
         self.setShortcut("")
         self.clicked.connect(grabPuzzleFrame().toggleLock)
         self._disableMe()
@@ -93,7 +94,14 @@ class SetPuzzleBtn(QPushButton):
         self.setEnabled(True)
 
         self.setStyleSheet(
-            "QPushButton {color : rgb(255,140,0); font-weight: bold;}")
+            """
+            QPushButton#SetPuzzleBtn {
+                color : rgb(255,140,0);
+                border: 1px solid rgb(255,140,0);
+                font-weight: bold;
+                font-size: 12px;
+                }
+            """)
         self.setToolTip(
             'Push button to lock the puzzle to be solved')
 
@@ -123,6 +131,7 @@ class SolvePuzzleButton(QPushButton):
         self.setText("Solve")
         self.setShortcut("")
         self.setObjectName("solveBtn")
+        self.setFlat(True)
         self._disableMe()
         btnFont = QFont()
         self.setFont(btnFont)

@@ -79,21 +79,21 @@ class PuzzleFrame(QFrame):
         self.setParent(parent)
         # self.setGeometry(QtCore.QRect(10, 130, 911, 691))
 
-        self.setAutoFillBackground(True)
-        self.setFrameShape(QFrame.Shape.StyledPanel)
-        self.setFrameShadow(QFrame.Shadow.Plain)
+        self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
         self.setLineWidth(3)
         self.setObjectName("puzzleFrame")
+        self.setContentsMargins(0, 0, 0, 0)
+        
 
-        self.setSizePolicy(
-            QSizePolicy(
-                QSizePolicy.Policy.MinimumExpanding,
-                QSizePolicy.Policy.MinimumExpanding)
-        )
+        #self.setSizePolicy(
+        #    QSizePolicy(
+        #        QSizePolicy.Policy.MinimumExpanding,
+        #        QSizePolicy.Policy.MinimumExpanding)
+        #)
 
         self.puzzleLayout = QGridLayout()
         self.puzzleLayout.setObjectName("puzzleLayout")
-        self.puzzleLayout.setSpacing(1)
+        self.puzzleLayout.setSpacing(3)
         self.puzzleLayout.setContentsMargins(0, 0, 0, 0)
 
         mainPanelLayout = grabWidget(QVBoxLayout, 'mainPanelLayout')
@@ -317,17 +317,16 @@ class PuzzleFrame(QFrame):
 
 class PuzzleSquare(QLineEdit):
 
-    @cached_property
-    def _sizePolicy(self):
+    #def _sizePolicy(self):
         # Set the size policy so constant across all
-        sizePolicy = QSizePolicy(
-            QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Expanding)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHorizontalStretch(0)
+        #sizePolicy = QSizePolicy(
+        #    QSizePolicy.Policy.Expanding,
+        #    QSizePolicy.Policy.Expanding)
+        #sizePolicy.setVerticalStretch(1)
+        #sizePolicy.setHorizontalStretch(1)
 
-        sizePolicy.setHeightForWidth(False)
-        return sizePolicy
+        #sizePolicy.setHeightForWidth(False)
+        #return sizePolicy
 
     @property
     def squareType(self):
@@ -389,7 +388,7 @@ class PuzzleSquare(QLineEdit):
 
         self.setObjectName(objectName)
         self.setParent(parent)
-        self.setSizePolicy(self.sizePolicy())
+        #self.setSizePolicy(self.sizePolicy())
         self.setCursor(QCursor(Qt.CursorShape.IBeamCursor))
         self.setAcceptDrops(True)
         self.setInputMethodHints(Qt.InputMethodHint.ImhDigitsOnly)
@@ -397,6 +396,7 @@ class PuzzleSquare(QLineEdit):
         self.setText("")
         self.setMaxLength(1)
         self.setFrame(True)
+        
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setDragEnabled(True)
         self.setPlaceholderText("")

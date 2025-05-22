@@ -1,8 +1,9 @@
 
-from PyQt6.QtWidgets import QWidget, QMainWindow, QSizePolicy, QLabel, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QMainWindow, QSizePolicy, QLabel, QPushButton, QHBoxLayout, QSplitter
 from PyQt6.QtCore import Qt, QMetaObject
 from PyQt6.QtGui import QIcon, QPixmap, QGuiApplication
 from .uiMainPanelComponents import UiMainPanel
+from .uiSidebarComponents import UiSidebar
 from .uiStatusBarComponents import PuzzleInfoLabel
 from .uiMenuComponents import MenuBar
 from .uiHelpers import grabWidget, grabPuzzleFrame
@@ -55,28 +56,32 @@ class AppMainWindow(QMainWindow):
         self.centralWidget.setObjectName("centralWidget")
         self.setCentralWidget(self.centralWidget)
 
-        self.masterAppLayout = QHBoxLayout()
-        self.masterAppLayout.setObjectName('masterAppLayout')
-        self.centralWidget.setLayout(self.masterAppLayout)
-
+        self.layout = QHBoxLayout(self.centralWidget)
+        self.layout.setObjectName('mainWindowLayout')
+        #self.centralWidget.setLayout(self.splitter)
         self.setStyleSheet("QWidget {font-family: 'Segoe ui';}")
-
-        '''
-        theSizePolicy = QSizePolicy(
-            QSizePolicy.Policy.Expanding,
-            QSizePolicy.Policy.Expanding)
-        theSizePolicy.setVerticalStretch(0)
-        theSizePolicy.setHorizontalStretch(0)
-        theSizePolicy.setHeightForWidth(False)
-        self.setSizePolicy(theSizePolicy)
-        '''
-
+        
+        #self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        
     def setupUi(self):
 
         uiLogger.debug('Entered AppMainWindow setup')
+        self.uiSidebarPanel = UiSidebar(self)
         self.uiMainPanel = UiMainPanel(self)
-        self.masterAppLayout.addWidget(self.uiMainPanel)
-
+        
+        self.splitter = QSplitter()
+        self.splitter.setObjectName('masterSplitter')
+        self.splitter.setOrientation(Qt.Orientation.Horizontal)
+        self.splitter.setChildrenCollapsible(True)
+        self.splitter.setHandleWidth(8)
+        
+        self.splitter.addWidget(self.uiSidebarPanel)
+        self.splitter.addWidget(self.uiMainPanel)
+        
+        self.layout.addWidget(self.splitter)
+        self.layout.setStretch(0, 1)
+        self.layout.setSpacing(0)
+        
         self.uiStatusBar = self.statusBar()
         self.uiStatusBar.setObjectName('uiStatusBar')
         self.uiStatusBar.showMessage('Starting Up')

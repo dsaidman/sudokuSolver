@@ -10,9 +10,10 @@ as a single instance across multiple other modules. The module contains:
 Returns:
     None: no return values
 """
-_lang = "julia"
+
 import os
 from functools import cached_property
+_lang = "julia"  # default language
 if _lang == "lua":
     import lupa.luajit21 as lupa
     from lupa import LuaRuntime
