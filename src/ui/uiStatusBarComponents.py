@@ -14,12 +14,7 @@ class PuzzleInfoLabel(QLabel):
 
         self.setParent(parent)
         self.setObjectName(objectName)
-        puzzleLabelFont = QFont()
-        puzzleLabelFont.setBold(False)
-        puzzleLabelFont.setItalic(False)
-        puzzleLabelFont.setFamily("Lucida Console")
         self.setText("0 OF 17 Squares Set")
-        self.setFont(puzzleLabelFont)
         self.setAlignment(Qt.AlignmentFlag.AlignRight |
                           Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
         self.setProperty("state", "NotSolvable")
@@ -52,6 +47,8 @@ class PuzzleInfoLabel(QLabel):
     def reset(self):
         self.setProperty("state", "NotSolvable")
         self.setText("0 OF 17 Squares Set")
+        self.style().polish(self)
+        self.style().unpolish(self)
 
     def update(self):
 

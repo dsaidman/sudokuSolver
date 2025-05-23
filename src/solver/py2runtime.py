@@ -13,12 +13,7 @@ Returns:
 
 import os
 from functools import cached_property
-_lang = "julia"  # default language
-if _lang == "lua":
-    import lupa.luajit21 as lupa
-    from lupa import LuaRuntime
-elif _lang == "julia":
-    from juliacall import Main as jl
+from ui.uiHelpers import grabMainWindow
 import logging
 uiLogger = logging.getLogger('uiLogger')
 
@@ -26,20 +21,43 @@ class Py2Runtime:
 
     @property
     def runtime(self):
-        return self._runtime
+        return self._runtime[self.lang]
 
     @cached_property
     def defintions(self):
-        return self._definitionsModule
+        return self._definitionsModule[self.lang]
 
     @cached_property
     def solver(self):
-        return self._solverModule
+        return self._solverModule[self.lang]
 
-    def __init__(self, lang=_lang):
+    def __init__(self, lang=None):
         """Constructor method initializes runtime and modules."""
         self.lang = lang
-        if lang == "lua":
+        #uiLogger.debug(f'Initializing Py2Runtime with lang: {self.lang}')
+        self._runtime = {}
+        self._definitionsModule = {}
+        self._solverModule = {}
+        self._version = {}
+        
+    def getLang(self):
+        return self.lang
+    
+    def setLang(self, lang):
+        """
+        Set the runtime language.
+
+        Args:
+            lang (str): The language to set the runtime to. Can be "lua" or "julia".
+        """
+        if lang.lower() not in ["luajit", "julia"]:
+            raise ValueError(f"Invalid language: {lang}. Must be 'luajit' or 'julia'.")
+        self.lang = lang.lower()
+        uiLogger.info(f"Using {self.lang} runtime")
+        
+        if self.lang == "luajit" and self.lang not in self._runtime:
+            import lupa.luajit21 as lupa
+            from lupa import LuaRuntime
             
             # Get the lua runtime from lupa. Try to use luajit if possible
             lua = LuaRuntime()
@@ -47,39 +65,39 @@ class Py2Runtime:
                 f"Using {
                     lua.lua_implementation} (compiled with {
                     lupa.LUA_VERSION})")
-            self._version = lupa.LUA_VERSION
+            self._version['luajit'] = lupa.LUA_VERSION
             
             lua.execute("package.path = '../solver/?.lua;' .. package.path")
             lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
 
             uiLogger.debug('Initializing lua runtime...')
-            self._runtime = lua
+            self._runtime['luajit'] = lua
 
             uiLogger.debug('\tImporting defintions.lua as table object...')
             
-            self._definitionsModule = lua.require('src.solver.definitions')[0]
+            self._definitionsModule['luajit'] = lua.require('src.solver.definitions')[0]
 
             uiLogger.debug('\tImporting solver.lua as table object...')
-            self._solverModule = lua.require('src.solver.solver')[0]
+            self._solverModule['luajit'] = lua.require('src.solver.solver')[0]
 
             uiLogger.info('\tLua Runtime initialized')
-        elif lang == "julia":
+        elif lang == "julia" and self.lang not in self._runtime:
+            from juliacall import Main as jl
             uiLogger.info(f"Using julia {jl.VERSION}")
-            self._version = jl.VERSION
+            self._version['julia'] = jl.VERSION
             
             uiLogger.debug('Initializing julia runtime...')
-            self._runtime = jl
+            self._runtime['julia'] = jl
             
             uiLogger.debug('\tImporting defintions.jl...')
-            jl.include("solver\\Solver.jl")
-            self._definitionsModule = jl.Solver.Definitions
+            
+            jl.include("src\\solver\\Solver.jl")
+            self._definitionsModule['julia'] = jl.Solver.Definitions
             
             uiLogger.debug('\tImporting defintions.jl...')
-            jl.include("solver\\Solver.jl")
-            self._solverModule = jl.Solver
+            self._solverModule['julia'] = jl.Solver
             
             uiLogger.info('\tJulia Runtime initialized')
-
 
     @staticmethod
     def relPath2ImportPath(relPath):
@@ -107,4 +125,4 @@ class Py2Runtime:
 
 # Evaluate the Py2Lua object inside the module so it can be imported
 # directly without making new class instances
-RuntimePy = Py2Runtime(_lang)
+RuntimePy = Py2Runtime()

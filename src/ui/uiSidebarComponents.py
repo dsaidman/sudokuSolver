@@ -1,5 +1,8 @@
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QPushButton
 from PyQt6.QtCore import Qt
+from .uiHelpers import grabMainWindow
+from solver.py2runtime import RuntimePy as rt
+from solver.definitions import sudokuDefs as defs
 
 
 class UiSidebar(QFrame):
@@ -129,7 +132,11 @@ class UiSidebarButton(QPushButton):
             btn.style().unpolish(btn)
             btn.style().polish(btn)
 
+        defs.setLang(self.text())
+        rt.setLang(self.text())
         self.setProperty("selected", True)
         self.style().unpolish(self)
         self.style().polish(self)
+        grabMainWindow().runtimeLang = self.text()
+        grabMainWindow().uiStatusBar.languageLabel.setText(f'Runtime: {self.text()}')
 

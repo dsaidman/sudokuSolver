@@ -1,11 +1,9 @@
 from functools import cached_property, lru_cache
 import logging
-from solver.py2runtime import _lang
-if _lang == "python":
-    from string import ascii_uppercase 
-    from string import digits
-else:
-    from solver.py2runtime import RuntimePy as rt
+from string import ascii_uppercase 
+from string import digits
+from ui.uiHelpers import grabMainWindow
+from solver.py2runtime import RuntimePy as rt
 uiLogger = logging.getLogger('uiLogger')
 
 class definitions:
@@ -28,7 +26,7 @@ class definitions:
         Returns:
             list: capital let`ters A to I
         """
-        if self.lang == "lua":
+        if self.lang == "luajit":
             return sorted(list(rt.defintions.rowNames.values()))
         elif self.lang == "julia":
             return sorted(list(rt.defintions.rowNames)) 
@@ -44,7 +42,7 @@ class definitions:
             list: capital letters A to I
         """
         # return list(digits[1:10])
-        if self.lang == "lua":
+        if self.lang == "luajit":
             return sorted(list(rt.defintions.colNames.values()))
         elif self.lang == "julia":
             return sorted(list(rt.defintions.columnNames)) 
@@ -60,7 +58,7 @@ class definitions:
         Returns:
             list: cached list of keys
         """
-        if self.lang == "lua":
+        if self.lang == "luajit":
             return sorted(
                 list(
                     rt.defintions.allKeys.values()),
@@ -115,7 +113,7 @@ class definitions:
         Returns:
             list: Unique list of strings of squares that cannot share same value
         """
-        if self.lang == "lua":
+        if self.lang == "luajit":
             return list(rt.defintions['getNeighbors'](squareID))
         elif self.lang == "julia":
             return list(rt.defintions.neighbors[squareID])
@@ -124,11 +122,20 @@ class definitions:
             return
             
     
-    def __init__(self,lang=_lang):
+    def __init__(self):
+        pass
+        #uiLogger.info("Using %s runtime", self.lang)
+        self.lang = None
+    def setLang(self, lang):
+        """
+        Set the language for the SudokuParams instance.
+
+        Args:
+            lang (str): The language to set. Options are "luajit", "julia", or "python".
+        """
         self.lang = lang
-        uiLogger.info("Using %s runtime", self.lang)
         
 
 
 # Return the pre-cached SudokuParams instance to be shared across modules
-sudokuDefs = definitions(_lang)
+sudokuDefs = definitions()

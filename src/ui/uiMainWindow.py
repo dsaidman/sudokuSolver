@@ -6,7 +6,9 @@ from .uiMainPanelComponents import UiMainPanel
 from .uiSidebarComponents import UiSidebar
 from .uiStatusBarComponents import PuzzleInfoLabel
 from .uiMenuComponents import MenuBar
-from .uiHelpers import grabWidget, grabPuzzleFrame
+from solver.py2runtime import RuntimePy as rt
+from solver.definitions import sudokuDefs as defs
+from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow
 from .uiEnums import AppStatusEnum
 from functools import lru_cache
 from math import floor
@@ -26,9 +28,14 @@ class AppMainWindow(QMainWindow):
         self._status = statusVal
         return statusVal
 
-    def __init__(self):
+    def __init__(self,lang="julia"):
+        """Constructor method initializes the main window and its components."""
+        uiLogger.debug('Initializing AppMainWindow')
         super(AppMainWindow, self).__init__()
 
+        self.runtimeLang = lang
+        rt.setLang(self.runtimeLang)
+        defs.setLang(self.runtimeLang)
         uiLogger.debug('Entered AppMainWindow')
         self.setObjectName("MainWindow")
         self.setWindowModality(Qt.WindowModality.NonModal)
@@ -60,9 +67,7 @@ class AppMainWindow(QMainWindow):
         self.layout.setObjectName('mainWindowLayout')
         #self.centralWidget.setLayout(self.splitter)
         self.setStyleSheet("QWidget {font-family: 'Segoe ui';}")
-        
-        #self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
-        
+
     def setupUi(self):
 
         uiLogger.debug('Entered AppMainWindow setup')
@@ -85,12 +90,19 @@ class AppMainWindow(QMainWindow):
         self.uiStatusBar = self.statusBar()
         self.uiStatusBar.setObjectName('uiStatusBar')
         self.uiStatusBar.showMessage('Starting Up')
+        
+        self.uiStatusBar.languageLabel = QLabel(self.uiStatusBar)
+        self.uiStatusBar.languageLabel.setObjectName('languageLabel')
+        self.uiStatusBar.languageLabel.setText(f'Runtime: {grabMainWindow().runtimeLang}')
+        self.uiStatusBar.addPermanentWidget(self.uiStatusBar.languageLabel)
+        
         self.uiStatusBar.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar)
         self.uiStatusBar.addPermanentWidget(self.uiStatusBar.puzzleInfoLabel)
-
+        
         self.menuBar = MenuBar(self)
 
         QMetaObject.connectSlotsByName(self)
+        self.uiStatusBar.showMessage('Ready')
 
     def _resetMainWindow(self):
         self.uiStatusBar.puzzleInfoLabel.reset()
