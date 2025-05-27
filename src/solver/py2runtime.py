@@ -11,7 +11,7 @@ Returns:
     None: no return values
 """
 
-import os
+import os, sys
 import logging
 uiLogger = logging.getLogger('uiLogger')
 
@@ -125,6 +125,17 @@ class Py2Runtime:
             self._solverModule['julia'] = jl.Solver
 
             uiLogger.info('\tJulia Runtime initialized')
+        elif lang == "python" and self.lang not in self._runtime:
+            import solver.solver as pySolver
+            #uiLogger.info(f"Using python {jl.VERSION}")
+            self._version['python'] = sys.version
+
+            self._runtime['python'] = []
+
+
+            self._definitionsModule['python'] = pySolver
+
+            self._solverModule['python'] = pySolver.solve
 
     @staticmethod
     def relPath2ImportPath(relPath):
