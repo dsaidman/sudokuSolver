@@ -48,7 +48,7 @@ class Py2Runtime:
         Args:
             lang (str): The language to set the runtime to. Can be "lua" or "julia".
         """
-        if lang.lower() not in ["luajit", "lua", "julia"]:
+        if lang.lower() not in ["luajit", "lua", "julia","python"]:
             raise ValueError(
                 f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
         self.lang = lang.lower()

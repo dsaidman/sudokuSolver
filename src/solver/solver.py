@@ -19,7 +19,7 @@ def _getCellNeighbors(sq):
 
 # All neigbhors of a
 def _neighborsOf(sq):
-    return list((set(_getRowNeighbors(sq)) | set(_getColumnNeighbors(sq)) | set(_getCellNeighbors(sq))) -set(sq)).sort()
+    return sorted(list((set(_getRowNeighbors(sq)) | set(_getColumnNeighbors(sq)) | set(_getCellNeighbors(sq))) -set(sq)))
 
 neighbors = {sq : _neighborsOf(sq) for sq in squares}
 
@@ -65,13 +65,15 @@ def _getNextEntryPoint(pzl):
     return nextSquareChoiceKey
 
 def _eliminationPass(pzl):
+    
+    
 	didChange = True
 	while didChange and not isPuzzleComplete(pzl):
 		solvedSquares = [k for k,v in pzl.items() if len(v)==1]
 		didChange = False
 		for solvedSquare in solvedSquares:
 			solvedValue     = pzl[solvedSquare]
-			solvedNeighbors = filter(lambda nsq: nsq is not solvedSquare, neighbors[solvedSquare])
+			solvedNeighbors = [nsq for nsq in neighbors[solvedSquare] if nsq is not solvedSquare]
             # Remove solvedValue from all neighbors 
 			for nsq in solvedNeighbors:
 				if len(pzl[nsq])>1 and solvedValue in pzl[nsq]:

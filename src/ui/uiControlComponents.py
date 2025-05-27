@@ -191,9 +191,16 @@ class SolvePuzzleButton(QPushButton):
                 for k, v in puzzleFrame.asDict().items():
                     puzzleArg[k] = v
                 solveFun = rt.solver.solveTheThing
+            elif rt.lang == "python":
 
+                puzzleArg = rt.defintions.puzzle0.copy()
+                for k, v in puzzleFrame.asDict().items():
+                    puzzleArg[k] = v
+                    
+                solveFun = rt.solver
             # Everything is ready to call
             tStart = tictoc()
+            
             result = solveFun(puzzleArg)
             tDuration_ms = (tictoc() - tStart) * 1000
             print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
