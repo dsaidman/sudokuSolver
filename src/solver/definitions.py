@@ -4,6 +4,7 @@ from string import ascii_uppercase
 from string import digits
 from ui.uiHelpers import grabMainWindow
 from solver.py2runtime import RuntimePy as rt
+import solver as pySolver
 uiLogger = logging.getLogger('uiLogger')
 
 
@@ -27,12 +28,12 @@ class definitions:
         Returns:
             list: capital let`ters A to I
         """
-        if self.lang == "luajit":
+        if self.lang == "luajit" or self.lang == "lua":
             return sorted(list(rt.defintions.rowNames.values()))
         elif self.lang == "julia":
             return sorted(list(rt.defintions.rowNames))
         elif self.lang == "python":
-            return sorted(list(ascii_uppercase[0:9]))
+            return sorted(pySolver.rowNames)
 
     @cached_property
     def columns(self):
@@ -43,12 +44,12 @@ class definitions:
             list: capital letters A to I
         """
         # return list(digits[1:10])
-        if self.lang == "luajit":
+        if self.lang == "luajit" or self.lang == "lua":
             return sorted(list(rt.defintions.colNames.values()))
         elif self.lang == "julia":
             return sorted(list(rt.defintions.columnNames))
         elif self.lang == "python":
-            return list(digits[1:])
+            return sorted(pySolver.columnNames)
 
     @cached_property
     def squares(self):
@@ -58,7 +59,7 @@ class definitions:
         Returns:
             list: cached list of keys
         """
-        if self.lang == "luajit":
+        if self.lang == "luajit" or self.lang == "lua":
             return sorted(
                 list(
                     rt.defintions.allKeys.values()),
@@ -69,8 +70,8 @@ class definitions:
                     rt.defintions.squares),
                 reverse=False)
         elif self.lang == "python":
-            return sorted(
-                list([row + col for row in self.rows for col in self.columns]))
+            return sorted(pySolver.squares)
+            
 
     def nextSquare(self, currentKey):
         """
@@ -119,8 +120,7 @@ class definitions:
         elif self.lang == "julia":
             return list(rt.defintions.neighbors[squareID])
         elif self.lang == "python":
-            print("not yet implimented")
-            return
+            return pySolver.neighbors[squareID]
 
     def __init__(self):
         pass
