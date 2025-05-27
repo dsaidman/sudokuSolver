@@ -1,5 +1,7 @@
+
+
 [project]
-name = "SudokuSolver"
+name = "sudokuSolver"
 version = "v0.0.1"
 authors = [ { name="David Saidman" } ]
 description = "Using sudoku as a sample problem to learn the essential parts of some new languages and tools"
