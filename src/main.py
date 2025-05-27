@@ -7,6 +7,7 @@ import sys
 import logging
 uiLogger = logging.getLogger('uiLogger')
 
+
 def main():
     # temporary
     FORMAT = '%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s'
@@ -25,6 +26,7 @@ def main():
     MainWindow.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

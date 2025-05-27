@@ -10,6 +10,7 @@ class UiSidebar(QFrame):
     Sidebar component for the Sudoku Solver application.
     This class creates a sidebar with buttons for different solver options.
     """
+
     def __init__(self, parent=None):
         """
         Initializes the sidebar with a specified parent widget.
@@ -25,11 +26,12 @@ class UiSidebar(QFrame):
         # Example layout and styling
         layout = QVBoxLayout(self)
         layout.setObjectName('uiSidebarLayout')
-        layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignRight)
+        layout.setAlignment(Qt.AlignmentFlag.AlignLeft |
+                            Qt.AlignmentFlag.AlignRight)
         layout.setSpacing(3)
         self.setLayout(layout)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
-        
+
         self.setLineWidth(1)
         self.setStyleSheet("""
                             QPushButton {
@@ -65,37 +67,37 @@ class UiSidebar(QFrame):
     def initUi(self):
         # Initialize sidebar components here
         # For example, you can add buttons, labels, etc.
-        
+
         self.luajitBtn = UiSidebarButton("LuaJit", self)
         self.luajitBtn.setObjectName("luajitBtn")
         self.luajitBtn.setEnabled(True)
         self.luajitBtn.setProperty("selected", True)
         self.luajitBtn.setToolTip("Using lupa")
-        
+
         self.luaBtn = UiSidebarButton("Lua", self)
         self.luaBtn.setObjectName("luaBtn")
         self.luaBtn.setEnabled(True)
         self.luaBtn.setProperty("selected", False)
         self.luaBtn.setToolTip("Using lupa")
-        
-        self.juliaBtn  = UiSidebarButton("julia", self)
+
+        self.juliaBtn = UiSidebarButton("julia", self)
         self.juliaBtn.setObjectName("juliaBtn")
-        self.juliaBtn.setEnabled(True) 
+        self.juliaBtn.setEnabled(True)
         self.juliaBtn.setProperty("selected", False)
         self.juliaBtn.setToolTip("Using juliaCall")
-        
+
         self.pythonBtn = UiSidebarButton("python", self)
         self.pythonBtn.setObjectName("pythonBtn")
         self.pythonBtn.setEnabled(False)
         self.pythonBtn.setProperty("selected", False)
         self.pythonBtn.setToolTip("Python sovler not yet implemented")
-        
+
         self.cythonBtn = UiSidebarButton("cython", self)
         self.cythonBtn.setObjectName("cythonBtn")
         self.cythonBtn.setEnabled(False)
         self.cythonBtn.setProperty("selected", False)
         self.cythonBtn.setToolTip("cython sovler not yet implemented")
-        
+
         layout = self.layout()
         layout.addStretch()
         layout.addWidget(self.luajitBtn)
@@ -104,30 +106,42 @@ class UiSidebar(QFrame):
         layout.addWidget(self.pythonBtn)
         layout.addWidget(self.cythonBtn)
         layout.addStretch()
-        
-        for btn in [self.luajitBtn, self.luaBtn, self.juliaBtn, self.pythonBtn, self.cythonBtn]:
+
+        for btn in [
+                self.luajitBtn,
+                self.luaBtn,
+                self.juliaBtn,
+                self.pythonBtn,
+                self.cythonBtn]:
             btn.clicked.connect(btn.onButtonClicked)
-        
+
+
 class UiSidebarButton(QPushButton):
     """
     Custom button class for the sidebar.
     This class can be extended to add more functionality to the sidebar buttons.
     """
-    def __init__(self, text=None,parent=None):
-        super().__init__(text,parent)
+
+    def __init__(self, text=None, parent=None):
+        super().__init__(text, parent)
         self.setFlat(True)
         self.setText(text)
         self.setParent(parent)
         self.setContentsMargins(0, 0, 0, 0)
-        
+
     def onButtonClicked(self, button):
         """
         Set the selected button in the sidebar.
         :param button: The button to be selected.
         """
-        
+
         parent = self.parent()
-        for btn in [parent.luajitBtn, parent.luaBtn, parent.juliaBtn, parent.pythonBtn, parent.cythonBtn]:
+        for btn in [
+                parent.luajitBtn,
+                parent.luaBtn,
+                parent.juliaBtn,
+                parent.pythonBtn,
+                parent.cythonBtn]:
             btn.setProperty("selected", False)
             btn.style().unpolish(btn)
             btn.style().polish(btn)
@@ -137,9 +151,12 @@ class UiSidebarButton(QPushButton):
         self.setProperty("selected", True)
         self.style().unpolish(self)
         self.style().polish(self)
-        
+
         grabMainWindow().runtimeLang = self.text()
         languageLabel = grabMainWindow().uiStatusBar.statusWidget.languageLabel
         languageLabel.setText(f'{self.text()}       ')
         languageLabel.setStyleSheet(
-            f"QLabel#languageLabel {{ color: {self.palette().color(self.foregroundRole()).name()}; font-weight: bold; }}")
+            f"QLabel#languageLabel {
+                color: {
+                    self.palette().color(
+                        self.foregroundRole()).name()}; font-weight: bold; } ")

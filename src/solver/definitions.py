@@ -1,10 +1,11 @@
 from functools import cached_property, lru_cache
 import logging
-from string import ascii_uppercase 
+from string import ascii_uppercase
 from string import digits
 from ui.uiHelpers import grabMainWindow
 from solver.py2runtime import RuntimePy as rt
 uiLogger = logging.getLogger('uiLogger')
+
 
 class definitions:
     """
@@ -29,7 +30,7 @@ class definitions:
         if self.lang == "luajit":
             return sorted(list(rt.defintions.rowNames.values()))
         elif self.lang == "julia":
-            return sorted(list(rt.defintions.rowNames)) 
+            return sorted(list(rt.defintions.rowNames))
         elif self.lang == "python":
             return sorted(list(ascii_uppercase[0:9]))
 
@@ -45,10 +46,9 @@ class definitions:
         if self.lang == "luajit":
             return sorted(list(rt.defintions.colNames.values()))
         elif self.lang == "julia":
-            return sorted(list(rt.defintions.columnNames)) 
+            return sorted(list(rt.defintions.columnNames))
         elif self.lang == "python":
             return list(digits[1:])
-
 
     @cached_property
     def squares(self):
@@ -62,14 +62,15 @@ class definitions:
             return sorted(
                 list(
                     rt.defintions.allKeys.values()),
-                    reverse=False)
+                reverse=False)
         elif self.lang == "julia":
             return sorted(
                 list(
                     rt.defintions.squares),
-                    reverse=False)
+                reverse=False)
         elif self.lang == "python":
-            return sorted(list([row+col for row in self.rows for col in self.columns]))
+            return sorted(
+                list([row + col for row in self.rows for col in self.columns]))
 
     def nextSquare(self, currentKey):
         """
@@ -120,12 +121,12 @@ class definitions:
         elif self.lang == "python":
             print("not yet implimented")
             return
-            
-    
+
     def __init__(self):
         pass
-        #uiLogger.info("Using %s runtime", self.lang)
+        # uiLogger.info("Using %s runtime", self.lang)
         self.lang = None
+
     def setLang(self, lang):
         """
         Set the language for the SudokuParams instance.
@@ -134,7 +135,6 @@ class definitions:
             lang (str): The language to set. Options are "luajit", "julia", or "python".
         """
         self.lang = lang
-        
 
 
 # Return the pre-cached SudokuParams instance to be shared across modules

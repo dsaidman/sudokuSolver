@@ -18,7 +18,7 @@ class UiPanel(QFrame):
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
         self.setContentsMargins(0, 0, 0, 0)
         self.setLineWidth(1)
-        
+
         self.setStyleSheet(
             """
             QPushButton {
@@ -35,11 +35,11 @@ class UiPanel(QFrame):
                 font-weight: bold;
                 }
             QPushButton[completed="true"] {
-                color: rgb(0,255,0); 
+                color: rgb(0,255,0);
                 font-weight: bold;
                 }
             """)
-        
+
         self.setupUiPanel()
 
     def setupUiPanel(self):
@@ -72,15 +72,16 @@ class UiPanel(QFrame):
         self.setPuzzleBtn._disableMe()
         self.setPuzzleBtn.setProperty("completed", True)
         self.setPuzzleBtn.setToolTip("Puzzle is complete! Nothing to do here")
-        
+
         self.solvePuzzleBtn._disableMe()
         self.solvePuzzleBtn.setProperty("completed", True)
         self.solvePuzzleBtn.setText('SOLVED')
 
-
         grabPuzzleFrame().onSquareChangeEvent()
-        grabStatusBar().statusWidget.puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
+        grabStatusBar().statusWidget.puzzleInfoLabel.setText(
+            '81 of 81 SQUARES SET: SOLVED')
         grabStatusBar().statusWidget.puzzleInfoLabel.update()
+
 
 class InfoDisplayLabel(QLabel):
     def __init__(self, parent, objectName="infoDisplayLabel"):
@@ -90,7 +91,8 @@ class InfoDisplayLabel(QLabel):
         self.setParent(parent)
         self.setObjectName(objectName)
         self.setText("")
-        self.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter |
+                          Qt.AlignmentFlag.AlignVCenter)
         self.setEnabled(False)
 
     def _resetAction(self):
@@ -106,7 +108,7 @@ class SetPuzzleBtn(QPushButton):
         self.setParent(parent)
         self.setObjectName(objectName)
         self.setText("Lock")
-        #self.setFlat(True)
+        # self.setFlat(True)
         self.clicked.connect(grabPuzzleFrame().toggleLock)
         self._disableMe()
         self.setProperty('completed', False)
@@ -118,7 +120,7 @@ class SetPuzzleBtn(QPushButton):
             self.setToolTip(
                 'Puzzle is valid, click to lock the puzzle when ready')
         else:
-             self.setToolTip(
+            self.setToolTip(
                 'Im locked and puzzle is set. Press solve to solve the puzzle')
         self.style().polish(self)
         self.style().unpolish(self)
@@ -148,7 +150,7 @@ class SolvePuzzleButton(QPushButton):
         self.setShortcut("")
         self.setObjectName("solveBtn")
         self.setProperty("completed", False)
-        #self.setFlat(True)
+        # self.setFlat(True)
         self._disableMe()
         self.clicked.connect(self.solveIt)
         self.clicked.connect(self._disableMe)
@@ -178,17 +180,17 @@ class SolvePuzzleButton(QPushButton):
             return False
         else:
             if rt.lang == "luajit" or rt.lang == "lua":
-                
+
                 puzzleArg = rt.dict2Table(puzzleFrame.asDict())
                 solveFun = rt.solver['solve']
             elif rt.lang == "julia":
-                #puzzleArg = rt.runtime.convert( 
-                #                                      rt.runtime.Dict[rt.runtime.String,rt.runtime.String], 
-                #                                      puzzleFrame.asDict()) # Ensure typed correctly
+                # puzzleArg = rt.runtime.convert(
+                #                                      rt.runtime.Dict[rt.runtime.String,rt.runtime.String],
+                # puzzleFrame.asDict()) # Ensure typed correctly
                 puzzleArg = rt.runtime.copy(rt.defintions.puzzle0)
-                for k,v in  puzzleFrame.asDict().items():
+                for k, v in puzzleFrame.asDict().items():
                     puzzleArg[k] = v
-                solveFun  = rt.solver.solveTheThing
+                solveFun = rt.solver.solveTheThing
 
             # Everything is ready to call
             tStart = tictoc()
@@ -211,9 +213,9 @@ class SolvePuzzleButton(QPushButton):
                 numOperations = runtimeInfo['numOperations']
             else:
                 difficultyEnum = "UNSET"
-                numRecursions  = "UNSET"
-                numOperations  = "UNSET"
-                
+                numRecursions = "UNSET"
+                numOperations = "UNSET"
+
             displayLabel = grabWidget(QLabel, 'infoDisplayLabel')
 
             displayText = f'Completed in {
@@ -222,12 +224,12 @@ class SolvePuzzleButton(QPushButton):
             displayLabel.setText(displayText)
             displayLabel.setStyleSheet(
                 """
-                font-size: 12px; 
-                font-weight: bold; 
+                font-size: 12px;
+                font-weight: bold;
                 color: rgb(0, 255, 0);
                 background-color: rgba(0, 0, 0, 0.5);
                 """)
-                
+
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
 

@@ -15,6 +15,7 @@ import os
 import logging
 uiLogger = logging.getLogger('uiLogger')
 
+
 class Py2Runtime:
 
     @property
@@ -36,10 +37,10 @@ class Py2Runtime:
         self._definitionsModule = {}
         self._solverModule = {}
         self._version = {}
-        
+
     def getLang(self):
         return self.lang
-    
+
     def setLang(self, lang):
         """
         Set the runtime language.
@@ -47,15 +48,16 @@ class Py2Runtime:
         Args:
             lang (str): The language to set the runtime to. Can be "lua" or "julia".
         """
-        if lang.lower() not in ["luajit","lua","julia"]:
-            raise ValueError(f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
+        if lang.lower() not in ["luajit", "lua", "julia"]:
+            raise ValueError(
+                f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
         self.lang = lang.lower()
         uiLogger.info(f"Using {self.lang} runtime")
-        
+
         if self.lang == "luajit" and self.lang not in self._runtime:
             import lupa.luajit21 as lupa
             from lupa import LuaRuntime
-            
+
             # Get the lua runtime from lupa. Try to use luajit if possible
             lua = LuaRuntime()
             uiLogger.info(
@@ -63,7 +65,7 @@ class Py2Runtime:
                     lua.lua_implementation} (compiled with {
                     lupa.LUA_VERSION})")
             self._version['luajit'] = lupa.LUA_VERSION
-            
+
             lua.execute("package.path = '../solver/?.lua;' .. package.path")
             lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
 
@@ -71,8 +73,9 @@ class Py2Runtime:
             self._runtime['luajit'] = lua
 
             uiLogger.debug('\tImporting defintions.lua as table object...')
-            
-            self._definitionsModule['luajit'] = lua.require('src.solver.definitions')[0]
+
+            self._definitionsModule['luajit'] = lua.require(
+                'src.solver.definitions')[0]
 
             uiLogger.debug('\tImporting solver.lua as table object...')
             self._solverModule['luajit'] = lua.require('src.solver.solver')[0]
@@ -81,7 +84,7 @@ class Py2Runtime:
         elif self.lang == "lua" and self.lang not in self._runtime:
             import lupa.lua54 as lupa
             from lupa import LuaRuntime
-            
+
             # Get the lua runtime from lupa. Try to use luajit if possible
             lua = LuaRuntime()
             uiLogger.info(
@@ -89,7 +92,7 @@ class Py2Runtime:
                     lua.lua_implementation} (compiled with {
                     lupa.LUA_VERSION})")
             self._version['lua'] = lupa.LUA_VERSION
-            
+
             lua.execute("package.path = '../solver/?.lua;' .. package.path")
             lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
 
@@ -97,8 +100,9 @@ class Py2Runtime:
             self._runtime['lua'] = lua
 
             uiLogger.debug('\tImporting defintions.lua as table object...')
-            
-            self._definitionsModule['lua'] = lua.require('src.solver.definitions')[0]
+
+            self._definitionsModule['lua'] = lua.require(
+                'src.solver.definitions')[0]
 
             uiLogger.debug('\tImporting solver.lua as table object...')
             self._solverModule['lua'] = lua.require('src.solver.solver')[0]
@@ -108,18 +112,18 @@ class Py2Runtime:
             from juliacall import Main as jl
             uiLogger.info(f"Using julia {jl.VERSION}")
             self._version['julia'] = jl.VERSION
-            
+
             uiLogger.debug('Initializing julia runtime...')
             self._runtime['julia'] = jl
-            
+
             uiLogger.debug('\tImporting defintions.jl...')
-            
+
             jl.include("src\\solver\\Solver.jl")
             self._definitionsModule['julia'] = jl.Solver.Definitions
-            
+
             uiLogger.debug('\tImporting defintions.jl...')
             self._solverModule['julia'] = jl.Solver
-            
+
             uiLogger.info('\tJulia Runtime initialized')
 
     @staticmethod

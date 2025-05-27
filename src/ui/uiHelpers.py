@@ -4,6 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFrame
 
+
 def grabWidget(widgetType, widgetName):
     return grabMainWindow().findChildren(widgetType, widgetName)[0]
 

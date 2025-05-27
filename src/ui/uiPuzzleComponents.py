@@ -14,6 +14,7 @@ from functools import cached_property
 sys.path.append(os.path.abspath('..'))
 uiLogger = logging.getLogger('uiLogger')
 
+
 class PuzzleFrame(QFrame):
     """
     A QtWidgets QFrame superclass that contains all the widgets and methods of the sudoku puzzle and its squares.
@@ -83,13 +84,12 @@ class PuzzleFrame(QFrame):
         self.setLineWidth(3)
         self.setObjectName("puzzleFrame")
         self.setContentsMargins(0, 0, 0, 0)
-        
 
-        #self.setSizePolicy(
+        # self.setSizePolicy(
         #    QSizePolicy(
         #        QSizePolicy.Policy.MinimumExpanding,
         #        QSizePolicy.Policy.MinimumExpanding)
-        #)
+        # )
 
         self.puzzleLayout = QGridLayout()
         self.puzzleLayout.setObjectName("puzzleLayout")
@@ -196,7 +196,7 @@ class PuzzleFrame(QFrame):
         squares = {}
         for squareKey in sudokuDefs.squares:
             squares[squareKey] = PuzzleSquare(self, squareKey)
-            
+
             self.puzzleLayout.addWidget(
                 squares[squareKey],
                 3 + sudokuDefs.rows.index(squareKey[0]) +
@@ -377,7 +377,7 @@ class PuzzleSquare(QLineEdit):
 
         self.setObjectName(objectName)
         self.setParent(parent)
-        #self.setSizePolicy(self.sizePolicy())
+        # self.setSizePolicy(self.sizePolicy())
         self.setCursor(QCursor(Qt.CursorShape.IBeamCursor))
         self.setAcceptDrops(True)
         self.setInputMethodHints(Qt.InputMethodHint.ImhDigitsOnly)
@@ -385,7 +385,7 @@ class PuzzleSquare(QLineEdit):
         self.setText("")
         self.setMaxLength(1)
         self.setFrame(True)
-        
+
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setDragEnabled(True)
         self.setPlaceholderText("")

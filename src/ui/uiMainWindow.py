@@ -12,10 +12,12 @@ from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow
 from .uiEnums import AppStatusEnum
 from functools import lru_cache
 from math import floor
-import inspect, logging
+import inspect
+import logging
 import os
 __all__ = ['AppMainWindow']
 uiLogger = logging.getLogger('uiLogger')
+
 
 class AppMainWindow(QMainWindow):
 
@@ -28,7 +30,7 @@ class AppMainWindow(QMainWindow):
         self._status = statusVal
         return statusVal
 
-    def __init__(self,lang="luajit"):
+    def __init__(self, lang="luajit"):
         """Constructor method initializes the main window and its components."""
         uiLogger.debug('Initializing AppMainWindow')
         super(AppMainWindow, self).__init__()
@@ -65,7 +67,7 @@ class AppMainWindow(QMainWindow):
 
         self.layout = QHBoxLayout(self.centralWidget)
         self.layout.setObjectName('mainWindowLayout')
-        #self.centralWidget.setLayout(self.splitter)
+        # self.centralWidget.setLayout(self.splitter)
         self.setStyleSheet("* {font-family: 'Consolas';}")
 
     def setupUi(self):
@@ -73,26 +75,24 @@ class AppMainWindow(QMainWindow):
         uiLogger.debug('Entered AppMainWindow setup')
         self.uiSidebarPanel = UiSidebar(self)
         self.uiMainPanel = UiMainPanel(self)
-        
+
         self.splitter = QSplitter()
         self.splitter.setObjectName('masterSplitter')
         self.splitter.setOrientation(Qt.Orientation.Horizontal)
         self.splitter.setChildrenCollapsible(True)
         self.splitter.setHandleWidth(8)
-        
+
         self.splitter.addWidget(self.uiSidebarPanel)
         self.splitter.addWidget(self.uiMainPanel)
-        
+
         self.layout.addWidget(self.splitter)
         self.layout.setStretch(0, 1)
         self.layout.setSpacing(0)
-        
-    
+
         self.uiStatusBar = self.statusBar()
         self.uiStatusBar.setObjectName('uiStatusBar')
         self.uiStatusBar.showMessage('Starting Up')
-        
-        
+
         self.uiStatusBar.statusWidget = QWidget(self.uiStatusBar)
         self.uiStatusBar.statusWidget.setObjectName('statusWidget')
         statusWidgetLayout = QHBoxLayout(self.uiStatusBar.statusWidget)
@@ -100,22 +100,27 @@ class AppMainWindow(QMainWindow):
         statusWidgetLayout.setContentsMargins(0, 0, 0, 0)
         statusWidgetLayout.setSpacing(0)
 
-        
-        self.uiStatusBar.statusWidget.languageLabel = QLabel(self.uiStatusBar.statusWidget)
-        self.uiStatusBar.statusWidget.languageLabel.setObjectName('languageLabel')
-        self.uiStatusBar.statusWidget.languageLabel.setText(f'{grabMainWindow().runtimeLang}')
-        self.uiStatusBar.statusWidget.languageLabel.setStyleSheet( """
+        self.uiStatusBar.statusWidget.languageLabel = QLabel(
+            self.uiStatusBar.statusWidget)
+        self.uiStatusBar.statusWidget.languageLabel.setObjectName(
+            'languageLabel')
+        self.uiStatusBar.statusWidget.languageLabel.setText(
+            f'{grabMainWindow().runtimeLang}')
+        self.uiStatusBar.statusWidget.languageLabel.setStyleSheet("""
                                                                     color: magenta;
                                                                     font-weight: bold;
                                                                   """)
-        self.uiStatusBar.statusWidget.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar.statusWidget)
-        
+        self.uiStatusBar.statusWidget.puzzleInfoLabel = PuzzleInfoLabel(
+            self.uiStatusBar.statusWidget)
+
         statusWidgetLayout.addStretch()
-        statusWidgetLayout.addWidget(self.uiStatusBar.statusWidget.languageLabel)
+        statusWidgetLayout.addWidget(
+            self.uiStatusBar.statusWidget.languageLabel)
         statusWidgetLayout.addStretch()
-        statusWidgetLayout.addWidget(self.uiStatusBar.statusWidget.puzzleInfoLabel)
+        statusWidgetLayout.addWidget(
+            self.uiStatusBar.statusWidget.puzzleInfoLabel)
         statusWidgetLayout.addStretch()
-        
+
         self.uiStatusBar.addPermanentWidget(self.uiStatusBar.statusWidget)
         self.menuBar = MenuBar(self)
 

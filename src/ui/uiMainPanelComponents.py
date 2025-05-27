@@ -9,6 +9,7 @@ from solver import definitions as sudokuDefs
 import logging
 uiLogger = logging.getLogger('uiLogger')
 
+
 class UiMainPanel(QFrame):
 
     def __init__(self, parent):
@@ -18,7 +19,7 @@ class UiMainPanel(QFrame):
         self.setObjectName('uiMainPanel')
         self.setParent(parent)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
-        self.setContentsMargins(3,3,3,3)
+        self.setContentsMargins(3, 3, 3, 3)
         self.setLineWidth(1)
         self.setupUi()
 
@@ -29,31 +30,30 @@ class UiMainPanel(QFrame):
         self.mainPanelLayout = QVBoxLayout()
         self.mainPanelLayout.setObjectName('mainPanelLayout')
         self.setLayout(self.mainPanelLayout)
-        
+
         self.uiTitleFrame = UiTitleFrame(self)
-        self.puzzleFrame  = PuzzleFrame(self)
-        self.uiFrame      = UiPanel(self)
+        self.puzzleFrame = PuzzleFrame(self)
+        self.uiFrame = UiPanel(self)
 
         # make master layout widget for nestthig the layouts
         self.mainPanelLayout.setContentsMargins(0, 0, 0, 0)
-        
+
         self.mainPanelLayout.addStretch()
-        
+
         uiLogger.debug('Inserting uiTitleFrame Widget into UiMainPanel')
-        self.mainPanelLayout.insertWidget(0,self.uiTitleFrame)
-        
+        self.mainPanelLayout.insertWidget(0, self.uiTitleFrame)
+
         uiLogger.debug('Inserting PuzzleFrame into UiMainPanel')
-        self.mainPanelLayout.insertWidget(1,self.puzzleFrame)
-        
+        self.mainPanelLayout.insertWidget(1, self.puzzleFrame)
+
         uiLogger.debug('Inserting UiControlFrame into UiMainPanel')
-        self.mainPanelLayout.insertWidget(2,self.uiFrame)
+        self.mainPanelLayout.insertWidget(2, self.uiFrame)
 
         self.mainPanelLayout.addStretch()
-        
 
-        #self.uiTitleFrame.raise_()
-        #self.uiFrame.raise_()
-        #self.puzzleFrame.raise_()
+        # self.uiTitleFrame.raise_()
+        # self.uiFrame.raise_()
+        # self.puzzleFrame.raise_()
 
     def orderTabs(self):
 
@@ -74,7 +74,7 @@ class UiTitleFrame(QFrame):
         self.setObjectName("uiTitleFrame")
         self.setParent(parent)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
-        
+
         self.setContentsMargins(0, 0, 0, 0)
 
         self.titleFrameLayout = QHBoxLayout()
@@ -87,10 +87,12 @@ class UiTitleFrame(QFrame):
         self.titleLabel = QLabel(self)
         self.titleLabel.setObjectName("titleLabel")
         self.titleLabel.setParent(self)
-        #self.titleLabel.setAutoFillBackground(True)
+        # self.titleLabel.setAutoFillBackground(True)
         self.titleLabel.setText("Sudoku Solver")
-        self.titleLabel.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
-        self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.titleLabel.setFrameStyle(
+            QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
+        self.titleLabel.setAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
         self.titleLabel.setStyleSheet("""
                                       QLabel#titleLabel {
                                           background-color: rgb(100,100,100);
