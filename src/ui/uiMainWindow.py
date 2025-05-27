@@ -104,6 +104,10 @@ class AppMainWindow(QMainWindow):
         self.uiStatusBar.statusWidget.languageLabel = QLabel(self.uiStatusBar.statusWidget)
         self.uiStatusBar.statusWidget.languageLabel.setObjectName('languageLabel')
         self.uiStatusBar.statusWidget.languageLabel.setText(f'{grabMainWindow().runtimeLang}')
+        self.uiStatusBar.statusWidget.languageLabel.setStyleSheet( """
+                                                                    color: magenta;
+                                                                    font-weight: bold;
+                                                                  """)
         self.uiStatusBar.statusWidget.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar.statusWidget)
         
         statusWidgetLayout.addStretch()
@@ -113,8 +117,6 @@ class AppMainWindow(QMainWindow):
         statusWidgetLayout.addStretch()
         
         self.uiStatusBar.addPermanentWidget(self.uiStatusBar.statusWidget)
-        self.uiStatusBar.statusWidget.languageLabel.setStyleSheet(
-            f"QLabel#languageLabel {{ color: {self.palette().color(self.foregroundRole()).name()}; font-weight: bold; }}")
         self.menuBar = MenuBar(self)
 
         QMetaObject.connectSlotsByName(self)

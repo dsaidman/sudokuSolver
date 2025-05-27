@@ -44,7 +44,7 @@ class UiSidebar(QFrame):
                                 font-style: italic;
                             }
                             QPushButton#luajitBtn {
-                               color: green;
+                               color: magenta;
                             }
                             QPushButton#luaBtn {
                                color: forestgreen;
