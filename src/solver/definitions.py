@@ -1,7 +1,5 @@
 from functools import cached_property, lru_cache
 import logging
-from string import ascii_uppercase
-from string import digits
 from ui.uiHelpers import grabMainWindow
 from solver.py2runtime import RuntimePy as rt
 import solver as pySolver
