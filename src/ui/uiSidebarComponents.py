@@ -156,7 +156,4 @@ class UiSidebarButton(QPushButton):
         languageLabel = grabMainWindow().uiStatusBar.statusWidget.languageLabel
         languageLabel.setText(f'{self.text()}       ')
         languageLabel.setStyleSheet(
-            f"QLabel#languageLabel {
-                color: {
-                    self.palette().color(
-                        self.foregroundRole()).name()}; font-weight: bold; } ")
+            "QLabel#languageLabel { color:" + self.palette().color(self.foregroundRole()).name()+ "; font-weight: bold; } ")

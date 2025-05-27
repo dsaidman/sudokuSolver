@@ -105,13 +105,3 @@ function importPuzzle(filePath::String)::Dict{String,String}
     end
     return puzzle
 end
-
-
-
-puzzleFile = "C:\\Users\\david\\Projects\\sudokuSolver\\input\\hardSample.ini"
-puzzle = importPuzzle(puzzleFile)
-Solver.solveTheThing(copy(puzzle))
-#using Profile
-#@profile Solver.solveTheThing(copy(puzzle))
-#Profile.print()
-
