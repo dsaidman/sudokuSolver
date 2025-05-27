@@ -69,19 +69,19 @@ class UiSidebar(QFrame):
         self.luajitBtn = UiSidebarButton("LuaJit", self)
         self.luajitBtn.setObjectName("luajitBtn")
         self.luajitBtn.setEnabled(True)
-        self.luajitBtn.setProperty("selected", False)
+        self.luajitBtn.setProperty("selected", True)
         self.luajitBtn.setToolTip("Using lupa")
         
         self.luaBtn = UiSidebarButton("Lua", self)
         self.luaBtn.setObjectName("luaBtn")
-        self.luaBtn.setEnabled(False)
+        self.luaBtn.setEnabled(True)
         self.luaBtn.setProperty("selected", False)
         self.luaBtn.setToolTip("Using lupa")
         
         self.juliaBtn  = UiSidebarButton("julia", self)
         self.juliaBtn.setObjectName("juliaBtn")
         self.juliaBtn.setEnabled(True) 
-        self.juliaBtn.setProperty("selected", True)
+        self.juliaBtn.setProperty("selected", False)
         self.juliaBtn.setToolTip("Using juliaCall")
         
         self.pythonBtn = UiSidebarButton("python", self)
@@ -137,6 +137,9 @@ class UiSidebarButton(QPushButton):
         self.setProperty("selected", True)
         self.style().unpolish(self)
         self.style().polish(self)
+        
         grabMainWindow().runtimeLang = self.text()
-        grabMainWindow().uiStatusBar.languageLabel.setText(f'Runtime: {self.text()}')
-
+        languageLabel = grabMainWindow().uiStatusBar.statusWidget.languageLabel
+        languageLabel.setText(f'{self.text()}       ')
+        languageLabel.setStyleSheet(
+            f"QLabel#languageLabel {{ color: {self.palette().color(self.foregroundRole()).name()}; font-weight: bold; }}")

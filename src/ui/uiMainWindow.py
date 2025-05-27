@@ -28,7 +28,7 @@ class AppMainWindow(QMainWindow):
         self._status = statusVal
         return statusVal
 
-    def __init__(self,lang="julia"):
+    def __init__(self,lang="luajit"):
         """Constructor method initializes the main window and its components."""
         uiLogger.debug('Initializing AppMainWindow')
         super(AppMainWindow, self).__init__()
@@ -66,7 +66,7 @@ class AppMainWindow(QMainWindow):
         self.layout = QHBoxLayout(self.centralWidget)
         self.layout.setObjectName('mainWindowLayout')
         #self.centralWidget.setLayout(self.splitter)
-        self.setStyleSheet("QWidget {font-family: 'Segoe ui';}")
+        self.setStyleSheet("* {font-family: 'Consolas';}")
 
     def setupUi(self):
 
@@ -87,31 +87,47 @@ class AppMainWindow(QMainWindow):
         self.layout.setStretch(0, 1)
         self.layout.setSpacing(0)
         
+    
         self.uiStatusBar = self.statusBar()
         self.uiStatusBar.setObjectName('uiStatusBar')
         self.uiStatusBar.showMessage('Starting Up')
         
-        self.uiStatusBar.languageLabel = QLabel(self.uiStatusBar)
-        self.uiStatusBar.languageLabel.setObjectName('languageLabel')
-        self.uiStatusBar.languageLabel.setText(f'Runtime: {grabMainWindow().runtimeLang}')
-        self.uiStatusBar.addPermanentWidget(self.uiStatusBar.languageLabel)
         
-        self.uiStatusBar.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar)
-        self.uiStatusBar.addPermanentWidget(self.uiStatusBar.puzzleInfoLabel)
+        self.uiStatusBar.statusWidget = QWidget(self.uiStatusBar)
+        self.uiStatusBar.statusWidget.setObjectName('statusWidget')
+        statusWidgetLayout = QHBoxLayout(self.uiStatusBar.statusWidget)
+        statusWidgetLayout.setObjectName('statusWidgetLayout')
+        statusWidgetLayout.setContentsMargins(0, 0, 0, 0)
+        statusWidgetLayout.setSpacing(0)
+
         
+        self.uiStatusBar.statusWidget.languageLabel = QLabel(self.uiStatusBar.statusWidget)
+        self.uiStatusBar.statusWidget.languageLabel.setObjectName('languageLabel')
+        self.uiStatusBar.statusWidget.languageLabel.setText(f'{grabMainWindow().runtimeLang}')
+        self.uiStatusBar.statusWidget.puzzleInfoLabel = PuzzleInfoLabel(self.uiStatusBar.statusWidget)
+        
+        statusWidgetLayout.addStretch()
+        statusWidgetLayout.addWidget(self.uiStatusBar.statusWidget.languageLabel)
+        statusWidgetLayout.addStretch()
+        statusWidgetLayout.addWidget(self.uiStatusBar.statusWidget.puzzleInfoLabel)
+        statusWidgetLayout.addStretch()
+        
+        self.uiStatusBar.addPermanentWidget(self.uiStatusBar.statusWidget)
+        self.uiStatusBar.statusWidget.languageLabel.setStyleSheet(
+            f"QLabel#languageLabel {{ color: {self.palette().color(self.foregroundRole()).name()}; font-weight: bold; }}")
         self.menuBar = MenuBar(self)
 
         QMetaObject.connectSlotsByName(self)
         self.uiStatusBar.showMessage('Ready')
 
     def _resetMainWindow(self):
-        self.uiStatusBar.puzzleInfoLabel.reset()
+        self.uiStatusBar.statusWidget.puzzleInfoLabel.reset()
         self.uiMainPanel.puzzleFrame.resetPuzzle()
         grabWidget(QLabel, 'infoDisplayLabel')._resetAction()
         grabWidget(QPushButton, 'setPuzzleBtn')._disableMe()
 
     def _updateWindow(self):
-        self.uiStatusBar.puzzleInfoLabel.update()
+        self.uiStatusBar.statusWidget.puzzleInfoLabel.update()
         grabPuzzleFrame().onSquareChangeEvent()
 
     def resizeApp(self):

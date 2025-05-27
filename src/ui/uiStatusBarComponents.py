@@ -15,11 +15,11 @@ class PuzzleInfoLabel(QLabel):
         self.setParent(parent)
         self.setObjectName(objectName)
         self.setText("0 OF 17 Squares Set")
-        self.setAlignment(Qt.AlignmentFlag.AlignRight |
-                          Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.setProperty("state", "NotSolvable")
         self.setStyleSheet(
             """
+            QLabel { font-family: 'Segoe UI'; font-size: 12px; font-weight: bold; }
             QLabel#puzzleInfoLabel[state="Invalid"] {
                 color: rgb(255, 0, 0);
                 font-style: italic;

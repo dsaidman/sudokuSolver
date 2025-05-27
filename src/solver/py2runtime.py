@@ -12,8 +12,6 @@ Returns:
 """
 
 import os
-from functools import cached_property
-from ui.uiHelpers import grabMainWindow
 import logging
 uiLogger = logging.getLogger('uiLogger')
 
@@ -23,18 +21,17 @@ class Py2Runtime:
     def runtime(self):
         return self._runtime[self.lang]
 
-    @cached_property
+    @property
     def defintions(self):
         return self._definitionsModule[self.lang]
 
-    @cached_property
+    @property
     def solver(self):
         return self._solverModule[self.lang]
 
     def __init__(self, lang=None):
         """Constructor method initializes runtime and modules."""
         self.lang = lang
-        #uiLogger.debug(f'Initializing Py2Runtime with lang: {self.lang}')
         self._runtime = {}
         self._definitionsModule = {}
         self._solverModule = {}
@@ -50,8 +47,8 @@ class Py2Runtime:
         Args:
             lang (str): The language to set the runtime to. Can be "lua" or "julia".
         """
-        if lang.lower() not in ["luajit", "julia"]:
-            raise ValueError(f"Invalid language: {lang}. Must be 'luajit' or 'julia'.")
+        if lang.lower() not in ["luajit","lua","julia"]:
+            raise ValueError(f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
         self.lang = lang.lower()
         uiLogger.info(f"Using {self.lang} runtime")
         
@@ -79,6 +76,32 @@ class Py2Runtime:
 
             uiLogger.debug('\tImporting solver.lua as table object...')
             self._solverModule['luajit'] = lua.require('src.solver.solver')[0]
+
+            uiLogger.info('\tLuaJit Runtime initialized')
+        elif self.lang == "lua" and self.lang not in self._runtime:
+            import lupa.lua54 as lupa
+            from lupa import LuaRuntime
+            
+            # Get the lua runtime from lupa. Try to use luajit if possible
+            lua = LuaRuntime()
+            uiLogger.info(
+                f"Using {
+                    lua.lua_implementation} (compiled with {
+                    lupa.LUA_VERSION})")
+            self._version['lua'] = lupa.LUA_VERSION
+            
+            lua.execute("package.path = '../solver/?.lua;' .. package.path")
+            lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
+
+            uiLogger.debug('Initializing lua runtime...')
+            self._runtime['lua'] = lua
+
+            uiLogger.debug('\tImporting defintions.lua as table object...')
+            
+            self._definitionsModule['lua'] = lua.require('src.solver.definitions')[0]
+
+            uiLogger.debug('\tImporting solver.lua as table object...')
+            self._solverModule['lua'] = lua.require('src.solver.solver')[0]
 
             uiLogger.info('\tLua Runtime initialized')
         elif lang == "julia" and self.lang not in self._runtime:

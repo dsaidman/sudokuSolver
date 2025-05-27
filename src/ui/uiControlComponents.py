@@ -79,10 +79,8 @@ class UiPanel(QFrame):
 
 
         grabPuzzleFrame().onSquareChangeEvent()
-        grabStatusBar().puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
-        grabStatusBar().puzzleInfoLabel.update()
-
-
+        grabStatusBar().statusWidget.puzzleInfoLabel.setText('81 of 81 SQUARES SET: SOLVED')
+        grabStatusBar().statusWidget.puzzleInfoLabel.update()
 
 class InfoDisplayLabel(QLabel):
     def __init__(self, parent, objectName="infoDisplayLabel"):
@@ -92,13 +90,12 @@ class InfoDisplayLabel(QLabel):
         self.setParent(parent)
         self.setObjectName(objectName)
         self.setText("")
-        self.setStyleSheet("font-size: 12px;")
-        self.setAlignment(Qt.AlignmentFlag.AlignRight |
-                          Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
         self.setEnabled(False)
 
     def _resetAction(self):
         self.setText("")
+        self.setStyleSheet("")
 
 
 class SetPuzzleBtn(QPushButton):
@@ -180,7 +177,8 @@ class SolvePuzzleButton(QPushButton):
             self.setProperty("completed", False)
             return False
         else:
-            if rt.lang == "luajit":
+            if rt.lang == "luajit" or rt.lang == "lua":
+                
                 puzzleArg = rt.dict2Table(puzzleFrame.asDict())
                 solveFun = rt.solver['solve']
             elif rt.lang == "julia":
@@ -206,7 +204,7 @@ class SolvePuzzleButton(QPushButton):
             uiPanel = grabWidget(QFrame, 'UiPanel')
             uiPanel._setCompleted()
 
-            if rt.lang == "luajit":
+            if rt.lang == "luajit" or rt.lang == "lua":
                 runtimeInfo = dict(result['info'])
                 difficultyEnum = runtimeInfo['difficulty']
                 numRecursions = runtimeInfo['numRecursions']
@@ -222,7 +220,14 @@ class SolvePuzzleButton(QPushButton):
                 tDuration_ms:.2f} milliseconds - Difficulty: {
                 difficultyEnum:s}\n{numRecursions} Recursions - {numOperations} Operations'
             displayLabel.setText(displayText)
-
+            displayLabel.setStyleSheet(
+                """
+                font-size: 12px; 
+                font-weight: bold; 
+                color: rgb(0, 255, 0);
+                background-color: rgba(0, 0, 0, 0.5);
+                """)
+                
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
 

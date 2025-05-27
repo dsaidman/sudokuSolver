@@ -317,17 +317,6 @@ class PuzzleFrame(QFrame):
 
 class PuzzleSquare(QLineEdit):
 
-    #def _sizePolicy(self):
-        # Set the size policy so constant across all
-        #sizePolicy = QSizePolicy(
-        #    QSizePolicy.Policy.Expanding,
-        #    QSizePolicy.Policy.Expanding)
-        #sizePolicy.setVerticalStretch(1)
-        #sizePolicy.setHorizontalStretch(1)
-
-        #sizePolicy.setHeightForWidth(False)
-        #return sizePolicy
-
     @property
     def squareType(self):
         return self._squareType
