@@ -88,7 +88,7 @@ class UiSidebar(QFrame):
 
         self.pythonBtn = UiSidebarButton("python", self)
         self.pythonBtn.setObjectName("pythonBtn")
-        self.pythonBtn.setEnabled(False)
+        self.pythonBtn.setEnabled(True)
         self.pythonBtn.setProperty("selected", False)
         self.pythonBtn.setToolTip("Python sovler not yet implemented")
 
