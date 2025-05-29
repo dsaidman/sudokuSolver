@@ -55,19 +55,22 @@ def isPuzzleSolved(pzl):
 def _getNextEntryPoint(pzl):
 
 	# Of all unknowns, find the unknown value that occurs most often
-    pzlStr               = "".join([pzlSq.text() for pzlSq in pzl.values()])
+    pzlStr               = "".join(list(pzl.values()))
     unsolvedCount        = [pzlStr.count(val) for val in "123456789"]
-    mostFrequentUnsolved = unsolvedCount.index( max(unsolvedCount) ) [0]
+    mostFrequentUnsolved = str(unsolvedCount.index( max(unsolvedCount) )) 
 
 	# With the value that occurs most often (mostFrequentUnsolved), find the square 
 	# with mostFrequentUnsolved with fewest remaining possible values. 
 	# The selection will eliminate the most possible paths
     nextSquareChoices   = { k : len(v) for k, v in pzl.items() if mostFrequentUnsolved in v and len(v)>1}
-    nextSquareChoiceKey = nextSquareChoices.index( min(nextSquareChoices) )[0]
+    bestValueCount      = min(nextSquareChoices.values())
+    nextSquareChoices   = {k : v for k, v in nextSquareChoices.items() if v == bestValueCount}
+    nextSquareChoiceKey = list(nextSquareChoices.keys())[0]
     return nextSquareChoiceKey
 
 def _eliminationPass(pzl):
     
+
 	didChange = True
 	while didChange and not isPuzzleComplete(pzl):
 		solvedSquares = [k for k,v in pzl.items() if len(v)==1]
