@@ -55,7 +55,7 @@ def isPuzzleSolved(pzl):
 def _getNextEntryPoint(pzl):
 
 	# Of all unknowns, find the unknown value that occurs most often
-    pzlStr               = pzl.values()
+    pzlStr               = "".join([pzlSq.text() for pzlSq in pzl.values()])
     unsolvedCount        = [pzlStr.count(val) for val in "123456789"]
     mostFrequentUnsolved = unsolvedCount.index( max(unsolvedCount) ) [0]
 
