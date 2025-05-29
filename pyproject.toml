@@ -1,4 +1,7 @@
 
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "sudokuSolver"
@@ -12,16 +15,10 @@ license-files = ["LICEN[CS]E*"]
 classifiers = [
     "Programming Language :: Python :: 3"]
 dependencies = [
-    "filelock>=3.18.0",
-    "humanfriendly>=10.0",
     "juliacall>=0.9.25",
-    "juliapkg>=0.1.17",
     "logger>=1.4",
     "lupa>=2.4",
     "PyQt6>=6.9.0",
-    "PyQt6-Qt6>=6.9.0",
-    "PyQt6_sip>=13.10.0",
-    "semver>=3.0.4"
     ]
 keywords = ["sudoku","pyqt6","juliaCall","lupa"]
 
@@ -29,10 +26,15 @@ keywords = ["sudoku","pyqt6","juliaCall","lupa"]
 [project.urls]
 Repository = "https://github.com/dsaidman/sudokuSolver.git"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sudokuSolver.src.*"]
 
-[build-system]
-requires = ["hatchling >= 1.26"]
-build-backend = "hatchling.build"
+[project.scripts]
+sudokuSolver = "sudokuSolver.src.main:main"
+
+
+
 
 [tool.autopep8]
 in-place = true
