@@ -71,7 +71,7 @@ class UiSidebar(QFrame):
         self.luajitBtn = UiSidebarButton("LuaJit", self)
         self.luajitBtn.setObjectName("luajitBtn")
         self.luajitBtn.setEnabled(True)
-        self.luajitBtn.setProperty("selected", True)
+        self.luajitBtn.setProperty("selected", False)
         self.luajitBtn.setToolTip("Using lupa")
 
         self.luaBtn = UiSidebarButton("Lua", self)
@@ -89,7 +89,7 @@ class UiSidebar(QFrame):
         self.pythonBtn = UiSidebarButton("python", self)
         self.pythonBtn.setObjectName("pythonBtn")
         self.pythonBtn.setEnabled(True)
-        self.pythonBtn.setProperty("selected", False)
+        self.pythonBtn.setProperty("selected", True)
         self.pythonBtn.setToolTip("Python sovler not yet implemented")
 
         self.cythonBtn = UiSidebarButton("cython", self)
@@ -128,7 +128,7 @@ class UiSidebarButton(QPushButton):
         self.setText(text)
         self.setParent(parent)
         self.setContentsMargins(0, 0, 0, 0)
-
+        
     def onButtonClicked(self, button):
         """
         Set the selected button in the sidebar.

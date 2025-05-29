@@ -2,7 +2,6 @@
 
 from PyQt6.QtWidgets import QVBoxLayout, QLabel, QFrame, QMainWindow, QHBoxLayout
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
 from .uiPuzzleComponents import PuzzleFrame
 from .uiControlComponents import UiPanel
 from solver import definitions as sudokuDefs
@@ -50,10 +49,6 @@ class UiMainPanel(QFrame):
         self.mainPanelLayout.insertWidget(2, self.uiFrame)
 
         self.mainPanelLayout.addStretch()
-
-        # self.uiTitleFrame.raise_()
-        # self.uiFrame.raise_()
-        # self.puzzleFrame.raise_()
 
     def orderTabs(self):
 

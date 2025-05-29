@@ -340,10 +340,8 @@ class PuzzleSquare(QLineEdit):
     def neighbors(self):
 
         squares = grabPuzzleSquares()
-        outArg = {}
-        for squareKey in self.neighborKeys:
-            outArg[squareKey] = squares[squareKey]
-        return outArg
+        return {squareKey: squares[squareKey] for squareKey in self.neighborKeys}
+
 
     @property
     def nextSquare(self):
@@ -359,6 +357,7 @@ class PuzzleSquare(QLineEdit):
         retVal = ValidityEnum.Valid
         if len(myValue) > 0:
             for neighborSquare in self.neighbors.values():
+                
                 if myValue in neighborSquare.text():
                     retVal = ValidityEnum.Invalid
                     break

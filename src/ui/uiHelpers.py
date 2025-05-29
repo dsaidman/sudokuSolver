@@ -47,6 +47,13 @@ def grabStatusBar():
 def getAppStatus():
     return grabMainWindow().status
 
+def setStatusBarText(text):
+    statusBar = grabStatusBar()
+    if text is None or text == "":
+        text = "Ready"
+    statusBar.setText(text)
+    statusBar.style().polish(statusBar)
+    statusBar.style().unpolish(statusBar)
 
 @lru_cache(typed=False)
 def getBasePath():

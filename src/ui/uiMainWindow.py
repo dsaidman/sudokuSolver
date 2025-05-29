@@ -30,7 +30,7 @@ class AppMainWindow(QMainWindow):
         self._status = statusVal
         return statusVal
 
-    def __init__(self, lang="luajit"):
+    def __init__(self, lang="python"):
         """Constructor method initializes the main window and its components."""
         uiLogger.debug('Initializing AppMainWindow')
         super(AppMainWindow, self).__init__()
@@ -107,7 +107,7 @@ class AppMainWindow(QMainWindow):
         self.uiStatusBar.statusWidget.languageLabel.setText(
             f'{grabMainWindow().runtimeLang}')
         self.uiStatusBar.statusWidget.languageLabel.setStyleSheet("""
-                                                                    color: magenta;
+                                                                    color: yellow;
                                                                     font-weight: bold;
                                                                   """)
         self.uiStatusBar.statusWidget.puzzleInfoLabel = PuzzleInfoLabel(

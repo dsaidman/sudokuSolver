@@ -2,7 +2,7 @@ from functools import cached_property, lru_cache
 import logging
 from ui.uiHelpers import grabMainWindow
 from solver.py2runtime import RuntimePy as rt
-import solver as pySolver
+import solver.solver as pySolver
 uiLogger = logging.getLogger('uiLogger')
 
 

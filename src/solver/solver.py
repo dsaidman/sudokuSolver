@@ -19,7 +19,8 @@ def _getCellNeighbors(sq):
 
 # All neigbhors of a
 def _neighborsOf(sq):
-    return sorted(list((set(_getRowNeighbors(sq)) | set(_getColumnNeighbors(sq)) | set(_getCellNeighbors(sq))) -set(sq)))
+    
+    return sorted(list((set(_getRowNeighbors(sq)) | set(_getColumnNeighbors(sq)) | set(_getCellNeighbors(sq))) -set([sq])))
 
 neighbors = {sq : _neighborsOf(sq) for sq in squares}
 
@@ -44,7 +45,8 @@ def isPuzzleComplete(pzl):
     return all([len(v) == 1 for v in pzl.values()])
 
 def isFamilyCorrect(pzl,familySquares):
-    return sorted( "".join([pzl[familySq] for familySq in familySquares])) == "123456789"
+    
+    return  "".join(sorted([pzl[familySq] for familySq in familySquares])) == "123456789"
 
 def isPuzzleSolved(pzl):
     return isPuzzleComplete(pzl) and all(map(lambda fam: isFamilyCorrect(pzl, fam), families))
@@ -65,7 +67,6 @@ def _getNextEntryPoint(pzl):
     return nextSquareChoiceKey
 
 def _eliminationPass(pzl):
-    
     
 	didChange = True
 	while didChange and not isPuzzleComplete(pzl):

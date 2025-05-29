@@ -126,6 +126,7 @@ class Py2Runtime:
 
             uiLogger.info('\tJulia Runtime initialized')
         elif lang == "python" and self.lang not in self._runtime:
+            
             import solver.solver as pySolver
             #uiLogger.info(f"Using python {jl.VERSION}")
             self._version['python'] = sys.version
