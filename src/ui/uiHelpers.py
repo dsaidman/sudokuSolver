@@ -2,6 +2,7 @@
     This module provides helper functions to interact with the main window and its widgets in a PyQt application.
     It includes functions to grab specific widgets, the main window, and the application instance.
     It also provides functions to set the status bar text and retrieve puzzle-related widgets.
+    
     Functions:
         grabWidget(widgetType, widgetName: str) -> QWidget:
             Grabs a widget of the specified type and name from the main window.
