@@ -1,10 +1,10 @@
-import cython
 # -*- coding: utf-8 -*-
 # Sudoku Solver	
 # This module provides functions to solve a Sudoku puzzle using a backtracking algorithm.
 
 #Playing with types, so make some type aliases
 type SudokuPuzzle = dict[str, str]
+type Square       = str
 type VectorString = list[str]
 type NeighborDict = tuple[dict[str, list[str]]]
 type Families     = tuple[list[VectorString]]
@@ -137,7 +137,7 @@ def isPuzzleSolved(pzl: SudokuPuzzle) -> bool:
 	return isPuzzleComplete(pzl) and all(map(lambda fam: isFamilyCorrect(pzl, fam), families))
 
 
-def _getNextEntryPoint(pzl: SudokuPuzzle) -> str:
+def _getNextEntryPoint(pzl: SudokuPuzzle):
     """Get the next entry point for solving the puzzle.
 	Finds the square with the most frequent unknown value and the fewest remaining possible values.
 	Args:
@@ -148,16 +148,19 @@ def _getNextEntryPoint(pzl: SudokuPuzzle) -> str:
 	# Of all unknowns, find the unknown value that occurs most often
     pzlStr                = "".join(list(pzl.values()))
     unsolvedCount         = [pzlStr.count(val) for val in "123456789"]
-    mostFrequentUnsolved  = str(unsolvedCount.index( max(unsolvedCount) )) 
+    mostFrequentUnsolved  = str(unsolvedCount.index( max(unsolvedCount) )+1) 
 
 	# With the value that occurs most often (mostFrequentUnsolved), find the square 
 	# with mostFrequentUnsolved with fewest remaining possible values. 
 	# The selection will eliminate the most possible paths
     nextSquareChoices   = { k : len(v) for k, v in pzl.items() if mostFrequentUnsolved in v and len(v)>1}
+    if len(nextSquareChoices) == 0: return False
     bestValueCount      = min(nextSquareChoices.values())
     nextSquareChoices   = {k : v for k, v in nextSquareChoices.items() if v == bestValueCount}
     nextSquareChoiceKey = list(nextSquareChoices.keys())[0]
-    return nextSquareChoiceKey
+    nextSquareChoiceValues = "".join(sorted(pzl[nextSquareChoiceKey],key=pzlStr.count,reverse=True))
+    	
+    return nextSquareChoiceKey, nextSquareChoiceValues
 
 def _eliminationPass(pzl: SudokuPuzzle) -> SudokuPuzzle:
 	"""Perform an elimination pass on the puzzle.
@@ -182,7 +185,7 @@ def _eliminationPass(pzl: SudokuPuzzle) -> SudokuPuzzle:
 	# Dont return a copy in this case, change in place
 	return pzl
 
-def _solveTheThing(puzzle: SudokuPuzzle) -> SudokuPuzzle | bool:
+def _solveTheThing(puzzle: SudokuPuzzle):
 	"""Recursively solve the Sudoku puzzle using backtracking.
 	Args:
 		puzzle (SudokuPuzzle): The Sudoku puzzle represented as a dictionary.
@@ -193,20 +196,26 @@ def _solveTheThing(puzzle: SudokuPuzzle) -> SudokuPuzzle | bool:
 	if not isPuzzleSolved(puzzle):
 		# Make a guess
 		puzzle    = _eliminationPass(puzzle)
+  
+		if puzzle is False:
+			return False
+
 		if isPuzzleSolved(puzzle):
 			return puzzle
-		elif isPuzzleComplete(puzzle) and  not isPuzzleSolved(puzzle):
+
+		if isPuzzleComplete(puzzle) and  not isPuzzleSolved(puzzle):
 			return False
 		else:
-			nextEntry = _getNextEntryPoint(puzzle)
-			nextValues= puzzle[nextEntry]
+			nextEntry, nextValues = _getNextEntryPoint(puzzle)
+			if not nextEntry: return False
+
 			for nextValue in nextValues:
 				nextPuzzleGuess = puzzle.copy()
 				nextPuzzleGuess[nextEntry] = nextValue
 				nextPuzzleGuess = _solveTheThing(nextPuzzleGuess)
 				
-				if nextPuzzleGuess is False:
-					continue
+				if not nextPuzzleGuess:
+					continue  # No solution found for this guess, try the next one
 				elif isPuzzleSolved(nextPuzzleGuess):
 					return nextPuzzleGuess
 			return False

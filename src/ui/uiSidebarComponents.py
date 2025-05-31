@@ -92,27 +92,19 @@ class UiSidebar(QFrame):
         self.pythonBtn.setProperty("selected", True)
         self.pythonBtn.setToolTip("Python sovler not yet implemented")
 
-        self.cythonBtn = UiSidebarButton("cython", self)
-        self.cythonBtn.setObjectName("cythonBtn")
-        self.cythonBtn.setEnabled(False)
-        self.cythonBtn.setProperty("selected", False)
-        self.cythonBtn.setToolTip("cython sovler not yet implemented")
-
         layout = self.layout()
         layout.addStretch()
         layout.addWidget(self.luajitBtn)
         layout.addWidget(self.luaBtn)
         layout.addWidget(self.juliaBtn)
         layout.addWidget(self.pythonBtn)
-        layout.addWidget(self.cythonBtn)
         layout.addStretch()
 
         for btn in [
                 self.luajitBtn,
                 self.luaBtn,
                 self.juliaBtn,
-                self.pythonBtn,
-                self.cythonBtn]:
+                self.pythonBtn]:
             btn.clicked.connect(btn.onButtonClicked)
 
 
@@ -140,8 +132,7 @@ class UiSidebarButton(QPushButton):
                 parent.luajitBtn,
                 parent.luaBtn,
                 parent.juliaBtn,
-                parent.pythonBtn,
-                parent.cythonBtn]:
+                parent.pythonBtn]:
             btn.setProperty("selected", False)
             btn.style().unpolish(btn)
             btn.style().polish(btn)

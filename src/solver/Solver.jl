@@ -105,7 +105,7 @@ end
 
 findFirstDictKey(inDict::Dict, matchedValue::Int) = first([k for (k,v) in inDict if v==matchedValue])
 
-function getNextEntryPoint(puzzle::SudokuPuzzleT)::String
+function getNextEntryPoint(puzzle::SudokuPuzzleT)::Union{String,Bool}
 
 	# Of all unknowns, find the unknown value that occurs most often
 	unsolvedCount::Dict{Char,Int}   = countOccurances(puzzle)
@@ -115,6 +115,9 @@ function getNextEntryPoint(puzzle::SudokuPuzzleT)::String
 	# with mostFrequentUnsolved with fewest remaining possible values. 
 	# The selection will eliminate the most possible paths
     nextSquareChoices::Dict{String,Int} = Dict{String,Int}(k => length(v) for (k, v) in puzzle if (occursin(mostFrequentUnsolved, v) && length(v)>1))
+	if isempty(nextSquareChoices)
+		return false
+	end
 	nextSquareChoiceKey = findFirstDictKey(nextSquareChoices, minimum(values(nextSquareChoices)))
 	return nextSquareChoiceKey
 
@@ -130,8 +133,16 @@ function solveTheThing(puzzle::SudokuPuzzleT)::Union{SudokuPuzzleT,Bool}
 		elseif isPuzzleComplete(puzzle) && ~isPuzzleSolved(puzzle)
 			return false
 		else
-			nextEntry::SquareT = getNextEntryPoint(puzzle)
-			nextValues::String = puzzle[nextEntry]
+			nextEntry::Union{String,Bool} = getNextEntryPoint(puzzle)
+			if nextEntry == false
+				return false
+			end
+			allPuzzleVals = join(values(puzzle))
+			
+			nextValues::String = join(sort(collect(puzzle[nextEntry]), by = x->count(==(x), allPuzzleVals ), rev = true))
+			# Sort the next values by how often they occur in the puzzle, most frequent first
+			# This way we try the most frequent values first, which should lead to fewer branches
+			# and hopefully a faster solution
 			for nextValue::Char in nextValues
 				nextPuzzleGuess::Union{SudokuPuzzleT,Bool} = copy(puzzle)
 				nextPuzzleGuess[nextEntry] = string(nextValue)
