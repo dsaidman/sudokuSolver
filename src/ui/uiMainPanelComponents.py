@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QVBoxLayout, QLabel, QFrame, QMainWindow, QHBoxLayou
 from PyQt6.QtCore import Qt
 from .uiPuzzleComponents import PuzzleFrame
 from .uiControlComponents import UiPanel
-from solver import definitions as sudokuDefs
+from .sudokuDefs import sudokuDefs
 import logging
 uiLogger = logging.getLogger('uiLogger')
 

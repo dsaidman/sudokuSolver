@@ -1,10 +1,10 @@
 
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QCursor, QFont
-from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QSizePolicy, QLineEdit
+from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
 from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares, grabCurrentSquare
-from solver.definitions import sudokuDefs
+from .sudokuDefs import sudokuDefs
 import sys
 import os
 import logging

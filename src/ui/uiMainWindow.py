@@ -7,10 +7,10 @@ from .uiSidebarComponents import UiSidebar
 from .uiStatusBarComponents import PuzzleInfoLabel
 from .uiMenuComponents import MenuBar
 from solver.py2runtime import RuntimePy as rt
-from solver.definitions import sudokuDefs as defs
+from .sudokuDefs import sudokuDefs as defs
 from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow
 from .uiEnums import AppStatusEnum
-from functools import lru_cache
+from functools import cache
 from math import floor
 import inspect
 import logging
@@ -151,7 +151,7 @@ class AppMainWindow(QMainWindow):
             floor(int(float(_width) / 12)))
 
 
-@lru_cache(typed=False)
+@cache
 def _getScreenSize():
     cp = QGuiApplication.primaryScreen().availableGeometry().size()
     return cp.height(), cp.width()

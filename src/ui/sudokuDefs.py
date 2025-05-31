@@ -12,7 +12,6 @@ class SudokuDefinitions:
     This class provides methods to retrieve rows, columns, squares, and neighbors of a Sudoku puzzle.
     It also allows setting the language for the Sudoku definitions, which can be used to switch between different runtime environments.
     """
-    __slots__ = ('lang', 'rows', 'columns', 'squares')  # Define the slots to optimize memory usage
     
     def __init__(self, lang=None):
 
@@ -128,12 +127,12 @@ class SudokuDefinitions:
         Args:
             lang (str): The language to set. Options are "luajit", "julia", or "python".
         """
-        if lang not in ["luajit","lua", "julia", "python"]:
+        if lang.lower() not in ["luajit","lua", "julia", "python"]:
             raise ValueError("Invalid language specified. Choose from 'luajit','lua', 'julia', or 'python'.")
 
         printStr = f"Changing runtime language from {self.lang} to {lang}"
         uiLogger.info(printStr)
-        setAppStatusbar(printStr)
+        #setAppStatusbar(printStr)
         
         self.lang = lang
 

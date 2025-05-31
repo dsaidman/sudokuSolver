@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QFrame, QVBoxLayout, QPushButton
 from PyQt6.QtCore import Qt
 from .uiHelpers import grabMainWindow
 from solver.py2runtime import RuntimePy as rt
-from solver.definitions import sudokuDefs as defs
+from .sudokuDefs import sudokuDefs as defs
 
 
 class UiSidebar(QFrame):
