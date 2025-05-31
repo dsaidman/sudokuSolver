@@ -1,3 +1,4 @@
+import cython
 # -*- coding: utf-8 -*-
 # Sudoku Solver	
 # This module provides functions to solve a Sudoku puzzle using a backtracking algorithm.
@@ -15,6 +16,7 @@ cellRows:    tuple[VectorString]  = ["ABC", "DEF", "GHI"]
 cellColumns: tuple[VectorString]  = ["123", "456", "789"]
 
 # Combines all combinations for two strings into a single loopable list of tuples.
+
 def cross(first:str, second:str)-> list[tuple[str, str]]: return [(f, s) for f in first for s in second]
 
 def _getRowNeighbors(sq: str) -> NeighborDict:
@@ -67,8 +69,6 @@ def _neighborsOf(sq: str) -> VectorString:
 		VectorString: A sorted list of square IDs that cannot share the same value as the given square.
 	"""
     return sorted(list((set(_getRowNeighbors(sq)) | set(_getColumnNeighbors(sq)) | set(_getCellNeighbors(sq))) -set([sq])))
-
-
 
 def _defineFamilies() -> Families:
 	"""Define all families of squares in the Sudoku puzzle.
@@ -169,16 +169,16 @@ def _eliminationPass(pzl: SudokuPuzzle) -> SudokuPuzzle:
 	"""
 	didChange = True
 	while didChange and not isPuzzleComplete(pzl):
-		solvedSquares = [k for k,v in pzl.items() if len(v)==1]
+		solvedSquares = [k for k, v in pzl.items() if len(v) == 1]
 		didChange = False
 		for solvedSquare in solvedSquares:
-			solvedValue     = pzl[solvedSquare]
+			solvedValue = pzl[solvedSquare]
 			solvedNeighbors = [nsq for nsq in neighbors[solvedSquare] if nsq is not solvedSquare]
-            # Remove solvedValue from all neighbors 
+			# Remove solvedValue from all neighbors 
 			for nsq in solvedNeighbors:
-				if len(pzl[nsq])>1 and solvedValue in pzl[nsq]:
+				if len(pzl[nsq]) > 1 and solvedValue in pzl[nsq]:
 					didChange = True
-					pzl[nsq] = pzl[nsq].replace(solvedValue,"")
+					pzl[nsq] = pzl[nsq].replace(solvedValue, "")
 	# Dont return a copy in this case, change in place
 	return pzl
 
