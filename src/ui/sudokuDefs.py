@@ -1,22 +1,23 @@
-from functools import cached_property, lru_cache
+from functools import cached_property, cache
 import logging
-from ui.uiHelpers import grabMainWindow
 from solver.py2runtime import RuntimePy as rt
 import solver.solver as pySolver
+from ui.uiHelpers import setAppStatusbar
 uiLogger = logging.getLogger('uiLogger')
 
 
-class definitions:
+class SudokuDefinitions:
     """
-    A class with properties and methods that collectively define the rules of a lua puzzle.
-
-    SudokuParams behaves as in interface the definitions.lua lua module imported in
-    LuaPy to utilize the lightweight and very fast cached variables and methods in
-    a familiar python container
-
-    Returns:
-        object: SudokuParams object with cached methods and properties that define the rules of sudoku
+    A class to define and manage Sudoku puzzle parameters and properties.
+    This class provides methods to retrieve rows, columns, squares, and neighbors of a Sudoku puzzle.
+    It also allows setting the language for the Sudoku definitions, which can be used to switch between different runtime environments.
     """
+    __slots__ = ('lang', 'rows', 'columns', 'squares')  # Define the slots to optimize memory usage
+    
+    def __init__(self, lang=None):
+
+        # uiLogger.info("Using %s runtime", self.lang)
+        self.lang = None
 
     @cached_property
     def rows(self):
@@ -97,7 +98,7 @@ class definitions:
         return self.squares[(
             (self.squares.index(currentKey) + -1) % len(self.squares))]
 
-    @lru_cache(maxsize=82)
+    @cache
     def neighbors(self, squareID):
         """
         Returns list of squareID that cannot share the same value.
@@ -119,12 +120,7 @@ class definitions:
             return list(rt.defintions.neighbors[squareID])
         elif self.lang == "python":
             return pySolver.neighbors[squareID]
-
-    def __init__(self):
-        pass
-        # uiLogger.info("Using %s runtime", self.lang)
-        self.lang = None
-
+        
     def setLang(self, lang):
         """
         Set the language for the SudokuParams instance.
@@ -132,8 +128,14 @@ class definitions:
         Args:
             lang (str): The language to set. Options are "luajit", "julia", or "python".
         """
+        if lang not in ["luajit","lua", "julia", "python"]:
+            raise ValueError("Invalid language specified. Choose from 'luajit','lua', 'julia', or 'python'.")
+
+        printStr = f"Changing runtime language from {self.lang} to {lang}"
+        uiLogger.info(printStr)
+        setAppStatusbar(printStr)
+        
         self.lang = lang
 
-
 # Return the pre-cached SudokuParams instance to be shared across modules
-sudokuDefs = definitions()
+sudokuDefs = SudokuDefinitions()

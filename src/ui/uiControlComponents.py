@@ -5,7 +5,7 @@ from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QLabel, QGridLayout, QVBoxLayout, QFrame, QPushButton
 from .uiHelpers import grabPuzzleFrame, grabWidget, grabStatusBar
 from .uiEnums import ValidityEnum, SquareTypeEnum
-from solver.definitions import sudokuDefs
+from ui.sudokuDefs import sudokuDefs
 from solver.py2runtime import RuntimePy as rt
 
 
