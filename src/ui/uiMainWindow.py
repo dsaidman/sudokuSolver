@@ -1,5 +1,5 @@
 
-from PyQt6.QtWidgets import QWidget, QMainWindow, QSizePolicy, QLabel, QPushButton, QHBoxLayout, QSplitter
+from PyQt6.QtWidgets import QWidget, QMainWindow, QLabel, QPushButton, QHBoxLayout, QSplitter
 from PyQt6.QtCore import Qt, QMetaObject
 from PyQt6.QtGui import QIcon, QPixmap, QGuiApplication
 from .uiMainPanelComponents import UiMainPanel
@@ -34,11 +34,13 @@ class AppMainWindow(QMainWindow):
         """Constructor method initializes the main window and its components."""
         uiLogger.debug('Initializing AppMainWindow')
         super(AppMainWindow, self).__init__()
-
+        
+        uiLogger.debug('Setting up main window properties')
+        self.setWindowFlags(Qt.WindowType.Window)
         self.runtimeLang = lang
         rt.setLang(self.runtimeLang)
         defs.setLang(self.runtimeLang)
-        uiLogger.debug('Entered AppMainWindow')
+    
         self.setObjectName("MainWindow")
         self.setWindowModality(Qt.WindowModality.NonModal)
         self.setWindowTitle("SudokuSolverApp")
@@ -69,6 +71,9 @@ class AppMainWindow(QMainWindow):
         self.layout.setObjectName('mainWindowLayout')
         # self.centralWidget.setLayout(self.splitter)
         self.setStyleSheet("* {font-family: 'Consolas';}")
+        
+        self.setupUi()
+        self.resizeApp()
 
     def setupUi(self):
 
@@ -139,7 +144,7 @@ class AppMainWindow(QMainWindow):
 
     def resizeApp(self):
 
-        _height, _width = getScreenSize()
+        _height, _width = _getScreenSize()
 
         self.resize(
             int(floor(float(_height) / 6)),
@@ -147,6 +152,6 @@ class AppMainWindow(QMainWindow):
 
 
 @lru_cache(typed=False)
-def getScreenSize():
+def _getScreenSize():
     cp = QGuiApplication.primaryScreen().availableGeometry().size()
     return cp.height(), cp.width()
