@@ -119,10 +119,11 @@ class Py2Runtime:
             uiLogger.debug('\tImporting defintions.jl...')
 
             jl.include("src\\solver\\Solver.jl")
-            self._definitionsModule['julia'] = jl.Solver.Definitions
+            
+            self._definitionsModule['julia'] = jl.JDefinitions
 
             uiLogger.debug('\tImporting defintions.jl...')
-            self._solverModule['julia'] = jl.Solver
+            self._solverModule['julia'] = jl.JSolver
 
             uiLogger.info('\tJulia Runtime initialized')
         elif lang == "python" and self.lang not in self._runtime:
