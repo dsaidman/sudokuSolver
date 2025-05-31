@@ -157,7 +157,7 @@ def getAppStatus():
 def setStatusBarText(text: str = None) -> None:
     setAppStatusbar(text if text else 'Ready')
 
-@cache(maxsize=1)
+@cache
 def getBasePath() -> str:
     import os, sys
     from pathlib import Path

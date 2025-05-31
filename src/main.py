@@ -42,17 +42,7 @@ def main():
     
     appStyle = "Fusion"
     uiLogger.debug(f'Setting application style to { appStyle }')
-    
-    # Set application style and attributes. Im not sure what any of this does, copilot suggested it.
-    from PyQt6.QtCore import Qt
-    if appStyle == "Fusion":
-        from PyQt6.QtCore import QCoreApplication
-        QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
-        QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)
-    else:
-        uiLogger.warning(f'Unknown application style: {appStyle}. Defaulting to Fusion style.')
-        
-    app.setStyle('Fusion')
+    app.setStyle(appStyle)
     
     uiLogger.debug('Creating AppMainWindow instance')
     # Create the main window instance
@@ -64,7 +54,7 @@ def main():
 
     sys.exit(app.exec())
 
-def setupLogging(loggingLevel=logging.INFO) -> logging.Logger:
+def setupLogging(loggingLevel='INFO') -> logging.Logger:
     """Set up logging for the application.
     This function configures the logging settings, including the format and level of logging.
     It creates a logger that can be used throughout the application.
@@ -75,7 +65,7 @@ def setupLogging(loggingLevel=logging.INFO) -> logging.Logger:
     FORMAT = '%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s'
     logging.basicConfig(
         format=FORMAT,
-        level=loggingLevel,
+        level=logging.__dict__[loggingLevel.upper()],
         handlers=[
             logging.StreamHandler(sys.stdout)
         ]
