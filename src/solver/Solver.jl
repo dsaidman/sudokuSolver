@@ -65,11 +65,17 @@ export solve, importPuzzle
 
 using ..JDefinitions
 	
-@inline isPuzzleComplete(pzl::SudokuPuzzleT)::Bool = all(v -> length(v) == 1, values(pzl))
+@inline function isPuzzleComplete(pzl::SudokuPuzzleT)::Bool
+    all(v -> length(v) == 1, values(pzl))
+end
 
-@inline isFamilyCorrect(puzzle::SudokuPuzzleT,familySquares::VectorStringT)::Bool = join(sort(collect(join([puzzle[familySq] for familySq in familySquares])))) == "123456789"
+@inline function isFamilyCorrect(puzzle::SudokuPuzzleT,familySquares::VectorStringT)::Bool
+    join(sort(collect(join([puzzle[familySq] for familySq in familySquares])))) == "123456789"
+end
 
-@inline isPuzzleSolved(pzl::SudokuPuzzleT)::Bool = isPuzzleComplete(pzl) && all(fam -> isFamilyCorrect(pzl, fam), values(families))
+@inline function isPuzzleSolved(pzl::SudokuPuzzleT)::Bool
+    isPuzzleComplete(pzl) && all(fam -> isFamilyCorrect(pzl, fam), values(families))
+end
 
 # Is there a way to make this more julia-like? Probably
 function eliminationPass(puzzle::SudokuPuzzleT)::SudokuPuzzleT
