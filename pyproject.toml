@@ -37,4 +37,4 @@ sudokuSolver = "sudokuSolver.src.main:main"
 [tool.autopep8]
 in-place = true
 recursive = true
-aggressive = 2
+aggressive = 3

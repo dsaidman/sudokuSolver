@@ -40,8 +40,8 @@ class MenuBar(QMenuBar):
         self.importFromIniAction.shortcut = QShortcut(
             QKeySequence("Ctrl+I"), self)
         self.importFromIniAction.setObjectName("importFromIniAction")
-        self.importFromIniAction.triggered.connect(self.importIni)
-        self.importFromIniAction.shortcut.activated.connect(self.importIni)
+        self.importFromIniAction.triggered.connect(self.importPuzzle)
+        self.importFromIniAction.shortcut.activated.connect(self.importPuzzle)
 
         self.resetAllAction = QAction(theMainWindow)
         self.resetAllAction.setText("&Reset")
@@ -57,20 +57,17 @@ class MenuBar(QMenuBar):
         self.resetAllAction.shortcut.activated.connect(
             grabMainWindow()._resetMainWindow)
 
-    def importIni(self):
+    def importPuzzle(self):
 
         _basePath = getBasePath()
-        fname = QFileDialog.getOpenFileName(
-            self,
-            'Load ini file',
-            os.path.join(_basePath, 'input'),
-            "Ini Files (*.ini *.txt)")
+        fname = os.path.normpath(os.path.join(_basePath,'..','..', 'resources','samples.ini'))
         if fname:
             grabMainWindow()._resetMainWindow()
 
             puzzleIni = configparser.ConfigParser()
             puzzleIni.read(fname)
             puzzleNames = list(puzzleIni._sections.keys())
+            
             if len(puzzleNames) == 0:
                 return
             puzzleName = self._choosePuzzle(puzzleNames)

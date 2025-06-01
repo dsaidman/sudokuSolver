@@ -102,18 +102,6 @@ def parseArgs() -> argparse.Namespace:
         help='Set the logging level (default: info). This option allows you to control the verbosity of the application logs. Choose from debug, info, warning, error, or critical.'
     )
     
-    parser.add_argument('-f','--file',
-        type=str,
-        default=os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','input','samples.ini')),
-        help='Path to the input file (default: samples.ini). This option specifies the path to the input file containing Sudoku puzzles. The default path is set to samples.ini in the input directory.'
-    )
-    
-    parser.add_argument('-p', '--puzzle',
-        type=str,
-        default="Hard",
-        choices=['Easy', 'Hard', 'Evil'],
-        help='Select the puzzle to load from the puzzle input file in --file argument. This option allows preloading a specific puzzle from the command line, which is particularly useful for testing purposes. Choose from Easy, Hard, or Evil puzzles.'
-    )
     parser.add_argument('-v', '--version',
         action='version',
         version='%(prog)s 1.0.0',
