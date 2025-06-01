@@ -51,7 +51,7 @@ class AppMainWindow(QMainWindow):
         iconpath = os.path.join(
             os.path.dirname(
                 os.path.dirname(path)),
-            'res',
+            'resources',
             'icon.ico')
 
         appIcon = QIcon()

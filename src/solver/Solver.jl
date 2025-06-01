@@ -70,7 +70,7 @@ using ..JDefinitions
 end
 
 @inline function isFamilyCorrect(puzzle::SudokuPuzzleT,familySquares::VectorStringT)::Bool
-    join(sort(collect(join([puzzle[familySq] for familySq in familySquares])))) == "123456789"
+    Set(join([puzzle[familySq] for familySq in familySquares])) == Set("123456789")
 end
 
 @inline function isPuzzleSolved(pzl::SudokuPuzzleT)::Bool
@@ -99,14 +99,10 @@ function eliminationPass(puzzle::SudokuPuzzleT)::SudokuPuzzleT
 end
 
 # Could use StatsBase, kinda like histcounts to get how often each value appears
-function countOccurances(puzzle::SudokuPuzzleT)::Dict{Char,Int}
+@inline function countOccurances(puzzle::SudokuPuzzleT)::Dict{Char,Int}
 	# Collect all values in the puzzle together
 	allPuzzleVals = join(values(puzzle))
-	occurances = Dict{Char,Int}()
-	for val in "123456789"
-		occurances[val] = count(==(val), allPuzzleVals)
-	end
-	return occurances
+	return Dict{Char,Int}(val => count(==(val), allPuzzleVals) for val in "123456789")
 end
 
 findFirstDictKey(inDict::Dict, matchedValue::Int) = first([k for (k,v) in inDict if v==matchedValue])
@@ -145,7 +141,7 @@ function solveTheThing(puzzle::SudokuPuzzleT)::Union{SudokuPuzzleT,Bool}
 			end
 			allPuzzleVals = join(values(puzzle))
 			
-			nextValues= join(sort(collect(puzzle[nextEntry]), by = x->count(==(x), allPuzzleVals ), rev = true))
+			nextValues= join(sort!(collect(puzzle[nextEntry]), by = x->count(==(x), allPuzzleVals ), rev = true))
 			# Sort the next values by how often they occur in the puzzle, most frequent first
 			# This way we try the most frequent values first, which should lead to fewer branches
 			# and hopefully a faster solution

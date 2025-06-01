@@ -3,23 +3,23 @@
 # This module provides functions to solve a Sudoku puzzle using a backtracking algorithm.
 
 #Playing with types, so make some type aliases
-type SudokuPuzzle = dict[str, str]
-type Square       = str
-type VectorString = list[str]
-type NeighborDict = tuple[dict[str, list[str]]]
-type Families     = tuple[list[VectorString]]
+type SudokuPuzzleT = dict[str, str]
+type SquareT       = str
+type VectorStringT = list[str]
+type NeighborT = tuple[dict[str, list[str]]]
+type FamiliesT     = tuple[list[VectorStringT]]
 
 rowNames:    tuple[str]            = "ABCDEFGHI"
 columnNames: tuple[str]            = "123456789"
-squares:     tuple[VectorString]  = [row+col for row in rowNames for col in columnNames]
-cellRows:    tuple[VectorString]  = ["ABC", "DEF", "GHI"]
-cellColumns: tuple[VectorString]  = ["123", "456", "789"]
+squares:     tuple[VectorStringT]  = [row+col for row in rowNames for col in columnNames]
+cellRows:    tuple[VectorStringT]  = ["ABC", "DEF", "GHI"]
+cellColumns: tuple[VectorStringT]  = ["123", "456", "789"]
 
 # Combines all combinations for two strings into a single loopable list of tuples.
 
 def cross(first:str, second:str)-> list[tuple[str, str]]: return [(f, s) for f in first for s in second]
 
-def _getRowNeighbors(sq: str) -> NeighborDict:
+def _getRowNeighbors(sq: str) -> NeighborT:
 	"""Return all neighbors of a square in the same row.
 	Finds all squares in the same row as the given square.
 
@@ -27,12 +27,12 @@ def _getRowNeighbors(sq: str) -> NeighborDict:
 		sq (str): The square ID (e.g., "A1")
 
 	Returns:
-		NeighborDict: A list of square IDs in the same row, including the given square.
+		NeighborT: A list of square IDs in the same row, including the given square.
 	"""
 	# sq is a square like "A1"
 	return [sq[0] + col for col in columnNames]
 
-def _getColumnNeighbors(sq: str) -> VectorString:
+def _getColumnNeighbors(sq: str) -> VectorStringT:
 	"""Return all neighbors of a square in the same column.
 	Finds all squares in the same column as the given square.
 
@@ -40,12 +40,12 @@ def _getColumnNeighbors(sq: str) -> VectorString:
 		sq (str): The square ID (e.g., "A1")
 
 	Returns:
-		VectorString: A list of square IDs in the same column, including the given square.
+		VectorStringT: A list of square IDs in the same column, including the given square.
 	"""
 	# sq is a square like "A1"
 	return [row + sq[1] for row in rowNames]
 
-def _getCellNeighbors(sq: str) -> VectorString:
+def _getCellNeighbors(sq: str) -> VectorStringT:
 	"""Return all neighbors of a square in the same cell.
 	Finds all squares in the same cell as the given square.
 
@@ -53,27 +53,27 @@ def _getCellNeighbors(sq: str) -> VectorString:
 		sq (str): The square ID (e.g., "A1")
 
 	Returns:
-		VectorString: A list of square IDs in the same cell, including the given square.
+		VectorStringT: A list of square IDs in the same cell, including the given square.
 	"""
 	_rows:str = cellRows[  [idx for idx, s in enumerate(cellRows) if sq[0] in s][0] ]
 	_cols:str = cellColumns[  [idx for idx, s in enumerate(cellColumns) if sq[1] in s][0] ]
 	return [r + c for r in _rows for c in _cols]
 
 
-def _neighborsOf(sq: str) -> VectorString:
+def _neighborsOf(sq: str) -> VectorStringT:
     """Return all neighbors of a square.
 	Finds all squares that cannot share the same value as the given square.
 	Args:
 		sq (str): The square ID (e.g., "A1")
 	Returns:
-		VectorString: A sorted list of square IDs that cannot share the same value as the given square.
+		VectorStringT: A sorted list of square IDs that cannot share the same value as the given square.
 	"""
     return sorted(list((set(_getRowNeighbors(sq)) | set(_getColumnNeighbors(sq)) | set(_getCellNeighbors(sq))) -set([sq])))
 
-def _defineFamilies() -> Families:
+def _defineFamilies() -> FamiliesT:
 	"""Define all families of squares in the Sudoku puzzle.
 	
-	Families are defined as rows, columns, and cells that contain squares that cannot share the same value.
+	FamiliesT are defined as rows, columns, and cells that contain squares that cannot share the same value.
 	Args:
 		rowNames (str): The names of the rows (e.g., "ABCDEFGHI").
 		columnNames (str): The names of the columns (e.g., "123456789").
@@ -81,9 +81,9 @@ def _defineFamilies() -> Families:
 		cellColumns (list[str]): The names of the cell columns (e.g., ["123", "456", "789"]).
 	
 	Returns:
-		Families: A list of families, where each family is a list of square IDs that cannot share the same value.
+		FamiliesT: A list of families, where each family is a list of square IDs that cannot share the same value.
 	"""
-	families:Families = []
+	families:FamiliesT = []
  
 	for rowName, colName in zip(rowNames, columnNames):
 		families.append(_getRowNeighbors(rowName + columnNames[1]))
@@ -97,51 +97,51 @@ def _defineFamilies() -> Families:
 	return families
 
 
-families:Families = _defineFamilies()
+families:FamiliesT = _defineFamilies()
 # Create a dictionary of neighbors for each square
-neighbors:NeighborDict       = {sq : _neighborsOf(sq) for sq in squares}
-puzzle0:  SudokuPuzzle       = {sq : "123456789" for sq in squares}
+neighbors:NeighborT       = {sq : _neighborsOf(sq) for sq in squares}
+puzzle0:  SudokuPuzzleT       = {sq : "123456789" for sq in squares}
 
 
-def isPuzzleComplete(pzl: SudokuPuzzle) -> bool:
+def isPuzzleComplete(pzl: SudokuPuzzleT) -> bool:
 	"""Check if the puzzle is complete.
 	Checks if all squares in the puzzle have exactly one possible value.
 	Args:
-		pzl (SudokuPuzzle): The Sudoku puzzle represented as a dictionary.
+		pzl (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
 	Returns:
 		bool: True if the puzzle is complete, False otherwise.	
 	"""
 	# Check if all squares have exactly one possible value
 	return all([len(v) == 1 for v in pzl.values()])
 
-def isFamilyCorrect(pzl: SudokuPuzzle, familySquares: VectorString) -> bool:
+def isFamilyCorrect(pzl: SudokuPuzzleT, familySquares: VectorStringT) -> bool:
 	"""Check if a family of squares is correct.
 	Checks if the values in a family of squares contain all digits from 1 to 9 exactly once.
 	Args:
-		pzl (SudokuPuzzle): The Sudoku puzzle represented as a dictionary.
-		familySquares (VectorString): A list of square IDs that form a family.
+		pzl (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
+		familySquares (VectorStringT): A list of square IDs that form a family.
 	Returns:
 		bool: True if the family is correct, False otherwise.
 	"""
 	# Check if the values in the family squares contain all digits from 1 to 9 exactly once
-	return "".join(sorted([pzl[familySq] for familySq in familySquares])) == "123456789"
+	return set([pzl[familySq] for familySq in familySquares]) == set("123456789")
 
-def isPuzzleSolved(pzl: SudokuPuzzle) -> bool:
+def isPuzzleSolved(pzl: SudokuPuzzleT) -> bool:
 	"""Check if the puzzle is solved.
 	Checks if the puzzle is complete and all families are correct.
 	Args:
-		pzl (SudokuPuzzle): The Sudoku puzzle represented as a dictionary.
+		pzl (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
 	Returns:
 		bool: True if the puzzle is solved, False otherwise.
 	"""
 	return isPuzzleComplete(pzl) and all(map(lambda fam: isFamilyCorrect(pzl, fam), families))
 
 
-def _getNextEntryPoint(pzl: SudokuPuzzle):
+def _getNextEntryPoint(pzl: SudokuPuzzleT):
     """Get the next entry point for solving the puzzle.
 	Finds the square with the most frequent unknown value and the fewest remaining possible values.
 	Args:
-		pzl (SudokuPuzzle): The Sudoku puzzle represented as a dictionary.
+		pzl (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
 	Returns:
 		str: The key of the next square to solve.
 	"""
@@ -162,13 +162,13 @@ def _getNextEntryPoint(pzl: SudokuPuzzle):
     	
     return nextSquareChoiceKey, nextSquareChoiceValues
 
-def _eliminationPass(pzl: SudokuPuzzle) -> SudokuPuzzle:
+def _eliminationPass(pzl: SudokuPuzzleT) -> SudokuPuzzleT:
 	"""Perform an elimination pass on the puzzle.
 	Removes impossible values from the puzzle based on the current state.
 	Args:
-		pzl (SudokuPuzzle): The Sudoku puzzle represented as a dictionary.	
+		pzl (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.	
 	Returns:
-		SudokuPuzzle: The updated puzzle after the elimination pass.
+		SudokuPuzzleT: The updated puzzle after the elimination pass.
 	"""
 	didChange = True
 	while didChange and not isPuzzleComplete(pzl):
@@ -185,12 +185,12 @@ def _eliminationPass(pzl: SudokuPuzzle) -> SudokuPuzzle:
 	# Dont return a copy in this case, change in place
 	return pzl
 
-def _solveTheThing(puzzle: SudokuPuzzle):
+def _solveTheThing(puzzle: SudokuPuzzleT):
 	"""Recursively solve the Sudoku puzzle using backtracking.
 	Args:
-		puzzle (SudokuPuzzle): The Sudoku puzzle represented as a dictionary.
+		puzzle (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
 	Returns:
-		SudokuPuzzle | bool: The solved puzzle if successful, False if no solution exists.
+		SudokuPuzzleT | bool: The solved puzzle if successful, False if no solution exists.
 	"""	
 
 	if not isPuzzleSolved(puzzle):
@@ -222,7 +222,7 @@ def _solveTheThing(puzzle: SudokuPuzzle):
 	else:
 		return puzzle
 
-def solve(puzzle: SudokuPuzzle) -> SudokuPuzzle | bool:
+def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
     """
     Solve the given sudoku puzzle using a backtracking algorithm.
     
