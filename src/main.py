@@ -8,120 +8,120 @@ All (nearly) of the doc strings in this Sudoku Solver application was automatica
 I only pressed tab. It blew my freaking mind.
 """
 
-import sys, os
-import logging
 import argparse
+import logging
+import sys
 
 
 def main():
-    """
-    Main function to start the Sudoku Solver application.
-    Initializes the application, sets up the main window, and starts the event loop.
-    This function also sets up logging for the application.
-    """
+	"""
+	Main function to start the Sudoku Solver application.
+	Initializes the application, sets up the main window, and starts the event loop.
+	This function also sets up logging for the application.
+	"""
 
-    # Set up logging
-    inArgs = parseArgs()
-    uiLogger = setupLogging(loggingLevel=inArgs.loglevel)
-    uiLogger.info("Starting Sudoku Solver Application")
-    uiLogger.debug("Setting up application environment")
+	# Set up logging
+	inArgs = parseArgs()
+	uiLogger = setupLogging(loggingLevel=inArgs.loglevel)
+	uiLogger.info("Starting Sudoku Solver Application")
+	uiLogger.debug("Setting up application environment")
 
-    # Parse command line arguments
-    uiLogger.debug("Parsing command line arguments")
+	# Parse command line arguments
+	uiLogger.debug("Parsing command line arguments")
 
-    # Import necessary PyQt modules
-    from PyQt6.QtWidgets import QApplication
+	# Import necessary PyQt modules
+	from PyQt6.QtWidgets import QApplication
 
-    uiLogger.debug("Importing QApplication from PyQt6.QtWidgets")
-    from ui.uiMainWindow import AppMainWindow
+	uiLogger.debug("Importing QApplication from PyQt6.QtWidgets")
+	from ui.uiMainWindow import AppMainWindow
 
-    uiLogger.debug("Importing AppMainWindow from ui.uiMainWindow")
-    # Initialize the application
-    uiLogger.debug("Initializing QApplication")
+	uiLogger.debug("Importing AppMainWindow from ui.uiMainWindow")
+	# Initialize the application
+	uiLogger.debug("Initializing QApplication")
 
-    app = QApplication(sys.argv)
-    app.setApplicationName("SudokuSolverApp")
-    app.setApplicationVersion("1.0.0")
-    uiLogger.debug("Application initialized with name and version")
+	app = QApplication(sys.argv)
+	app.setApplicationName("SudokuSolverApp")
+	app.setApplicationVersion("1.0.0")
+	uiLogger.debug("Application initialized with name and version")
 
-    appStyle = "Fusion"
-    uiLogger.debug(f"Setting application style to {appStyle}")
-    app.setStyle(appStyle)
+	appStyle = "Fusion"
+	uiLogger.debug(f"Setting application style to {appStyle}")
+	app.setStyle(appStyle)
 
-    uiLogger.debug("Creating AppMainWindow instance")
-    # Create the main window instance
-    MainWindow = AppMainWindow(lang=inArgs.language)
-    uiLogger.debug(f"AppMainWindow created with language: {inArgs.language}")
-    uiLogger.debug("Displaying the main window")
-    # Show the main window
-    MainWindow.show()
+	uiLogger.debug("Creating AppMainWindow instance")
+	# Create the main window instance
+	MainWindow = AppMainWindow(lang=inArgs.language)
+	uiLogger.debug(f"AppMainWindow created with language: {inArgs.language}")
+	uiLogger.debug("Displaying the main window")
+	# Show the main window
+	MainWindow.show()
 
-    sys.exit(app.exec())
+	sys.exit(app.exec())
 
 
 def setupLogging(loggingLevel="INFO") -> logging.Logger:
-    """Set up logging for the application.
-    This function configures the logging settings, including the format and level of logging.
-    It creates a logger that can be used throughout the application.
-    Returns:
-        logging.Logger: The configured logger instance.
-    """
+	"""Set up logging for the application.
+	This function configures the logging settings, including the format and level of logging.
+	It creates a logger that can be used throughout the application.
+	Returns:
+	    logging.Logger: The configured logger instance.
+	"""
 
-    FORMAT = "%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s"
-    logging.basicConfig(
-        format=FORMAT,
-        level=logging.__dict__[loggingLevel.upper()],
-        handlers=[logging.StreamHandler(sys.stdout)],
-    )
-    uiLogger = logging.getLogger("uiLogger")
-    uiLogger.debug("Logging is set up")
-    return uiLogger
+	FORMAT = "%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s"
+	logging.basicConfig(
+		format=FORMAT,
+		level=logging.__dict__[loggingLevel.upper()],
+		handlers=[logging.StreamHandler(sys.stdout)],
+	)
+	uiLogger = logging.getLogger("uiLogger")
+	uiLogger.debug("Logging is set up")
+	return uiLogger
 
 
 def parseArgs() -> argparse.Namespace:
-    """Parse command line arguments.
-    This function is a placeholder for future command line argument parsing.
-    Currently, it does not implement any functionality.
-    """
+	"""Parse command line arguments.
+	This function is a placeholder for future command line argument parsing.
+	Currently, it does not implement any functionality.
+	"""
 
-    # Placeholder for command line argument parsing
-    parser = argparse.ArgumentParser(
-        description="Sudoku Solver Application",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        add_help=True,
-        allow_abbrev=True,
-        prog="SudokuSolverApp",
-        epilog="something something dark side",
-        usage="%(prog)s [options]",
-    )
-    parser.add_argument(
-        "-l",
-        "--language",
-        type=str,
-        default="python",
-        choices=["python", "julia", "luajit", "lua"],
-        help="Set the runtime language for the solver (default: python). This option allows you to choose the programming language used for solving Sudoku puzzles. Supported languages are Python, Julia, LuaJIT, and Lua.",
-    )
+	# Placeholder for command line argument parsing
+	parser = argparse.ArgumentParser(
+		description="Sudoku Solver Application",
+		formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+		add_help=True,
+		allow_abbrev=True,
+		prog="SudokuSolverApp",
+		epilog="something something dark side",
+		usage="%(prog)s [options]",
+	)
+	parser.add_argument(
+		"-l",
+		"--language",
+		type=str,
+		default="python",
+		choices=["python", "julia", "luajit", "lua"],
+		help="Set the runtime language for the solver (default: python). This option allows you to choose the programming language used for solving Sudoku puzzles. Supported languages are Python, Julia, LuaJIT, and Lua.",
+	)
 
-    parser.add_argument(
-        "--loglevel",
-        type=str,
-        default="info",
-        choices=["debug", "info", "warning", "error", "critical"],
-        help="Set the logging level (default: info). This option allows you to control the verbosity of the application logs. Choose from debug, info, warning, error, or critical.",
-    )
+	parser.add_argument(
+		"--loglevel",
+		type=str,
+		default="info",
+		choices=["debug", "info", "warning", "error", "critical"],
+		help="Set the logging level (default: info). This option allows you to control the verbosity of the application logs. Choose from debug, info, warning, error, or critical.",
+	)
 
-    parser.add_argument(
-        "-v",
-        "--version",
-        action="version",
-        version="%(prog)s 1.0.0",
-        help="Show the application version and exit. This option displays the current version of the Sudoku Solver application and exits.",
-    )
+	parser.add_argument(
+		"-v",
+		"--version",
+		action="version",
+		version="%(prog)s 1.0.0",
+		help="Show the application version and exit. This option displays the current version of the Sudoku Solver application and exits.",
+	)
 
-    args = parser.parse_args()
-    return args
+	args = parser.parse_args()
+	return args
 
 
 if __name__ == "__main__":
-    main()
+	main()

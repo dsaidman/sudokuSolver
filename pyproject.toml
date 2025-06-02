@@ -33,6 +33,13 @@ include = ["sudokuSolver.src.*"]
 [project.scripts]
 sudokuSolver = "sudokuSolver.src.main:main"
 
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+indent-style = "tab"
+docstring-code-format = false
+
 
 [tool.autopep8]
 in-place = true
