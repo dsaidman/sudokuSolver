@@ -37,9 +37,18 @@ sudokuSolver = "sudokuSolver.src.main:main"
 line-length = 100
 
 [tool.ruff.format]
-indent-style = "tab"
+indent-style = "space"
 docstring-code-format = false
 
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 100
+disable = """
+    invalid-name,
+    no-name-in-module,
+    line-too-long,
+    import-error,
+    too-few-public-methods
+"""
 
 [tool.autopep8]
 in-place = true
