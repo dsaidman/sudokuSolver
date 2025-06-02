@@ -1,39 +1,40 @@
 """uiHelpers.py
-    This module provides helper functions to interact with the main window and its widgets in a PyQt application.
-    It includes functions to grab specific widgets, the main window, and the application instance.
-    It also provides functions to set the status bar text and retrieve puzzle-related widgets.
-    
-    Functions:
-        grabWidget(widgetType, widgetName: str) -> QWidget:
-            Grabs a widget of the specified type and name from the main window.
-        grabAppInstance() -> QApplication:
-            Retrieves the QApplication instance.
-        grabMainWindow() -> QMainWindow:
-            Retrieves the main window of the application.
-        grabPuzzleFrame() -> QFrame:
-            Retrieves the puzzle frame from the main window.
-        grabUiFrame() -> QFrame:
-            Retrieves the UI panel frame from the main window.
-        grabPuzzleInfoLabel() -> PuzzleInfoLabel:
-            Retrieves the puzzle info label from the status bar.
-        grabPuzzleSquares() -> dict:
-            Retrieves the puzzle squares from the puzzle frame.
-        grabCurrentSquare() -> dict:
-            Retrieves the currently focused puzzle square.
-        setAppStatusbar(statusText: str) -> None:
-            Sets the status bar text in the main window.
-        grabStatusBar() -> QStatusBar:
-            Retrieves the status bar from the main window.
-        getAppStatus() -> AppStatusEnum:
-            Retrieves the current application status.
-        setStatusBarText(text: str = None) -> None:
-            Sets the status bar text in the main window.
-        getBasePath() -> str:
-            Gets the base path of the application, pointing to the 'input' directory.
-    """
+This module provides helper functions to interact with the main window and its widgets in a PyQt application.
+It includes functions to grab specific widgets, the main window, and the application instance.
+It also provides functions to set the status bar text and retrieve puzzle-related widgets.
+
+Functions:
+    grabWidget(widgetType, widgetName: str) -> QWidget:
+        Grabs a widget of the specified type and name from the main window.
+    grabAppInstance() -> QApplication:
+        Retrieves the QApplication instance.
+    grabMainWindow() -> QMainWindow:
+        Retrieves the main window of the application.
+    grabPuzzleFrame() -> QFrame:
+        Retrieves the puzzle frame from the main window.
+    grabUiFrame() -> QFrame:
+        Retrieves the UI panel frame from the main window.
+    grabPuzzleInfoLabel() -> PuzzleInfoLabel:
+        Retrieves the puzzle info label from the status bar.
+    grabPuzzleSquares() -> dict:
+        Retrieves the puzzle squares from the puzzle frame.
+    grabCurrentSquare() -> dict:
+        Retrieves the currently focused puzzle square.
+    setAppStatusbar(statusText: str) -> None:
+        Sets the status bar text in the main window.
+    grabStatusBar() -> QStatusBar:
+        Retrieves the status bar from the main window.
+    getAppStatus() -> AppStatusEnum:
+        Retrieves the current application status.
+    setStatusBarText(text: str = None) -> None:
+        Sets the status bar text in the main window.
+    getBasePath() -> str:
+        Gets the base path of the application, pointing to the 'input' directory.
+"""
 
 from functools import cache
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFrame, QStatusBar, QLabel
+
 
 @cache
 def grabWidget(widgetType, widgetName: str):
@@ -67,10 +68,13 @@ def grabMainWindow() -> QMainWindow:
     """
     # Iterate through all top-level widgets to find the main window
     from PyQt6.QtWidgets import QApplication, QMainWindow
+
     return [
-        widget for widget in QApplication.topLevelWidgets() if isinstance(
-            widget,
-            QMainWindow)][0]
+        widget
+        for widget in QApplication.topLevelWidgets()
+        if isinstance(widget, QMainWindow)
+    ][0]
+
 
 @cache
 def grabPuzzleFrame() -> QFrame:
@@ -80,7 +84,8 @@ def grabPuzzleFrame() -> QFrame:
         QFrame: The puzzle frame of the application.
     """
     # Use the grabWidget function to find the puzzle frame by its type and name
-    return grabWidget(QFrame, 'puzzleFrame')
+    return grabWidget(QFrame, "puzzleFrame")
+
 
 @cache
 def grabUiFrame() -> QFrame:
@@ -90,7 +95,8 @@ def grabUiFrame() -> QFrame:
         QFrame: The UI panel frame of the application.
     """
     # Use the grabWidget function to find the UI panel frame by its type and name
-    return grabWidget(QFrame, 'UIPanel')
+    return grabWidget(QFrame, "UIPanel")
+
 
 @cache
 def grabPuzzleInfoLabel() -> QLabel:
@@ -99,7 +105,8 @@ def grabPuzzleInfoLabel() -> QLabel:
     Returns:
         PuzzleInfoLabel: The puzzle info label widget.
     """
-    return grabWidget(QLabel, 'puzzleInfoLabel')
+    return grabWidget(QLabel, "puzzleInfoLabel")
+
 
 @cache
 def grabPuzzleSquares() -> dict:
@@ -125,6 +132,7 @@ def grabCurrentSquare() -> dict:
             break
     return psquare
 
+
 def setAppStatusbar(statusText: str) -> None:
     """Set the status bar text in the main window.
     This function updates the status bar text in the main window.
@@ -142,6 +150,7 @@ def setAppStatusbar(statusText: str) -> None:
     else:
         print(f"Main window not found. Status: {statusText}")
 
+
 def grabStatusBar() -> QStatusBar:
     """Grab the status bar from the main window.
     This function retrieves the status bar widget from the main window.
@@ -154,13 +163,16 @@ def grabStatusBar() -> QStatusBar:
 def getAppStatus():
     return grabMainWindow().status
 
+
 def setStatusBarText(text: str = None) -> None:
-    setAppStatusbar(text if text else 'Ready')
+    setAppStatusbar(text if text else "Ready")
+
 
 @cache
 def getBasePath() -> str:
     import os, sys
     from pathlib import Path
+
     """Get the base path of the application.
     This function determines the base path of the application by resolving the current script's path.
     It constructs the path to the 'input' directory, which is expected to be two levels up from the current script's location.
@@ -171,14 +183,14 @@ def getBasePath() -> str:
     currentPath = Path(sys.argv[0]).resolve()
     if len(currentPath.parts) > 2:
         inputsPath = currentPath.parts[0:-2]
-        inputsPath = os.path.join(*inputsPath, 'input')
+        inputsPath = os.path.join(*inputsPath, "input")
     else:
         inputsPath = currentPath.parts[0:-1]
-        inputsPath = os.path.join(*inputsPath, 'input')
+        inputsPath = os.path.join(*inputsPath, "input")
 
     if not os.path.isdir(inputsPath):
         inputsPath = currentPath.parts[0:-1]
-        inputsPath = os.path.join(*inputsPath, 'input')
+        inputsPath = os.path.join(*inputsPath, "input")
 
-    setAppStatusbar(f'Using input location {inputsPath:s}')
+    setAppStatusbar(f"Using input location {inputsPath:s}")
     return inputsPath

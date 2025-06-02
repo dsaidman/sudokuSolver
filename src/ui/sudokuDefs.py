@@ -3,7 +3,8 @@ import logging
 from solver.py2runtime import RuntimePy as rt
 import solver.solver as pySolver
 from ui.uiHelpers import setAppStatusbar
-uiLogger = logging.getLogger('uiLogger')
+
+uiLogger = logging.getLogger("uiLogger")
 
 
 class SudokuDefinitions:
@@ -12,9 +13,8 @@ class SudokuDefinitions:
     This class provides methods to retrieve rows, columns, squares, and neighbors of a Sudoku puzzle.
     It also allows setting the language for the Sudoku definitions, which can be used to switch between different runtime environments.
     """
-    
-    def __init__(self, lang=None):
 
+    def __init__(self, lang=None):
         # uiLogger.info("Using %s runtime", self.lang)
         self.lang = None
 
@@ -58,18 +58,11 @@ class SudokuDefinitions:
             list: cached list of keys
         """
         if self.lang == "luajit" or self.lang == "lua":
-            return sorted(
-                list(
-                    rt.defintions.allKeys.values()),
-                reverse=False)
+            return sorted(list(rt.defintions.allKeys.values()), reverse=False)
         elif self.lang == "julia":
-            return sorted(
-                list(
-                    rt.defintions.squares),
-                reverse=False)
+            return sorted(list(rt.defintions.squares), reverse=False)
         elif self.lang == "python":
             return sorted(pySolver.squares)
-            
 
     def nextSquare(self, currentKey):
         """
@@ -81,8 +74,7 @@ class SudokuDefinitions:
         Returns:
             str: The key of the next tile in order A1->I9. For example, nextSquare('A2') returns A3. nextSquare('I9') returns A1
         """
-        return self.squares[(
-            (self.squares.index(currentKey) + 1) % len(self.squares))]
+        return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
 
     def lastSquare(self, currentKey):
         """
@@ -94,8 +86,7 @@ class SudokuDefinitions:
         Returns:
             str: The key of the previous tile in order A1->I9. For example, nextSquare('A2') returns A1. nextSquare('A1') returns I9
         """
-        return self.squares[(
-            (self.squares.index(currentKey) + -1) % len(self.squares))]
+        return self.squares[((self.squares.index(currentKey) + -1) % len(self.squares))]
 
     @cache
     def neighbors(self, squareID):
@@ -114,12 +105,12 @@ class SudokuDefinitions:
             list: Unique list of strings of squares that cannot share same value
         """
         if self.lang == "luajit":
-            return list(rt.defintions['getNeighbors'](squareID))
+            return list(rt.defintions["getNeighbors"](squareID))
         elif self.lang == "julia":
             return list(rt.defintions.neighbors[squareID])
         elif self.lang == "python":
             return pySolver.neighbors[squareID]
-        
+
     def setLang(self, lang):
         """
         Set the language for the SudokuParams instance.
@@ -127,14 +118,17 @@ class SudokuDefinitions:
         Args:
             lang (str): The language to set. Options are "luajit", "julia", or "python".
         """
-        if lang.lower() not in ["luajit","lua", "julia", "python"]:
-            raise ValueError("Invalid language specified. Choose from 'luajit','lua', 'julia', or 'python'.")
+        if lang.lower() not in ["luajit", "lua", "julia", "python"]:
+            raise ValueError(
+                "Invalid language specified. Choose from 'luajit','lua', 'julia', or 'python'."
+            )
 
         printStr = f"Changing runtime language from {self.lang} to {lang}"
         uiLogger.info(printStr)
-        #setAppStatusbar(printStr)
-        
+        # setAppStatusbar(printStr)
+
         self.lang = lang
+
 
 # Return the pre-cached SudokuParams instance to be shared across modules
 sudokuDefs = SudokuDefinitions()

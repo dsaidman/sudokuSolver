@@ -1,4 +1,3 @@
-
 """
 Module of helper objects that define rules of sudoku puzzles.
 
@@ -13,11 +12,11 @@ Returns:
 
 import os, sys
 import logging
-uiLogger = logging.getLogger('uiLogger')
+
+uiLogger = logging.getLogger("uiLogger")
 
 
 class Py2Runtime:
-
     @property
     def runtime(self):
         return self._runtime[self.lang]
@@ -48,9 +47,10 @@ class Py2Runtime:
         Args:
             lang (str): The language to set the runtime to. Can be "lua" or "julia".
         """
-        if lang.lower() not in ["luajit", "lua", "julia","python"]:
+        if lang.lower() not in ["luajit", "lua", "julia", "python"]:
             raise ValueError(
-                f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
+                f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'."
+            )
         self.lang = lang.lower()
         uiLogger.info(f"Using {self.lang} runtime")
 
@@ -61,26 +61,24 @@ class Py2Runtime:
             # Get the lua runtime from lupa. Try to use luajit if possible
             lua = LuaRuntime()
             uiLogger.info(
-                f"Using {
-                    lua.lua_implementation} (compiled with {
-                    lupa.LUA_VERSION})")
-            self._version['luajit'] = lupa.LUA_VERSION
+                f"Using {lua.lua_implementation} (compiled with {lupa.LUA_VERSION})"
+            )
+            self._version["luajit"] = lupa.LUA_VERSION
 
             lua.execute("package.path = '../solver/?.lua;' .. package.path")
             lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
 
-            uiLogger.debug('Initializing lua runtime...')
-            self._runtime['luajit'] = lua
+            uiLogger.debug("Initializing lua runtime...")
+            self._runtime["luajit"] = lua
 
-            uiLogger.debug('\tImporting defintions.lua as table object...')
+            uiLogger.debug("\tImporting defintions.lua as table object...")
 
-            self._definitionsModule['luajit'] = lua.require(
-                'src.solver.definitions')[0]
+            self._definitionsModule["luajit"] = lua.require("src.solver.definitions")[0]
 
-            uiLogger.debug('\tImporting solver.lua as table object...')
-            self._solverModule['luajit'] = lua.require('src.solver.solver')[0]
+            uiLogger.debug("\tImporting solver.lua as table object...")
+            self._solverModule["luajit"] = lua.require("src.solver.solver")[0]
 
-            uiLogger.info('\tLuaJit Runtime initialized')
+            uiLogger.info("\tLuaJit Runtime initialized")
         elif self.lang == "lua" and self.lang not in self._runtime:
             import lupa.lua54 as lupa
             from lupa import LuaRuntime
@@ -88,62 +86,59 @@ class Py2Runtime:
             # Get the lua runtime from lupa. Try to use luajit if possible
             lua = LuaRuntime()
             uiLogger.info(
-                f"Using {
-                    lua.lua_implementation} (compiled with {
-                    lupa.LUA_VERSION})")
-            self._version['lua'] = lupa.LUA_VERSION
+                f"Using {lua.lua_implementation} (compiled with {lupa.LUA_VERSION})"
+            )
+            self._version["lua"] = lupa.LUA_VERSION
 
             lua.execute("package.path = '../solver/?.lua;' .. package.path")
             lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
 
-            uiLogger.debug('Initializing lua runtime...')
-            self._runtime['lua'] = lua
+            uiLogger.debug("Initializing lua runtime...")
+            self._runtime["lua"] = lua
 
-            uiLogger.debug('\tImporting defintions.lua as table object...')
+            uiLogger.debug("\tImporting defintions.lua as table object...")
 
-            self._definitionsModule['lua'] = lua.require(
-                'src.solver.definitions')[0]
+            self._definitionsModule["lua"] = lua.require("src.solver.definitions")[0]
 
-            uiLogger.debug('\tImporting solver.lua as table object...')
-            self._solverModule['lua'] = lua.require('src.solver.solver')[0]
+            uiLogger.debug("\tImporting solver.lua as table object...")
+            self._solverModule["lua"] = lua.require("src.solver.solver")[0]
 
-            uiLogger.info('\tLua Runtime initialized')
+            uiLogger.info("\tLua Runtime initialized")
         elif lang == "julia" and self.lang not in self._runtime:
             from juliacall import Main as jl
+
             uiLogger.info(f"Using julia {jl.VERSION}")
-            self._version['julia'] = jl.VERSION
+            self._version["julia"] = jl.VERSION
 
-            uiLogger.debug('Initializing julia runtime...')
-            self._runtime['julia'] = jl
+            uiLogger.debug("Initializing julia runtime...")
+            self._runtime["julia"] = jl
 
-            uiLogger.debug('\tImporting defintions.jl...')
+            uiLogger.debug("\tImporting defintions.jl...")
 
             jl.include("src\\solver\\Solver.jl")
-            
-            self._definitionsModule['julia'] = jl.JDefinitions
 
-            uiLogger.debug('\tImporting defintions.jl...')
-            self._solverModule['julia'] = jl.JSolver
+            self._definitionsModule["julia"] = jl.JDefinitions
 
-            uiLogger.info('\tJulia Runtime initialized')
+            uiLogger.debug("\tImporting defintions.jl...")
+            self._solverModule["julia"] = jl.JSolver
+
+            uiLogger.info("\tJulia Runtime initialized")
         elif lang == "python" and self.lang not in self._runtime:
-            
             import solver.solver as pySolver
-            #uiLogger.info(f"Using python {jl.VERSION}")
-            self._version['python'] = sys.version
 
-            self._runtime['python'] = []
+            # uiLogger.info(f"Using python {jl.VERSION}")
+            self._version["python"] = sys.version
 
+            self._runtime["python"] = []
 
-            self._definitionsModule['python'] = pySolver
+            self._definitionsModule["python"] = pySolver
 
-            self._solverModule['python'] = pySolver.solve
+            self._solverModule["python"] = pySolver.solve
 
     @staticmethod
     def relPath2ImportPath(relPath):
-
-        importPath = relPath.replace(os.sep, '.')
-        return importPath[1:] if importPath[0] == '.' else importPath
+        importPath = relPath.replace(os.sep, ".")
+        return importPath[1:] if importPath[0] == "." else importPath
 
     def dict2Table(self, d):
         """

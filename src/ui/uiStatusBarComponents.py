@@ -1,4 +1,3 @@
-
 from PyQt6.QtWidgets import QLabel, QFrame, QPushButton
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -7,16 +6,13 @@ from .uiEnums import ValidityEnum
 
 
 class PuzzleInfoLabel(QLabel):
-
     def __init__(self, parent, objectName="puzzleInfoLabel"):
-        super(PuzzleInfoLabel, self).__init__(
-            parent, objectName="puzzleInfoLabel")
+        super(PuzzleInfoLabel, self).__init__(parent, objectName="puzzleInfoLabel")
 
         self.setParent(parent)
         self.setObjectName(objectName)
         self.setText("0 OF 17 Squares Set")
-        self.setAlignment(Qt.AlignmentFlag.AlignRight |
-                          Qt.AlignmentFlag.AlignVCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.setProperty("state", "NotSolvable")
         self.setStyleSheet(
             """
@@ -52,25 +48,28 @@ class PuzzleInfoLabel(QLabel):
         self.style().unpolish(self)
 
     def update(self):
-
-        puzzleFrame = grabWidget(QFrame, 'puzzleFrame')
+        puzzleFrame = grabWidget(QFrame, "puzzleFrame")
 
         numFilledSquares = puzzleFrame.validSquareCount
         theText = str(numFilledSquares) + " OF 17 Sqaures Set"
         puzzleIsValid = puzzleFrame.isValid
 
-        setPuzzleBtn = grabWidget(QPushButton, 'setPuzzleBtn')
+        setPuzzleBtn = grabWidget(QPushButton, "setPuzzleBtn")
 
         if puzzleIsValid == ValidityEnum.Invalid:
             self.setProperty("state", "Invalid")
             setPuzzleBtn._disableMe()
-        elif numFilledSquares >= 17 and numFilledSquares < 81 and puzzleIsValid == ValidityEnum.Valid:
+        elif (
+            numFilledSquares >= 17
+            and numFilledSquares < 81
+            and puzzleIsValid == ValidityEnum.Valid
+        ):
             self.setProperty("state", "Solvable")
-            theText = theText + ': READY'
+            theText = theText + ": READY"
             setPuzzleBtn._enableMe()
         elif numFilledSquares == 81 and puzzleIsValid == ValidityEnum.Valid:
             self.setProperty("state", "Solved")
-            theText = theText + ': COMPLETE'
+            theText = theText + ": COMPLETE"
             setPuzzleBtn._enableMe()
         elif numFilledSquares < 17 or puzzleIsValid == ValidityEnum.Valid:
             self.setProperty("state", "NotSolvable")

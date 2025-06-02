@@ -25,9 +25,8 @@ class UiSidebar(QFrame):
         self.setContentsMargins(0, 0, 0, 0)
         # Example layout and styling
         layout = QVBoxLayout(self)
-        layout.setObjectName('uiSidebarLayout')
-        layout.setAlignment(Qt.AlignmentFlag.AlignLeft |
-                            Qt.AlignmentFlag.AlignRight)
+        layout.setObjectName("uiSidebarLayout")
+        layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignRight)
         layout.setSpacing(3)
         self.setLayout(layout)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
@@ -100,11 +99,7 @@ class UiSidebar(QFrame):
         layout.addWidget(self.pythonBtn)
         layout.addStretch()
 
-        for btn in [
-                self.luajitBtn,
-                self.luaBtn,
-                self.juliaBtn,
-                self.pythonBtn]:
+        for btn in [self.luajitBtn, self.luaBtn, self.juliaBtn, self.pythonBtn]:
             btn.clicked.connect(btn.onButtonClicked)
 
 
@@ -120,7 +115,7 @@ class UiSidebarButton(QPushButton):
         self.setText(text)
         self.setParent(parent)
         self.setContentsMargins(0, 0, 0, 0)
-        
+
     def onButtonClicked(self, button):
         """
         Set the selected button in the sidebar.
@@ -128,11 +123,7 @@ class UiSidebarButton(QPushButton):
         """
 
         parent = self.parent()
-        for btn in [
-                parent.luajitBtn,
-                parent.luaBtn,
-                parent.juliaBtn,
-                parent.pythonBtn]:
+        for btn in [parent.luajitBtn, parent.luaBtn, parent.juliaBtn, parent.pythonBtn]:
             btn.setProperty("selected", False)
             btn.style().unpolish(btn)
             btn.style().polish(btn)
@@ -145,6 +136,9 @@ class UiSidebarButton(QPushButton):
 
         grabMainWindow().runtimeLang = self.text()
         languageLabel = grabMainWindow().uiStatusBar.statusWidget.languageLabel
-        languageLabel.setText(f'{self.text()}       ')
+        languageLabel.setText(f"{self.text()}       ")
         languageLabel.setStyleSheet(
-            "QLabel#languageLabel { color:" + self.palette().color(self.foregroundRole()).name()+ "; font-weight: bold; } ")
+            "QLabel#languageLabel { color:"
+            + self.palette().color(self.foregroundRole()).name()
+            + "; font-weight: bold; } "
+        )

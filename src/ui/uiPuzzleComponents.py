@@ -1,18 +1,31 @@
-
 from PyQt6.QtCore import Qt, QEvent
 from PyQt6.QtGui import QCursor, QFont
-from PyQt6.QtWidgets import QFrame, QGridLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit
+from PyQt6.QtWidgets import (
+    QFrame,
+    QGridLayout,
+    QVBoxLayout,
+    QPushButton,
+    QLabel,
+    QLineEdit,
+)
 from .uiEnums import ValidityEnum, SquareTypeEnum, AppStatusEnum
-from .uiHelpers import grabWidget, grabPuzzleFrame, grabMainWindow, grabPuzzleSquares, grabCurrentSquare
+from .uiHelpers import (
+    grabWidget,
+    grabPuzzleFrame,
+    grabMainWindow,
+    grabPuzzleSquares,
+    grabCurrentSquare,
+)
 from .sudokuDefs import sudokuDefs
 import sys
 import os
 import logging
 from math import floor
 from functools import cached_property
+
 # Until i figure out how to do this properly, path hack
-sys.path.append(os.path.abspath('..'))
-uiLogger = logging.getLogger('uiLogger')
+sys.path.append(os.path.abspath(".."))
+uiLogger = logging.getLogger("uiLogger")
 
 
 class PuzzleFrame(QFrame):
@@ -62,7 +75,6 @@ class PuzzleFrame(QFrame):
             ValidityEnum: Enumeration of square is valid
         """
         for square in self.squares.values():
-
             if square.isValid == ValidityEnum.Invalid:
                 self._isValid = ValidityEnum.Invalid
                 return self._isValid
@@ -96,7 +108,7 @@ class PuzzleFrame(QFrame):
         self.puzzleLayout.setSpacing(3)
         self.puzzleLayout.setContentsMargins(0, 0, 0, 0)
 
-        mainPanelLayout = grabWidget(QVBoxLayout, 'mainPanelLayout')
+        mainPanelLayout = grabWidget(QVBoxLayout, "mainPanelLayout")
         mainPanelLayout.addLayout(self.puzzleLayout)
 
         self._initSquares()
@@ -112,12 +124,14 @@ class PuzzleFrame(QFrame):
         """
         argList = []
         for squareKey, squareValue in self.squares.items():
-            if squareValue.squareType is SquareTypeEnum.InputLocked and len(
-                    squareValue.text()) > 0:
-
+            if (
+                squareValue.squareType is SquareTypeEnum.InputLocked
+                and len(squareValue.text()) > 0
+            ):
                 argList.append(
-                    '--{key}={val}'.format(key=squareKey, val=squareValue.text()))
-        return ' '.join(argList)
+                    "--{key}={val}".format(key=squareKey, val=squareValue.text())
+                )
+        return " ".join(argList)
 
     def asDict(self):
         """
@@ -128,26 +142,31 @@ class PuzzleFrame(QFrame):
         """
         argList = {}
         for squareKey, squareValue in self.squares.items():
-            if squareValue.squareType is SquareTypeEnum.InputLocked and len(
-                    squareValue.text()) > 0:
+            if (
+                squareValue.squareType is SquareTypeEnum.InputLocked
+                and len(squareValue.text()) > 0
+            ):
                 argList[squareKey] = squareValue.text()
         return argList
 
     def onSquareChangeEvent(self):
-        uiLogger.debug('Square change event called')
+        uiLogger.debug("Square change event called")
         for puzzleSquares in self.squares.values():
             puzzleSquares._refresh()
 
     def toggleLock(self):
         puzzleValid = grabPuzzleFrame().isValid
-        solveBtn = grabWidget(QPushButton, 'solveBtn')
-        setBtn = grabWidget(QPushButton, 'setPuzzleBtn')
-        if puzzleValid == ValidityEnum.Invalid or grabMainWindow().status == AppStatusEnum.Locked:
+        solveBtn = grabWidget(QPushButton, "solveBtn")
+        setBtn = grabWidget(QPushButton, "setPuzzleBtn")
+        if (
+            puzzleValid == ValidityEnum.Invalid
+            or grabMainWindow().status == AppStatusEnum.Locked
+        ):
             for square in self.squares.values():
                 square.setReadOnly(False)
                 square.squareType = SquareTypeEnum.InputUnlocked
                 square.setReadOnly(False)
-                square.setProperty('squareType', 'InputUnlockedAndValid')
+                square.setProperty("squareType", "InputUnlockedAndValid")
                 self.style().polish(self)
                 self.style().unpolish(self)
                 self.update()
@@ -155,10 +174,15 @@ class PuzzleFrame(QFrame):
             grabMainWindow().status = AppStatusEnum.Unlocked
             solveBtn._disableMe()
             setBtn.setText("Lock")
-        elif grabMainWindow().status == AppStatusEnum.Unlocked and puzzleValid == ValidityEnum.Valid:
+        elif (
+            grabMainWindow().status == AppStatusEnum.Unlocked
+            and puzzleValid == ValidityEnum.Valid
+        ):
             for square in self.squares.values():
-                if len(
-                        square.text()) > 0 and square.squareType == SquareTypeEnum.InputUnlocked:
+                if (
+                    len(square.text()) > 0
+                    and square.squareType == SquareTypeEnum.InputUnlocked
+                ):
                     square.squareType = SquareTypeEnum.InputLocked
                     square.setReadOnly(True)
                 if len(square.text()) == 0:
@@ -169,14 +193,12 @@ class PuzzleFrame(QFrame):
         self.onSquareChangeEvent()
 
     def _setNewFocus(self, oldKey, newKey):
-
         returnVal = False
         if oldKey in self.squares and oldKey != newKey:
             self.squares[oldKey].clearFocus()
         elif oldKey is None:
             for key in self.squares:
                 if key != newKey and self.squares[key].hasFocus():
-
                     self.squares[key].clearFocus()
                     break
 
@@ -199,107 +221,112 @@ class PuzzleFrame(QFrame):
 
             self.puzzleLayout.addWidget(
                 squares[squareKey],
-                3 + sudokuDefs.rows.index(squareKey[0]) +
-                floor(sudokuDefs.rows.index(squareKey[0]) / 3.),
-                3 + sudokuDefs.columns.index(squareKey[1]) +
-                floor(sudokuDefs.columns.index(squareKey[1]) / 3.),
-                1, 1)
+                3
+                + sudokuDefs.rows.index(squareKey[0])
+                + floor(sudokuDefs.rows.index(squareKey[0]) / 3.0),
+                3
+                + sudokuDefs.columns.index(squareKey[1])
+                + floor(sudokuDefs.columns.index(squareKey[1]) / 3.0),
+                1,
+                1,
+            )
             squares[squareKey].installEventFilter(self)
         self.squares = squares
 
     def _initHeaders(self):
-
         rowHeaders = {}
         for rowKey in sudokuDefs.rows:
-
-            rowHeaders[rowKey] = PuzzleHeader(
-                self, rowKey,
-                'RowHeader' + rowKey)
+            rowHeaders[rowKey] = PuzzleHeader(self, rowKey, "RowHeader" + rowKey)
             self.puzzleLayout.addWidget(
                 rowHeaders[rowKey],
-                3 +
-                sudokuDefs.rows.index(rowKey) +
-                floor(
-                    sudokuDefs.rows.index(rowKey) /
-                    3.),
+                3
+                + sudokuDefs.rows.index(rowKey)
+                + floor(sudokuDefs.rows.index(rowKey) / 3.0),
                 1,
                 1,
-                1)
+                1,
+            )
         self.rowHeaders = rowHeaders
 
         colHeaders = {}
         for colKey in sudokuDefs.columns:
-            colHeaders[colKey] = PuzzleHeader(
-                self, colKey,
-                'ColumnHeader' + colKey)
+            colHeaders[colKey] = PuzzleHeader(self, colKey, "ColumnHeader" + colKey)
             self.puzzleLayout.addWidget(
                 colHeaders[colKey],
                 1,
-                3 +
-                sudokuDefs.columns.index(colKey) +
-                floor(
-                    sudokuDefs.columns.index(colKey) /
-                    3.),
+                3
+                + sudokuDefs.columns.index(colKey)
+                + floor(sudokuDefs.columns.index(colKey) / 3.0),
                 1,
-                1)
+                1,
+            )
         self.colHeaders = colHeaders
 
     def _initBorderLines(self):
         # LineBorders
         lineBorders = {}
-        for vertLineNum in ['1', '3', '6', '9']:
+        for vertLineNum in ["1", "3", "6", "9"]:
             lineBorders[vertLineNum] = PuzzleBorderLine(
-                self,
-                QFrame.Shape.VLine,
-                'verticalLine' + vertLineNum)
+                self, QFrame.Shape.VLine, "verticalLine" + vertLineNum
+            )
 
             self.puzzleLayout.addWidget(
                 lineBorders[vertLineNum],
-                1, 2 + (4 * (['1', '3', '6', '9'].index(vertLineNum))), 13, 1)
+                1,
+                2 + (4 * (["1", "3", "6", "9"].index(vertLineNum))),
+                13,
+                1,
+            )
 
-        for horizLineNum in ['A', 'C', 'F', 'I']:
+        for horizLineNum in ["A", "C", "F", "I"]:
             lineBorders[horizLineNum] = PuzzleBorderLine(
-                self,
-                QFrame.Shape.HLine,
-                'horizontalLine' + horizLineNum)
+                self, QFrame.Shape.HLine, "horizontalLine" + horizLineNum
+            )
             self.puzzleLayout.addWidget(
                 lineBorders[horizLineNum],
-                2 + (4 * ['A', 'C', 'F', 'I'].index(horizLineNum)), 1, 1, 13)
+                2 + (4 * ["A", "C", "F", "I"].index(horizLineNum)),
+                1,
+                1,
+                13,
+            )
 
         self.lineBorders = lineBorders
 
     def eventFilter(self, source, event):
-        if isinstance(
-                source,
-                PuzzleSquare) and event.type() == event.Type.KeyPress:
+        if isinstance(source, PuzzleSquare) and event.type() == event.Type.KeyPress:
             sourceObjectName = source.objectName()
             rowNum = sourceObjectName[0]
             colNum = sourceObjectName[1]
             if event.key() == Qt.Key.Key_Up:
                 newFocusCol = colNum
                 newFocusRow = sudokuDefs.rows[
-                    (sudokuDefs.rows.index(rowNum) - 1) % len(sudokuDefs.rows)]
-                return self._setNewFocus(
-                    sourceObjectName, newFocusRow + newFocusCol)
+                    (sudokuDefs.rows.index(rowNum) - 1) % len(sudokuDefs.rows)
+                ]
+                return self._setNewFocus(sourceObjectName, newFocusRow + newFocusCol)
             elif event.key() == Qt.Key.Key_Down:
                 newFocusCol = colNum
                 newFocusRow = sudokuDefs.rows[
-                    (sudokuDefs.rows.index(rowNum) + 1) % len(sudokuDefs.rows)]
-                return self._setNewFocus(
-                    sourceObjectName, newFocusRow + newFocusCol)
+                    (sudokuDefs.rows.index(rowNum) + 1) % len(sudokuDefs.rows)
+                ]
+                return self._setNewFocus(sourceObjectName, newFocusRow + newFocusCol)
             elif event.key() == Qt.Key.Key_Tab or event.key() == Qt.Key.Key_Right:
-                newKey = sudokuDefs.squares[(sudokuDefs.squares.index(
-                    sourceObjectName) + 1) % len(sudokuDefs.squares)]
+                newKey = sudokuDefs.squares[
+                    (sudokuDefs.squares.index(sourceObjectName) + 1)
+                    % len(sudokuDefs.squares)
+                ]
                 return self._setNewFocus(sourceObjectName, newKey)
             elif event.key() == Qt.Key.Key_Left:
-                newKey = sudokuDefs.squares[(sudokuDefs.squares.index(
-                    sourceObjectName) - 1) % len(sudokuDefs.squares)]
+                newKey = sudokuDefs.squares[
+                    (sudokuDefs.squares.index(sourceObjectName) - 1)
+                    % len(sudokuDefs.squares)
+                ]
                 return self._setNewFocus(sourceObjectName, newKey)
             else:
                 return False
-        elif isinstance(source, PuzzleSquare) and ((event.type() == QEvent.Type.FocusIn)
-                                                   or (event.type() == QEvent.Type.MouseButtonRelease)):
-
+        elif isinstance(source, PuzzleSquare) and (
+            (event.type() == QEvent.Type.FocusIn)
+            or (event.type() == QEvent.Type.MouseButtonRelease)
+        ):
             if source.isEnabled():
                 sourceObjectName = source.objectName()
                 returnVal = self._setNewFocus(None, sourceObjectName)
@@ -316,7 +343,6 @@ class PuzzleFrame(QFrame):
 
 
 class PuzzleSquare(QLineEdit):
-
     @property
     def squareType(self):
         return self._squareType
@@ -325,8 +351,9 @@ class PuzzleSquare(QLineEdit):
     def squareType(self, squareValueSetting):
         if self._squareType != squareValueSetting:
             self._squareType = squareValueSetting
-        self.setStatusTip('{name}: {status}'.format(
-            name=self.name, status=self.squareType.name))
+        self.setStatusTip(
+            "{name}: {status}".format(name=self.name, status=self.squareType.name)
+        )
 
     @property
     def name(self):
@@ -338,10 +365,8 @@ class PuzzleSquare(QLineEdit):
 
     @property
     def neighbors(self):
-
         squares = grabPuzzleSquares()
         return {squareKey: squares[squareKey] for squareKey in self.neighborKeys}
-
 
     @property
     def nextSquare(self):
@@ -357,7 +382,6 @@ class PuzzleSquare(QLineEdit):
         retVal = ValidityEnum.Valid
         if len(myValue) > 0:
             for neighborSquare in self.neighbors.values():
-                
                 if myValue in neighborSquare.text():
                     retVal = ValidityEnum.Invalid
                     break
@@ -366,8 +390,9 @@ class PuzzleSquare(QLineEdit):
 
         if self._isValid != retVal:
             self._isValid = retVal
-            self.setToolTip('Square {name}: {tip}'.format(
-                name=self.name, tip=retVal.name))
+            self.setToolTip(
+                "Square {name}: {tip}".format(name=self.name, tip=retVal.name)
+            )
         self._isValid = retVal
         return self._isValid
 
@@ -396,7 +421,7 @@ class PuzzleSquare(QLineEdit):
         self._isValid = ValidityEnum.Valid
         self._neighborKeys = sudokuDefs.neighbors(self.name)
         self._squareType = SquareTypeEnum.InputUnlocked
-        self.setProperty('squareType', 'InputUnlockedAndValid')
+        self.setProperty("squareType", "InputUnlockedAndValid")
 
         self.setStyleSheet(
             """
@@ -428,8 +453,9 @@ class PuzzleSquare(QLineEdit):
             """
         )
 
-        self.setToolTip('Square {name}: {tip}'.format(
-            name=self.name, tip=self._isValid.name))
+        self.setToolTip(
+            "Square {name}: {tip}".format(name=self.name, tip=self._isValid.name)
+        )
         self.textEdited.connect(self.onChanged)
         self.textEdited.connect(grabPuzzleFrame().onSquareChangeEvent)
 
@@ -441,14 +467,14 @@ class PuzzleSquare(QLineEdit):
             allSquares[neighborKey].setProperty("isNeighbor", "true")
             allSquares[neighborKey].style().polish(allSquares[neighborKey])
             allSquares[neighborKey].style().unpolish(allSquares[neighborKey])
-        for nonNeighborKey in list(set(allSquares.keys()) -
-                                   set(currentSquare.neighborKeys) -
-                                   set(currentSquare.objectName())):
+        for nonNeighborKey in list(
+            set(allSquares.keys())
+            - set(currentSquare.neighborKeys)
+            - set(currentSquare.objectName())
+        ):
             allSquares[nonNeighborKey].setProperty("isNeighbor", "false")
-            allSquares[nonNeighborKey].style().polish(
-                allSquares[nonNeighborKey])
-            allSquares[nonNeighborKey].style().unpolish(
-                allSquares[nonNeighborKey])
+            allSquares[nonNeighborKey].style().polish(allSquares[nonNeighborKey])
+            allSquares[nonNeighborKey].style().unpolish(allSquares[nonNeighborKey])
         return super().focusInEvent(evnt)
 
     def onChanged(self, newTextStr):
@@ -467,64 +493,75 @@ class PuzzleSquare(QLineEdit):
 
     def _onResetAction(self):
         self.setEnabled(True)
-        self.setText('')
+        self.setText("")
         self.squareType = SquareTypeEnum.InputUnlocked
         self._isValid = ValidityEnum.Valid
-        self.setProperty('squareType', "InputUnlockedAndValid")
+        self.setProperty("squareType", "InputUnlockedAndValid")
         self.style().unpolish(self)
         self.style().polish(self)
 
     def _refresh(self):
         isValid = self.isValid
-        if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
-            self.setProperty('squareType', "InputUnlockedAndValid")
-            '''
+        if (
+            isValid == ValidityEnum.Valid
+            and self.squareType == SquareTypeEnum.InputUnlocked
+        ):
+            self.setProperty("squareType", "InputUnlockedAndValid")
+            """
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
                                "font-weight: bold;"
                                "font-style: regular;}")
-                               '''
-        elif isValid == ValidityEnum.Invalid and self.squareType == SquareTypeEnum.InputUnlocked:
-            self.setProperty('squareType', "InputUnlockedAndInvalid")
-            '''
+                               """
+        elif (
+            isValid == ValidityEnum.Invalid
+            and self.squareType == SquareTypeEnum.InputUnlocked
+        ):
+            self.setProperty("squareType", "InputUnlockedAndInvalid")
+            """
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,0,0);"
                                "font-style: italic;}")
-            '''
-        elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputLocked:
-            self.setProperty('squareType', "InputLockedAndValid")
-            '''
+            """
+        elif (
+            isValid == ValidityEnum.Valid
+            and self.squareType == SquareTypeEnum.InputLocked
+        ):
+            self.setProperty("squareType", "InputLockedAndValid")
+            """
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(255,140,0);"
                                "font-weight: bold;"
                                "font-style: normal;"
                                "background-color: rgb(30,30,30);"
                                "border-color: rgb(255,140,0);}")
-            '''
-        elif (isValid == ValidityEnum.Valid or isValid == ValidityEnum.NoStatement) and self.squareType == SquareTypeEnum.UserSet:
-            self.setProperty('squareType', "UserSetAndValid")
-            '''
+            """
+        elif (
+            isValid == ValidityEnum.Valid or isValid == ValidityEnum.NoStatement
+        ) and self.squareType == SquareTypeEnum.UserSet:
+            self.setProperty("squareType", "UserSetAndValid")
+            """
             self.setStyleSheet("QLineEdit {"
                                "color:	rgb(212,255,200);"
                                "font-weight: normal;"
                                "font-style: regular;}")
-            '''
+            """
         elif isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.Solved:
-            self.setProperty('squareType', "SolvedAndValid")
-            '''
+            self.setProperty("squareType", "SolvedAndValid")
+            """
             self.setStyleSheet("QLineEdit {"
                                "color:	rgba(0,255,0,204);"
                                "font-weight: normal;"
                                "font-style: regular;}")
-            '''
+            """
         self.style().unpolish(self)
         self.style().polish(self)
 
         self.setToolTip(
-            'Square {name}: {valid} - {status}'.format(
-                name=self.name,
-                valid=self._isValid.name,
-                status=self._squareType.name))
+            "Square {name}: {valid} - {status}".format(
+                name=self.name, valid=self._isValid.name, status=self._squareType.name
+            )
+        )
 
 
 class PuzzleBorderLine(QFrame):
@@ -546,10 +583,10 @@ class PuzzleHeader(QLabel):
 
         self.setObjectName(objectName)
         self.setParent(parent)
-        self.setText('  ' + text + '  ')
+        self.setText("  " + text + "  ")
         self.setScaledContents(True)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setFont(headerFont)
-        self.setStyleSheet("QLabel {"
-                           "background-color: rgb(70,70,70);"
-                           "border-color: rgb(70,70,70)}")
+        self.setStyleSheet(
+            "QLabel {background-color: rgb(70,70,70);border-color: rgb(70,70,70)}"
+        )
