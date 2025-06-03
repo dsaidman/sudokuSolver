@@ -3,8 +3,8 @@ luac.out
 *.vert*
 *venv*
 *.vscode
-*__pycache__*
-*.egg-info.*
+*__pycache__
+*egg-info
 
 # luarocks build files
 *.src.rock

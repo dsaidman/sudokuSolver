@@ -169,7 +169,7 @@ def _getNextEntryPoint(pzl: SudokuPuzzleT):
         k: len(v) for k, v in pzl.items() if mostFrequentUnsolved in v and len(v) > 1
     }
     if len(nextSquareChoices) == 0:
-        return False
+        return (False, False)
     bestValueCount = min(nextSquareChoices.values())
     nextSquareChoices = {k: v for k, v in nextSquareChoices.items() if v == bestValueCount}
     nextSquareChoiceKey = list(nextSquareChoices.keys())[0]
@@ -226,6 +226,7 @@ def _solveTheThing(puzzle: SudokuPuzzleT):
             return False
         else:
             nextEntry, nextValues = _getNextEntryPoint(puzzle)
+
             if not nextEntry:
                 return False
 
