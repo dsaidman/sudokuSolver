@@ -18,39 +18,39 @@ uiLogger = logging.getLogger("uiLogger")
 
 
 class Py2Runtime:
+    def __init__(self, lang=None):
+        self._lang = lang
+        self._runtime = {}
+        self._definitionsModule = {}
+        self._solverModule = {}
+        self._version = {}
+    
     @property
     def runtime(self):
         return self._runtime[self.lang]
 
     @property
-    def defintions(self):
+    def definitions(self):
         return self._definitionsModule[self.lang]
 
     @property
     def solver(self):
         return self._solverModule[self.lang]
+    
+    @property
+    def version(self):
+        return self._version[self.lang]
 
-    def __init__(self, lang=None):
-        """Constructor method initializes runtime and modules."""
-        self.lang = lang
-        self._runtime = {}
-        self._definitionsModule = {}
-        self._solverModule = {}
-        self._version = {}
+    @property
+    def lang(self) -> str:
+        return self._lang
 
-    def getLang(self):
-        return self.lang
-
-    def setLang(self, lang):
-        """
-        Set the runtime language.
-
-        Args:
-            lang (str): The language to set the runtime to. Can be "lua" or "julia".
-        """
+    @lang.setter
+    def lang(self, lang):
+        
         if lang.lower() not in ["luajit", "lua", "julia", "python"]:
             raise ValueError(f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
-        self.lang = lang.lower()
+        self._lang = lang.lower()
         uiLogger.info(f"Using {self.lang} runtime")
 
         if self.lang == "luajit" and self.lang not in self._runtime:
