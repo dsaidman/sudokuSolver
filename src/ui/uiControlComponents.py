@@ -1,4 +1,5 @@
 from time import perf_counter as tictoc
+import logging
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
@@ -9,6 +10,7 @@ from ui.sudokuDefs import sudokuDefs
 from .uiEnums import SquareTypeEnum, ValidityEnum
 from .uiHelpers import grabPuzzleFrame, grabStatusBar, grabWidget
 
+uiLogger = logging.getLogger("uiLogger")
 
 class UiPanel(QFrame):
     def __init__(self, parent, objectName="UiPanel"):
@@ -180,15 +182,17 @@ class SolvePuzzleButton(QPushButton):
 
                 solveFun = rt.solver
             # Everything is ready to call
+            uiLogger.info("Performing Compile Run...")
+            
+            solveFun(puzzleArg)
+            uiLogger.info("Performing timed run...")
+            
             tStart = tictoc()
-
             result = solveFun(puzzleArg)
             tDuration_ms = (tictoc() - tStart) * 1000
             print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
 
-            theSolution = {}
-            for squareKey, squareValue in result.items():
-                theSolution[squareKey] = squareValue
+            theSolution = {squareKey : squareValue for squareKey, squareValue in result.items()}
 
             self.setSolution(theSolution)
             uiPanel = grabWidget(QFrame, "UiPanel")
@@ -229,11 +233,8 @@ class SolvePuzzleButton(QPushButton):
             if puzzleSquares[puzzleKey].squareType is SquareTypeEnum.UserSet:
                 puzzleSquares[puzzleKey].squareType = SquareTypeEnum.Solved
                 puzzleSquares[puzzleKey].setText(theSolutionDict[puzzleKey])
-            # else:
-            #    allComplete = False
             puzzleSquares[puzzleKey].setEnabled(False)
         # if allComplete:
         for squareValue in puzzleSquares.values():
             squareValue.setEnabled(False)
-            squareValue.isValid
         puzzleFrame.onSquareChangeEvent()
