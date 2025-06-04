@@ -4,8 +4,7 @@ import logging
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
 
-from solver.py2runtime import RuntimePy as rt
-from ui.sudokuDefs import sudokuDefs
+from Puzzle import puzzle as sudokuDefs
 
 from .uiEnums import SquareTypeEnum, ValidityEnum
 from .uiHelpers import grabPuzzleFrame, grabStatusBar, grabWidget

@@ -1,10 +1,10 @@
-from functools import cached_property
+from functools import cached_property, cache
 
-from solver.py2runtime import RuntimePy as rt
+from py2runtime import RuntimePy as rt
 
 class SudokuPuzzle:
-    def __init__(self, lang = None, pzlStr:str="."*81):
-        self._lang    = None
+    def __init__(self, lang:str = "python", pzlStr:str="."*81):
+        self._lang    = lang
         self.value    = pzlStr
 
     @property
@@ -64,7 +64,7 @@ class SudokuPuzzle:
             return sorted(rt.definitions.columnNames)
 
     @cached_property
-    def squares(self):
+    def squares(self) -> list[str]:
         """
         Returns list of all square tile keys A1-I9 - 81 total.
 
@@ -77,9 +77,8 @@ class SudokuPuzzle:
             return sorted(list(rt.definitions.squares), reverse=False)
         elif self.runtime == "python":
             return sorted(rt.definitions.squares)
-
-    @cached_property
-    def nextSquare(self, currentKey):
+    @cache
+    def nextSquare(self, currentKey:str) -> str:
         """
         Returns next square in list of square keys A1->I9.
 
@@ -91,8 +90,8 @@ class SudokuPuzzle:
         """
         return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
 
-    @cached_property
-    def lastSquare(self, currentKey):
+    @cache
+    def lastSquare(self, currentKey:str) -> str:
         """
         Returns previous square in list of square keys A1->I9.
 
@@ -104,8 +103,8 @@ class SudokuPuzzle:
         """
         return self.squares[((self.squares.index(currentKey) + -1) % len(self.squares))]
 
-    @cached_property
-    def neighbors(self, squareID):
+    @cache
+    def neighbors(self, squareID:str) -> list[str]:
         """
         Returns list of squareID that cannot share the same value.
 

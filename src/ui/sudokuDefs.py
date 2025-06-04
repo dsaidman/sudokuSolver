@@ -1,8 +1,8 @@
 import logging
 from functools import cache, cached_property
 
-import solver.solver as pySolver
-from solver.py2runtime import RuntimePy as rt
+
+from py2runtime import RuntimePy as rt
 
 uiLogger = logging.getLogger("uiLogger")
 

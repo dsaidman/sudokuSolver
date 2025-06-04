@@ -15,9 +15,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from solver.py2runtime import RuntimePy as rt
+from py2runtime import RuntimePy as rt
+from Puzzle import puzzle
 
-from .sudokuDefs import sudokuDefs as defs
 from .uiEnums import AppStatusEnum
 from .uiHelpers import grabMainWindow, grabPuzzleFrame, grabWidget
 from .uiMainPanelComponents import UiMainPanel
@@ -38,6 +38,16 @@ class AppMainWindow(QMainWindow):
     def status(self, statusVal):
         self._status = statusVal
         return statusVal
+    
+    @property
+    def runtimeLang(self):
+        return self._lang
+    
+    @runtimeLang.setter
+    def runtimeLang(self,lang):
+        self._lang     = lang
+        puzzle.runtime = lang
+        rt.lang        = lang
 
     def __init__(self, lang="python"):
         """Constructor method initializes the main window and its components."""
@@ -47,8 +57,6 @@ class AppMainWindow(QMainWindow):
         uiLogger.debug("Setting up main window properties")
         self.setWindowFlags(Qt.WindowType.Window)
         self.runtimeLang = lang
-        rt.setLang(self.runtimeLang)
-        defs.setLang(self.runtimeLang)
 
         self.setObjectName("MainWindow")
         self.setWindowModality(Qt.WindowModality.NonModal)

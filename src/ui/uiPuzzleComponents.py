@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
-from .sudokuDefs import sudokuDefs
+from Puzzle import puzzle as sudokuDefs
 from .uiEnums import AppStatusEnum, SquareTypeEnum, ValidityEnum
 from .uiHelpers import (
     grabCurrentSquare,

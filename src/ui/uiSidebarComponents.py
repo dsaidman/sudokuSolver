@@ -1,9 +1,8 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QPushButton, QVBoxLayout
 
-from solver.py2runtime import RuntimePy as rt
+from Puzzle import puzzle
 
-from .sudokuDefs import sudokuDefs as defs
 from .uiHelpers import grabMainWindow
 
 
@@ -130,8 +129,8 @@ class UiSidebarButton(QPushButton):
             btn.style().unpolish(btn)
             btn.style().polish(btn)
 
-        defs.setLang(self.text())
-        rt.setLang(self.text())
+        puzzle.lang = self.text()
+
         self.setProperty("selected", True)
         self.style().unpolish(self)
         self.style().polish(self)
