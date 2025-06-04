@@ -17,7 +17,7 @@ import sys
 uiLogger = logging.getLogger("uiLogger")
 
 
-class Py2Runtime:
+class _Py2Runtime:
     def __init__(self, lang=None):
         self._lang = lang
         self._runtime = {}
@@ -155,4 +155,4 @@ class Py2Runtime:
 
 # Evaluate the Py2Lua object inside the module so it can be imported
 # directly without making new class instances
-RuntimePy = Py2Runtime()
+RuntimePy = _Py2Runtime()

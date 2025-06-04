@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
 
 from Puzzle import puzzle as sudokuDefs
-
+from py2runtime import RuntimePy as rt
 from .uiEnums import SquareTypeEnum, ValidityEnum
 from .uiHelpers import grabPuzzleFrame, grabStatusBar, grabWidget
 
@@ -175,7 +175,7 @@ class SolvePuzzleButton(QPushButton):
                     puzzleArg[k] = v
                 solveFun = rt.solver.solveTheThing
             elif rt.lang == "python":
-                puzzleArg = rt.defintions.puzzle0.copy()
+                puzzleArg = rt.definitions.puzzle0.copy()
                 for k, v in puzzleFrame.asDict().items():
                     puzzleArg[k] = v
 

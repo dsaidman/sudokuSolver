@@ -1,6 +1,6 @@
 
 module JDefinitions
-using Revise
+
 export rowNames, columnNames, squares, neighbors, cellRows, cellColumns, puzzle0, families, VectorStringT, SquareT, FamiliesT, NeighborsT, SudokuPuzzleT
 
 # Declare some types aliases for convenience
@@ -64,6 +64,7 @@ module JSolver
 export solve, importPuzzle
 
 using ..JDefinitions
+using ProfileView
 using Revise
 	
 @inline function isPuzzleComplete(pzl::SudokuPuzzleT)::Bool
@@ -151,7 +152,7 @@ function solveTheThing(puzzle::SudokuPuzzleT)::Union{SudokuPuzzleT,Bool}
 				nextPuzzleGuess[nextEntry] = string(nextValue)
 				nextPuzzleGuess = solveTheThing(nextPuzzleGuess)
 				
-				if typeof(nextPuzzleGuess) == Bool && !nextPuzzleGuess 
+                if nextPuzzleGuess == false
 					continue
 				elseif isPuzzleSolved(nextPuzzleGuess)
 					return nextPuzzleGuess
@@ -178,7 +179,7 @@ function solve(puzzle::SudokuPuzzleT)::Union{SudokuPuzzleT,Bool}
 end
 
 end
-
+#=
 function importPuzzle(filePath::String)::SudokuPuzzleT
     puzzle = copy(Solver.Definitions.puzzle0)
     open(filePath, "r") do file
@@ -189,3 +190,4 @@ function importPuzzle(filePath::String)::SudokuPuzzleT
     end
     return puzzle
 end
+=#

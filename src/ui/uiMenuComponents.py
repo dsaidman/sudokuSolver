@@ -4,7 +4,7 @@ import logging
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 from PyQt6.QtWidgets import QInputDialog, QMenu, QMenuBar, QPushButton
 
-from .sudokuDefs import sudokuDefs
+from Puzzle import puzzle as sudokuDefs
 from .uiEnums import SquareTypeEnum
 from .uiHelpers import (
     getBasePath,

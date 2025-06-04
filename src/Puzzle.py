@@ -2,7 +2,7 @@ from functools import cached_property, cache
 
 from py2runtime import RuntimePy as rt
 
-class SudokuPuzzle:
+class _SudokuPuzzle(object):
     def __init__(self, lang:str = "python", pzlStr:str="."*81):
         self._lang    = lang
         self.value    = pzlStr
@@ -126,4 +126,4 @@ class SudokuPuzzle:
         elif self.runtime == "python":
             return rt.definitions.neighbors[squareID]
 
-puzzle = SudokuPuzzle()
+puzzle = _SudokuPuzzle()
