@@ -47,11 +47,16 @@ class _Py2Runtime:
 
     @lang.setter
     def lang(self, lang):
-        
         if not lang:
             return
         
-        if lang in self._runtime:
+        lang = lang.lower()
+        if lang == self.lang:
+            return
+        
+        if lang in self._runtime or lang in self._version:
+            self._lang = lang
+            uiLogger.info(f"Using {self.lang} runtime")
             return
         
         if lang.lower() not in ["luajit", "lua", "julia", "python"]:
@@ -59,7 +64,7 @@ class _Py2Runtime:
         self._lang = lang.lower()
         uiLogger.info(f"Using {self.lang} runtime")
 
-        if self.lang == "luajit" and self.lang not in self._runtime:
+        if lang == "luajit" and self._lang not in self._version:
             import lupa.luajit21 as lupa
             from lupa import LuaRuntime
 
@@ -82,7 +87,7 @@ class _Py2Runtime:
             self._solverModule["luajit"] = lua.require("src.solver.solver")[0]
 
             uiLogger.info("\tLuaJit Runtime initialized")
-        elif self.lang == "lua" and self.lang not in self._runtime:
+        elif lang == "lua" and self._lang not in self._version:
             import lupa.lua54 as lupa
             from lupa import LuaRuntime
 
@@ -105,7 +110,7 @@ class _Py2Runtime:
             self._solverModule["lua"] = lua.require("src.solver.solver")[0]
 
             uiLogger.info("\tLua Runtime initialized")
-        elif lang == "julia" and self.lang not in self._runtime:
+        elif lang == "julia" and self._lang not in self._version:
             from juliacall import Main as jl
 
             uiLogger.info(f"Using julia {jl.VERSION}")
@@ -124,10 +129,9 @@ class _Py2Runtime:
             self._solverModule["julia"] = jl.JSolver
 
             uiLogger.info("\tJulia Runtime initialized")
-        elif lang == "python" and self.lang not in self._runtime:
+        elif lang == "python" and self.lang not in self._version:
             import solver.solver as pySolver
 
-            # uiLogger.info(f"Using python {jl.VERSION}")
             self._version["python"] = sys.version
 
             self._runtime["python"] = []

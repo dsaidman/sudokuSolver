@@ -45,7 +45,7 @@ class SudokuPuzzle(object):
             raise ValueError(
                 "Invalid language specified. Choose from 'luajit','lua', 'julia', or 'python'."
             )
-        self._lang = lang
+        self.lang  = lang
         rt.lang    = lang
 
     @cached_property
@@ -143,6 +143,8 @@ class SudokuPuzzle(object):
     
     def solve(self) -> dict[str,str]:
         puzzleArg = self.value
+        
+        self.lang = rt.lang
         if rt.lang == "luajit" or rt.lang == "lua":
             puzzleArg = rt.dict2Table(puzzleArg)
             solveFun = rt.solver["solve"]
