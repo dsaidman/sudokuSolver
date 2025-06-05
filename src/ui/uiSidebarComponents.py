@@ -2,6 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QPushButton, QVBoxLayout
 
 from Puzzle import puzzle
+from py2runtime import RuntimePy as rt
 
 from .uiHelpers import grabMainWindow
 
@@ -130,6 +131,8 @@ class UiSidebarButton(QPushButton):
             btn.style().polish(btn)
 
         puzzle.lang = self.text()
+        rt.lang     = self.text()
+        
 
         self.setProperty("selected", True)
         self.style().unpolish(self)

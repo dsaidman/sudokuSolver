@@ -1,7 +1,7 @@
 from functools import cached_property, cache
 import logging
 from py2runtime import RuntimePy as rt
-from time import perf_counter as tictoc
+
 uiLogger = logging.getLogger("uiLogger")
 
 class SudokuPuzzle(object):
@@ -140,27 +140,24 @@ class SudokuPuzzle(object):
             return list(rt.definitions.neighbors[squareID])
         elif self.runtime == "python":
             return rt.definitions.neighbors[squareID]
-        
-    def solve(self):
+    
+    def solve(self) -> dict[str,str]:
         puzzleArg = self.value
-        if self.runtime == "luajit" or self.runtime == "lua":
+        if rt.lang == "luajit" or rt.lang == "lua":
             puzzleArg = rt.dict2Table(puzzleArg)
             solveFun = rt.solver["solve"]
-        elif self.runtime == "julia":
+        elif rt.lang == "julia":
+            puzzleArg = rt.runtime.copy(rt.definitions.puzzle0)
+            for k, v in self.value.items():
+                puzzleArg[k] = v
             solveFun = rt.solver.solve
-        elif self.runtime == "python":
+        elif rt.lang == "python":
             solveFun = rt.solver
             # Everything is ready to call
-        uiLogger.info("Performing Compile Run...")
-        solveFun(puzzleArg)
-        uiLogger.info("Performing timed run...")
-            
-        tStart = tictoc()
+
         result = solveFun(puzzleArg)
-        tDuration_ms = (tictoc() - tStart) * 1000
-        print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
 
         self.solution = {squareKey : squareValue for squareKey, squareValue in result.items()}
-        return self.solution
+        return result
 
 puzzle = SudokuPuzzle()

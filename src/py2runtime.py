@@ -51,7 +51,7 @@ class _Py2Runtime:
         if not lang:
             return
         
-        if self.lang in self._runtime:
+        if lang in self._runtime:
             return
         
         if lang.lower() not in ["luajit", "lua", "julia", "python"]:

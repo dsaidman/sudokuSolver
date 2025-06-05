@@ -1,6 +1,6 @@
 
 module JDefinitions
-
+using Revise
 export rowNames, columnNames, squares, neighbors, cellRows, cellColumns, puzzle0, families, VectorStringT, SquareT, FamiliesT, NeighborsT, SudokuPuzzleT
 
 # Declare some types aliases for convenience
@@ -60,12 +60,12 @@ puzzle0::SudokuPuzzleT = Dict(sq => "123456789" for sq in squares)
 end
 
 module JSolver
-
+using Revise
 export solve, importPuzzle
 
 using ..JDefinitions
 using ProfileView
-using Revise
+
 	
 @inline function isPuzzleComplete(pzl::SudokuPuzzleT)::Bool
     all(v -> length(v) == 1, values(pzl))
@@ -166,7 +166,7 @@ function solveTheThing(puzzle::SudokuPuzzleT)::Union{SudokuPuzzleT,Bool}
 	end
 end
 
-function solve(puzzle::SudokuPuzzleT)::Union{SudokuPuzzleT,Bool}
+function solve(puzzle::SudokuPuzzleT)
 	# Make sure the puzzle is valid
 
 	if !isPuzzleComplete(puzzle) && !isPuzzleSolved(puzzle)

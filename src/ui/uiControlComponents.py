@@ -1,5 +1,6 @@
 
 import logging
+from time import process_time_ns as ttoc
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
@@ -173,9 +174,18 @@ class SolvePuzzleButton(QPushButton):
             thePzl = Puzzle(  
                             lang=rt.lang, 
                             value=puzzleFrame.asDict() )
+            #compilate run
             thePzl.solve()
-            '''
-            self.setSolution(theSolution)
+            
+            #timed run
+            thePzl.value = puzzleFrame.asDict()
+            
+            tStart = ttoc()
+            result = thePzl.solve()
+            tDuration_ms = (ttoc() - tStart) / 1000000
+
+            self.setSolution(result)
+   
             uiPanel = grabWidget(QFrame, "UiPanel")
             uiPanel._setCompleted()
 
@@ -206,7 +216,7 @@ class SolvePuzzleButton(QPushButton):
 
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
-            '''
+            
     def setSolution(self, theSolutionDict):
         puzzleFrame = grabPuzzleFrame()
         puzzleSquares = puzzleFrame.squares
