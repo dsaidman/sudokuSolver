@@ -1,12 +1,16 @@
 from functools import cached_property, cache
-
+import logging
 from py2runtime import RuntimePy as rt
+from time import perf_counter as tictoc
+uiLogger = logging.getLogger("uiLogger")
 
-class _SudokuPuzzle(object):
-    def __init__(self, lang:str = "python", pzlStr:str="."*81):
+class SudokuPuzzle(object):
+    def __init__(self, lang:str = "python", value="."*81):
         self._lang    = lang
-        self.value    = pzlStr
-
+        rt.lang       = lang
+        self.value    = value
+        self.solution = None
+        
     @property
     def runtimes(self) -> list[str]:
         return self._lang
@@ -16,8 +20,19 @@ class _SudokuPuzzle(object):
         return self._value
 
     @value.setter
-    def value(self,pzlStr:str) -> None:
-        self._value = {sqKey : sqValue if sqValue !="." else "123456789" for sqKey, sqValue in enumerate(pzlStr) }
+    def value(self,inPuzzle) -> None:
+        
+        ptype      = type(inPuzzle)
+        pzl      = dict.fromkeys(self.squares,"123456789")
+        
+        if ptype is dict:
+            for sqKey, sqValue in inPuzzle.items():
+                pzl[sqKey] = sqValue
+        elif ptype is str and len(inPuzzle) == 81:
+            for idx, val in enumerate(inPuzzle):
+                if val != ".":
+                    pzl[self.squares[idx]] = val 
+        self._value = pzl
 
     @property
     def runtime(self)  -> str:
@@ -125,5 +140,27 @@ class _SudokuPuzzle(object):
             return list(rt.definitions.neighbors[squareID])
         elif self.runtime == "python":
             return rt.definitions.neighbors[squareID]
+        
+    def solve(self):
+        puzzleArg = self.value
+        if self.runtime == "luajit" or self.runtime == "lua":
+            puzzleArg = rt.dict2Table(puzzleArg)
+            solveFun = rt.solver["solve"]
+        elif self.runtime == "julia":
+            solveFun = rt.solver.solve
+        elif self.runtime == "python":
+            solveFun = rt.solver
+            # Everything is ready to call
+        uiLogger.info("Performing Compile Run...")
+        solveFun(puzzleArg)
+        uiLogger.info("Performing timed run...")
+            
+        tStart = tictoc()
+        result = solveFun(puzzleArg)
+        tDuration_ms = (tictoc() - tStart) * 1000
+        print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
 
-puzzle = _SudokuPuzzle()
+        self.solution = {squareKey : squareValue for squareKey, squareValue in result.items()}
+        return self.solution
+
+puzzle = SudokuPuzzle()

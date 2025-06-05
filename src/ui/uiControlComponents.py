@@ -1,10 +1,12 @@
-from time import perf_counter as tictoc
+
 import logging
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
 
 from Puzzle import puzzle as sudokuDefs
+from Puzzle import SudokuPuzzle as Puzzle
+
 from py2runtime import RuntimePy as rt
 from .uiEnums import SquareTypeEnum, ValidityEnum
 from .uiHelpers import grabPuzzleFrame, grabStatusBar, grabWidget
@@ -110,6 +112,7 @@ class SetPuzzleBtn(QPushButton):
             self.setToolTip("Puzzle is valid, click to lock the puzzle when ready")
         else:
             self.setToolTip("Im locked and puzzle is set. Press solve to solve the puzzle")
+            
         self.style().polish(self)
         self.style().unpolish(self)
 
@@ -166,33 +169,12 @@ class SolvePuzzleButton(QPushButton):
             self.setProperty("completed", False)
             return False
         else:
-            if rt.lang == "luajit" or rt.lang == "lua":
-                puzzleArg = rt.dict2Table(puzzleFrame.asDict())
-                solveFun = rt.solver["solve"]
-            elif rt.lang == "julia":
-                puzzleArg = rt.runtime.copy(rt.defintions.puzzle0)
-                for k, v in puzzleFrame.asDict().items():
-                    puzzleArg[k] = v
-                solveFun = rt.solver.solveTheThing
-            elif rt.lang == "python":
-                puzzleArg = rt.definitions.puzzle0.copy()
-                for k, v in puzzleFrame.asDict().items():
-                    puzzleArg[k] = v
-
-                solveFun = rt.solver
-            # Everything is ready to call
-            uiLogger.info("Performing Compile Run...")
             
-            solveFun(puzzleArg)
-            uiLogger.info("Performing timed run...")
-            
-            tStart = tictoc()
-            result = solveFun(puzzleArg)
-            tDuration_ms = (tictoc() - tStart) * 1000
-            print(f"Elapsed time: {tDuration_ms:.2f} milliseconds")
-
-            theSolution = {squareKey : squareValue for squareKey, squareValue in result.items()}
-
+            thePzl = Puzzle(  
+                            lang=rt.lang, 
+                            value=puzzleFrame.asDict() )
+            thePzl.solve()
+            '''
             self.setSolution(theSolution)
             uiPanel = grabWidget(QFrame, "UiPanel")
             uiPanel._setCompleted()
@@ -224,7 +206,7 @@ class SolvePuzzleButton(QPushButton):
 
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
-
+            '''
     def setSolution(self, theSolutionDict):
         puzzleFrame = grabPuzzleFrame()
         puzzleSquares = puzzleFrame.squares

@@ -48,6 +48,12 @@ class _Py2Runtime:
     @lang.setter
     def lang(self, lang):
         
+        if not lang:
+            return
+        
+        if self.lang in self._runtime:
+            return
+        
         if lang.lower() not in ["luajit", "lua", "julia", "python"]:
             raise ValueError(f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
         self._lang = lang.lower()
@@ -62,8 +68,8 @@ class _Py2Runtime:
             uiLogger.info(f"Using {lua.lua_implementation} (compiled with {lupa.LUA_VERSION})")
             self._version["luajit"] = lupa.LUA_VERSION
 
-            lua.execute("package.path = '../solver/?.lua;' .. package.path")
-            lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
+            lua.execute("package.path = 'solver/?.lua;' .. package.path")
+            lua.execute("package.cpath = 'solver/?.lua;' .. package.cpath")
 
             uiLogger.debug("Initializing lua runtime...")
             self._runtime["luajit"] = lua
@@ -85,8 +91,8 @@ class _Py2Runtime:
             uiLogger.info(f"Using {lua.lua_implementation} (compiled with {lupa.LUA_VERSION})")
             self._version["lua"] = lupa.LUA_VERSION
 
-            lua.execute("package.path = '../solver/?.lua;' .. package.path")
-            lua.execute("package.cpath = '../solver/?.lua;' .. package.cpath")
+            lua.execute("package.path = './solver/?.lua;' .. package.path")
+            lua.execute("package.cpath = './solver/?.lua;' .. package.cpath")
 
             uiLogger.debug("Initializing lua runtime...")
             self._runtime["lua"] = lua
