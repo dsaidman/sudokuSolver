@@ -180,68 +180,10 @@ def _getNextEntryPoint(pzl: SudokuPuzzleT):
     return nextSquareChoiceKey, nextSquareChoiceValues
 
 
-def _eliminationPass(pzl: SudokuPuzzleT) -> SudokuPuzzleT:
-    """Perform an elimination pass on the puzzle.
-    Removes impossible values from the puzzle based on the current state.
-    Args:
-            pzl (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
-    Returns:
-            SudokuPuzzleT: The updated puzzle after the elimination pass.
-    """
-    didChange = True
-    while didChange and not isPuzzleComplete(pzl):
-        solvedSquares = [k for k, v in pzl.items() if len(v) == 1]
-        didChange = False
-        for solvedSquare in solvedSquares:
-            solvedValue = pzl[solvedSquare]
-            solvedNeighbors = [nsq for nsq in neighbors[solvedSquare] if nsq is not solvedSquare]
-            # Remove solvedValue from all neighbors
-            for nsq in solvedNeighbors:
-                if len(pzl[nsq]) > 1 and solvedValue in pzl[nsq]:
-                    didChange = True
-                    pzl[nsq] = pzl[nsq].replace(solvedValue, "")
-    # Dont return a copy in this case, change in place
-    return pzl
 
 
-def _solveTheThing(puzzle: SudokuPuzzleT):
-    """Recursively solve the Sudoku puzzle using backtracking.
-    Args:
-            puzzle (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
-    Returns:
-            SudokuPuzzleT | bool: The solved puzzle if successful, False if no solution exists.
-    """
 
-    if not isPuzzleSolved(puzzle):
-        # Make a guess
-        puzzle = _eliminationPass(puzzle)
 
-        if puzzle is False:
-            return False
-
-        if isPuzzleSolved(puzzle):
-            return puzzle
-
-        if isPuzzleComplete(puzzle) and not isPuzzleSolved(puzzle):
-            return False
-        else:
-            nextEntry, nextValues = _getNextEntryPoint(puzzle)
-
-            if not nextEntry:
-                return False
-
-            for nextValue in nextValues:
-                nextPuzzleGuess = puzzle.copy()
-                nextPuzzleGuess[nextEntry] = nextValue
-                nextPuzzleGuess = _solveTheThing(nextPuzzleGuess)
-
-                if not nextPuzzleGuess:
-                    continue  # No solution found for this guess, try the next one
-                elif isPuzzleSolved(nextPuzzleGuess):
-                    return nextPuzzleGuess
-            return False
-    else:
-        return puzzle
 
 
 def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
@@ -254,4 +196,73 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
     Returns:
         dict: The solved puzzle or False if no solution exists.
     """
+    
+            
+    numRecursions:int  = 0
+    numOperations:int  = 0
+    bestSinglePass:int = 0
+    
+    def _solveTheThing(puzzle: SudokuPuzzleT):
+        """Recursively solve the Sudoku puzzle using backtracking.
+        Args:
+                puzzle (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
+        Returns:
+                SudokuPuzzleT | bool: The solved puzzle if successful, False if no solution exists.
+        """
+
+        if not isPuzzleSolved(puzzle):
+            # Make a guess
+            puzzle = _eliminationPass(puzzle)
+
+            if puzzle is False:
+                return False
+
+            if isPuzzleSolved(puzzle):
+                return puzzle
+
+            if isPuzzleComplete(puzzle) and not isPuzzleSolved(puzzle):
+                return False
+            else:
+                nextEntry, nextValues = _getNextEntryPoint(puzzle)
+
+                if not nextEntry:
+                    return False
+
+                for nextValue in nextValues:
+                    nextPuzzleGuess = puzzle.copy()
+                    nextPuzzleGuess[nextEntry] = nextValue
+                    nextPuzzleGuess = _solveTheThing(nextPuzzleGuess)
+
+                    if not nextPuzzleGuess:
+                        continue  # No solution found for this guess, try the next one
+                    elif isPuzzleSolved(nextPuzzleGuess):
+                        return nextPuzzleGuess
+                return False
+        else:
+            return puzzle
+        
+    def _eliminationPass(pzl: SudokuPuzzleT) -> SudokuPuzzleT:
+        """Perform an elimination pass on the puzzle.
+        Removes impossible values from the puzzle based on the current state.
+        Args:
+                pzl (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
+        Returns:
+                SudokuPuzzleT: The updated puzzle after the elimination pass.
+        """
+        didChange = True
+        while didChange and not isPuzzleComplete(pzl):
+            solvedSquares = [k for k, v in pzl.items() if len(v) == 1]
+            didChange = False
+            for solvedSquare in solvedSquares:
+                solvedValue = pzl[solvedSquare]
+                solvedNeighbors = [nsq for nsq in neighbors[solvedSquare] if nsq is not solvedSquare]
+                # Remove solvedValue from all neighbors
+                for nsq in solvedNeighbors:
+                    if len(pzl[nsq]) > 1 and solvedValue in pzl[nsq]:
+                        didChange = True
+                        pzl[nsq] = pzl[nsq].replace(solvedValue, "")
+        # Dont return a copy in this case, change in place
+        return pzl
+    
+    
     return _solveTheThing(puzzle)
