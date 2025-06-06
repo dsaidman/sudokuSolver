@@ -102,15 +102,17 @@ class _Py2Runtime:
             uiLogger.debug("Initializing lua runtime...")
             self._runtime["lua"] = lua
 
-            uiLogger.debug("\tImporting defintions.lua as table object...")
+            uiLogger.debug("\tImporting LDefintions.lua as table object...")
 
-            self._definitionsModule["lua"] = lua.require("src.solver.definitions")[0]
+            self._definitionsModule["lua"] = lua.require("src.solver.LDefinitions")[0]
 
             uiLogger.debug("\tImporting solver.lua as table object...")
-            self._solverModule["lua"] = lua.require("src.solver.solver")[0]
+            self._solverModule["lua"] = lua.require("src.solver.LSolver")[0]
 
             uiLogger.info("\tLua Runtime initialized")
-        elif lang == "julia" and self._lang not in self._version:
+            
+        elif lang == "julia" and self._lang not in self._version: # Julia
+
             uiLogger.info("Handling julia runtime... this can take a minute so")
             uiLogger.info("Resolving Package dependencies...")
             juliaPkgTgt = os.path.normpath(os.path.join(os.path.dirname(__file__),'..'))
@@ -124,7 +126,9 @@ class _Py2Runtime:
                     target=juliaPkgTgt)
             uiLogger.debug("Resolving Packages")
             Pkg.resolve()
+            
             uiLogger.info("Importing julia via juliacall and juliapkg.json")
+            
             from juliacall import Main as jl
             uiLogger.info(f"Using julia {jl.VERSION}")
             self._version["julia"] = jl.VERSION
@@ -132,28 +136,24 @@ class _Py2Runtime:
             uiLogger.debug("Initializing julia runtime...")
             self._runtime["julia"] = jl
             
-            
-
-            uiLogger.debug("\tImporting defintions.jl...")
-
-            jl.include("src\\solver\\Solver.jl")
+            uiLogger.debug("\tImporting Julia Solver Module...")
+            jl.include("src\\solver\\JSolver.jl")
 
             self._definitionsModule["julia"] = jl.JDefinitions
-
-            uiLogger.debug("\tImporting defintions.jl...")
-            self._solverModule["julia"] = jl.JSolver
+            self._solverModule["julia"]      = jl.JSolver
 
             uiLogger.info("\tJulia Runtime initialized")
+            
         elif lang == "python" and self.lang not in self._version:
-            import solver.solver as pySolver
+            import solver.PySolver as pysolver
 
             self._version["python"] = sys.version
 
             self._runtime["python"] = []
 
-            self._definitionsModule["python"] = pySolver
+            self._definitionsModule["python"] = pysolver
 
-            self._solverModule["python"] = pySolver.solve
+            self._solverModule["python"] = pysolver.solve
 
     @staticmethod
     def relPath2ImportPath(relPath):

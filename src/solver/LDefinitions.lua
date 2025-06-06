@@ -1,5 +1,5 @@
 
-local myFuns = require "src.solver.helperLib"
+local myFuns = require "src.solver.LHelpers"
 
 local definitions = {}
 
@@ -15,15 +15,6 @@ definitions.cellColumns = {
                         [1] = '123',
                         [2] = '456',
                         [3] = '789'}
-
-definitions.difficultyEnum = {
-    [1] = 'TRIVIAL',
-    [2] = 'EASY',
-    [3] = 'SO SO',
-    [4] = 'HARD',
-    [5] = 'VERY HARD',
-    [6] = 'EVIL',
-    [7] = 'DASTURDLY EVIL'}
 
 local getRow = myFuns.getRow
 local getCol = myFuns.getCol
@@ -76,7 +67,7 @@ function definitions.getCellNeighbors(theGridID)
         local columnGroupIdx = myFuns.findStringMember(
             getCol(theGridID),
             definitions.cellColumns)
-        theCellNeighbors[theGridID] = myFuns.cross( 
+        theCellNeighbors[theGridID] = myFuns.cross(
             myFuns.string2Table(definitions.cellRows[rowGroupIdx]),
             myFuns.string2Table(definitions.cellColumns[columnGroupIdx]) )
         return theCellNeighbors[theGridID]

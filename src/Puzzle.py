@@ -1,4 +1,5 @@
 from functools import cached_property, cache
+from enum import Enum
 import logging
 from py2runtime import RuntimePy as rt
 
@@ -161,5 +162,15 @@ class SudokuPuzzle(object):
         
         self.solution = {squareKey : squareValue for squareKey, squareValue in result['solution'].items()}
         return result
+
+
+class DifficultyLevel(Enum):
+    TRIVIAL        = 0
+    EASY           = 1
+    MEH            = 2
+    HARD           = 3
+    VERYHARD       = 4
+    EVIL           = 5
+    DASTURDLY_EVIL = 6
 
 puzzle = SudokuPuzzle()

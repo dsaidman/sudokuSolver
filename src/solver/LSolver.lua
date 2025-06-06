@@ -1,20 +1,21 @@
 ---@diagnostic disable: trailing-space
 -- sudoku solver in lua, at least an attempt of one
 
-local myFuns      = require("src.solver.helperLib")
-local defs        = require('src.solver.definitions')
+local myFuns      = require("src.solver.LHelpers")
+local defs        = require('src.solver.LDefinitions')
 
 local rowNames    = defs.rowNames
 local colNames    = defs.colNames
 local valueList   = table.concat(defs.colNames)
 
-local solverInfo = {
-                        ['numOperations'] = 0,
-                        ['numRecursions'] = 0}
-
-local difficultEnum = defs.difficultyEnum
+local result = {        ['solution'] = {},
+                        ['duration_ms']    = 0.0,
+                        ['bestSinglePass'] = 0,
+                        ['numOperations']  = 0,
+                        ['numRecursions']  = 0}
 
 local allKeys     = defs.allKeys
+local squares     = defs.allKeys
 local allFamilies = defs.allFamilies
 
 local function isValidFamily( thePuzzle, theFamily )
@@ -148,7 +149,7 @@ local function getNextEntryPoint(thePuzzle)
     end
 end
 
-local function getDifficulty()
+--[[ local function getDifficulty()
     if solverInfo.numRecursions == 0 then
         return difficultEnum[1]
     elseif solverInfo.numRecursions < 5 then
@@ -164,7 +165,7 @@ local function getDifficulty()
     else
         return difficultEnum[7]
     end
-end
+end ]]
 
 local function solveTheThing(thePuzzle)
 
@@ -185,7 +186,7 @@ local function solveTheThing(thePuzzle)
                     neighborVals = thePuzzle[neighborKey]
                     if #neighborVals > 1 and neighborVals:find(gridValues)
                     then
-                        solverInfo.numOperations = solverInfo.numOperations+1
+                        result.numOperations = result.numOperations+1
                         didChange = true
                         thePuzzle[neighborKey] = neighborVals:gsub(gridValues,'')
                     end
@@ -214,7 +215,7 @@ local function solveTheThing(thePuzzle)
         do
             --print(string.format('Entry: %s - Value -%s',entryPoint, nextGuess ))
             --printPuzzle(thePuzzle)
-            solverInfo.numRecursions = solverInfo.numRecursions+1
+            result.numRecursions = result.numRecursions+1
             nextPuzzleGuess = myFuns.copyTable(thePuzzle)
             nextPuzzleGuess[entryPoint] = nextGuess
             nextPuzzleGuess = solveTheThing(myFuns.copyTable(nextPuzzleGuess))
@@ -247,16 +248,17 @@ local solver = {}
 function solver.solve(myStartingVals)
 
     local myPuzzle = importPuzzle(myStartingVals)
-    --printPuzzle(myPuzzle)
-    print(myFuns.cprint('Running...','red'))
+    result.bestSinglePass = 0
+    result.numOperations  = 0
+    result.numRecursions  = 0
+    result.solution       = false
+
     local startTime = os.clock()
     local theSolution = solveTheThing( myPuzzle )
-    solverInfo['runTime_seconds'] = os.clock()-startTime
-    solverInfo['difficulty'] = getDifficulty()
-    --printPuzzle(theSolution)
-    --print( puzzle2String(theSolution) )
-    theSolution['info'] = solverInfo
-    return theSolution
+    result['duration_ms'] = (os.clock()-startTime)*1000
+    result['solution'] = theSolution
+
+    return result
 end
 
 return solver

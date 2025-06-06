@@ -148,6 +148,7 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
 
     # Is there a way to make this more julia-like? Probably
     function eliminationPass(puzzle::SudokuPuzzleT)::SudokuPuzzleT
+        numEliminated = 0
         didChange = true
         while didChange == true && ~isPuzzleComplete(puzzle)
             solvedSquares = [k for (k, v) in puzzle if length(v) == 1]
@@ -157,6 +158,7 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
 
                 for nsq in neighbors[solvedSquare]
                     if length(puzzle[nsq]) > 1 && occursin(solvedValue, puzzle[nsq])
+                        numEliminated+=1
                         numOperations+=1
                         didChange = true
                         puzzle[nsq] = replace(puzzle[nsq], solvedValue => "")
@@ -164,12 +166,14 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
                 end
             end
         end
+        bestSinglePass = max(bestSinglePass, numEliminated)
         # Dont return a copy in this case, change in place
         return puzzle
     end
 
-    numRecursions::Int = 0
-	numOperations::Int = 0
+    numRecursions::Int  = 0
+	numOperations::Int  = 0
+    bestSinglePass = 0
 
 	elapsedTime = @elapsed soln = solveTheThing(puzzle)
 
@@ -177,6 +181,7 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
 		"solution"=>soln,
 		"numRecursions"=>numRecursions,
 		"numOperations"=>numOperations,
+        "bestSinglePass"=>bestSinglePass,
 		"duration_ms"=>elapsedTime*1000.0)
 end
 end
