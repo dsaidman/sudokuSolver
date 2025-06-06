@@ -158,8 +158,8 @@ class SudokuPuzzle(object):
             # Everything is ready to call
 
         result = solveFun(puzzleArg)
-
-        self.solution = {squareKey : squareValue for squareKey, squareValue in result.items()}
+        
+        self.solution = {squareKey : squareValue for squareKey, squareValue in result['solution'].items()}
         return result
 
 puzzle = SudokuPuzzle()

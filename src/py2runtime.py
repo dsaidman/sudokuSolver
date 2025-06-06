@@ -111,13 +111,28 @@ class _Py2Runtime:
 
             uiLogger.info("\tLua Runtime initialized")
         elif lang == "julia" and self._lang not in self._version:
+            uiLogger.info("Handling julia runtime... this can take a minute so")
+            uiLogger.info("Resolving Package dependencies...")
+            juliaPkgTgt = os.path.normpath(os.path.join(os.path.dirname(__file__),'..'))
+            import juliapkg as Pkg
+            
+            uiLogger.debug("Requiring julia 1.5 or newer")
+            Pkg.require_julia("1.5",target=juliaPkgTgt)
+            uiLogger.debug("Adding Cachaing module package list")
+            Pkg.add("Caching","68ad905a-5087-500a-aae7-0fd6acda2eb1",
+                    dev=False,
+                    target=juliaPkgTgt)
+            uiLogger.debug("Resolving Packages")
+            Pkg.resolve()
+            uiLogger.info("Importing julia via juliacall and juliapkg.json")
             from juliacall import Main as jl
-
             uiLogger.info(f"Using julia {jl.VERSION}")
             self._version["julia"] = jl.VERSION
 
             uiLogger.debug("Initializing julia runtime...")
             self._runtime["julia"] = jl
+            
+            
 
             uiLogger.debug("\tImporting defintions.jl...")
 
