@@ -2,6 +2,8 @@
 # Sudoku Solver
 # This module provides functions to solve a Sudoku puzzle using a backtracking algorithm.
 
+from time import process_time as ttoc
+
 # Playing with types, so make some type aliases
 type SudokuPuzzleT = dict[str, str]
 type SquareT = str
@@ -180,12 +182,6 @@ def _getNextEntryPoint(pzl: SudokuPuzzleT):
     return nextSquareChoiceKey, nextSquareChoiceValues
 
 
-
-
-
-
-
-
 def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
     """
     Solve the given sudoku puzzle using a backtracking algorithm.
@@ -196,51 +192,56 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
     Returns:
         dict: The solved puzzle or False if no solution exists.
     """
-    
-            
-    numRecursions:int  = 0
-    numOperations:int  = 0
-    bestSinglePass:int = 0
-    
-    def _solveTheThing(puzzle: SudokuPuzzleT):
+
+    # Metrics to count using nested functions
+    numRecursions: int = 0
+    numOperations: int = 0
+    bestSinglePass: int = 0
+
+    def _solveTheThing(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         """Recursively solve the Sudoku puzzle using backtracking.
         Args:
                 puzzle (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
         Returns:
                 SudokuPuzzleT | bool: The solved puzzle if successful, False if no solution exists.
         """
+        nonlocal numRecursions
 
-        if not isPuzzleSolved(puzzle):
-            # Make a guess
-            puzzle = _eliminationPass(puzzle)
-
-            if puzzle is False:
-                return False
-
-            if isPuzzleSolved(puzzle):
-                return puzzle
-
-            if isPuzzleComplete(puzzle) and not isPuzzleSolved(puzzle):
-                return False
-            else:
-                nextEntry, nextValues = _getNextEntryPoint(puzzle)
-
-                if not nextEntry:
-                    return False
-
-                for nextValue in nextValues:
-                    nextPuzzleGuess = puzzle.copy()
-                    nextPuzzleGuess[nextEntry] = nextValue
-                    nextPuzzleGuess = _solveTheThing(nextPuzzleGuess)
-
-                    if not nextPuzzleGuess:
-                        continue  # No solution found for this guess, try the next one
-                    elif isPuzzleSolved(nextPuzzleGuess):
-                        return nextPuzzleGuess
-                return False
-        else:
+        # Were already done, so return
+        if isPuzzleSolved(puzzle):
             return puzzle
-        
+
+        # Make a guess
+        puzzle = _eliminationPass(puzzle)
+
+        if puzzle is False:
+            return False
+
+        if isPuzzleSolved(puzzle):
+            return puzzle
+
+        if isPuzzleComplete(puzzle) and not isPuzzleSolved(puzzle):
+            return False
+        else:
+            nextEntry, nextValues = _getNextEntryPoint(puzzle)
+
+            if not nextEntry:
+                return False
+
+            for nextValue in nextValues:
+                # Update number of recursions it takes
+                numRecursions += 1
+
+                nextPuzzleGuess = puzzle.copy()
+                nextPuzzleGuess[nextEntry] = nextValue
+                nextPuzzleGuess = _solveTheThing(nextPuzzleGuess)
+
+                if not nextPuzzleGuess:
+                    continue  # No solution found for this guess, try the next one
+                elif isPuzzleSolved(nextPuzzleGuess):
+                    return nextPuzzleGuess
+            return False
+
     def _eliminationPass(pzl: SudokuPuzzleT) -> SudokuPuzzleT:
         """Perform an elimination pass on the puzzle.
         Removes impossible values from the puzzle based on the current state.
@@ -249,20 +250,34 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         Returns:
                 SudokuPuzzleT: The updated puzzle after the elimination pass.
         """
+        nonlocal bestSinglePass
+        nonlocal numOperations
+        singlePassCount = 0
         didChange = True
         while didChange and not isPuzzleComplete(pzl):
-            solvedSquares = [k for k, v in pzl.items() if len(v) == 1]
             didChange = False
-            for solvedSquare in solvedSquares:
+            for solvedSquare in [sqKey for sqKey, sqVal in pzl.items() if len(sqVal) == 1]:
                 solvedValue = pzl[solvedSquare]
-                solvedNeighbors = [nsq for nsq in neighbors[solvedSquare] if nsq is not solvedSquare]
-                # Remove solvedValue from all neighbors
-                for nsq in solvedNeighbors:
-                    if len(pzl[nsq]) > 1 and solvedValue in pzl[nsq]:
+                for solvedNeighbor in neighbors[solvedSquare]:
+                    if len(pzl[solvedNeighbor]) > 1 and solvedValue in pzl[solvedNeighbor]:
                         didChange = True
-                        pzl[nsq] = pzl[nsq].replace(solvedValue, "")
+                        singlePassCount += 1
+                        numOperations   += 1
+                        pzl[solvedNeighbor] = pzl[solvedNeighbor].replace(solvedValue, "")
+
+        # Update best single elimination pass
+        bestSinglePass = max(bestSinglePass, singlePassCount)
         # Dont return a copy in this case, change in place
         return pzl
-    
-    
-    return _solveTheThing(puzzle)
+
+    tStart      = ttoc()
+    solution    = _solveTheThing(puzzle)
+    duration_ms = (tStart-ttoc())*1000.
+    return {
+        "solution": solution,
+        "bestSinglePass": bestSinglePass,
+        "numOperations" : numOperations,
+        "numRecursions" : numRecursions,
+        "duration_ms"   : duration_ms
+    }
+     
