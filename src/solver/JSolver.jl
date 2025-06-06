@@ -62,7 +62,6 @@ module JSolver
 export solve
 
 using ..JDefinitions
-using ProfileView
 
 	
 @inline function isPuzzleComplete(pzl::SudokuPuzzleT)::Bool

@@ -20,7 +20,7 @@ dependencies = [
     "lupa>=2.4",
     "PyQt6>=6.9.0",
     ]
-keywords = ["sudoku","pyqt6","juliaCall","lupa"]
+keywords = ["sudoku","pyqt6","juliaCall","lupa","juliaLang","lua","luajit"]
 
 
 [project.urls]
@@ -49,8 +49,3 @@ disable = """
     import-error,
     too-few-public-methods
 """
-
-[tool.autopep8]
-in-place = true
-recursive = true
-aggressive = 3

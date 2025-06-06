@@ -1,18 +1,18 @@
-
 import logging
 from time import process_time_ns as ttoc
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
 
-from Puzzle import puzzle as sudokuDefs
 from Puzzle import SudokuPuzzle as Puzzle
-
+from Puzzle import puzzle as sudokuDefs
 from py2runtime import RuntimePy as rt
+
 from .uiEnums import SquareTypeEnum, ValidityEnum
 from .uiHelpers import grabPuzzleFrame, grabStatusBar, grabWidget
 
 uiLogger = logging.getLogger("uiLogger")
+
 
 class UiPanel(QFrame):
     def __init__(self, parent, objectName="UiPanel"):
@@ -113,7 +113,7 @@ class SetPuzzleBtn(QPushButton):
             self.setToolTip("Puzzle is valid, click to lock the puzzle when ready")
         else:
             self.setToolTip("Im locked and puzzle is set. Press solve to solve the puzzle")
-            
+
         self.style().polish(self)
         self.style().unpolish(self)
 
@@ -170,22 +170,19 @@ class SolvePuzzleButton(QPushButton):
             self.setProperty("completed", False)
             return False
         else:
-            
-            thePzl = Puzzle(  
-                            lang=rt.lang, 
-                            value=puzzleFrame.asDict() )
-            #compilate run
+            thePzl = Puzzle(lang=rt.lang, value=puzzleFrame.asDict())
+            # compilate run
             thePzl.solve()
-            
-            #timed run
+
+            # timed run
             thePzl.value = puzzleFrame.asDict()
-            
-            #tStart = ttoc()
+
+            # tStart = ttoc()
             result = thePzl.solve()
-            tDuration_ms = result['duration_ms'] #(ttoc() - tStart) / 1000000
+            tDuration_ms = result["duration_ms"]  # (ttoc() - tStart) / 1000000
 
             self.setSolution(thePzl.solution)
-   
+
             uiPanel = grabWidget(QFrame, "UiPanel")
             uiPanel._setCompleted()
 
@@ -216,7 +213,7 @@ class SolvePuzzleButton(QPushButton):
 
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
-            
+
     def setSolution(self, theSolutionDict):
         puzzleFrame = grabPuzzleFrame()
         puzzleSquares = puzzleFrame.squares

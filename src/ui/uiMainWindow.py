@@ -15,8 +15,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from py2runtime import RuntimePy as rt
 from Puzzle import puzzle
+from py2runtime import RuntimePy as rt
 
 from .uiEnums import AppStatusEnum
 from .uiHelpers import grabMainWindow, grabPuzzleFrame, grabWidget
@@ -38,16 +38,16 @@ class AppMainWindow(QMainWindow):
     def status(self, statusVal):
         self._status = statusVal
         return statusVal
-    
+
     @property
     def runtimeLang(self):
         return self._lang
-    
+
     @runtimeLang.setter
-    def runtimeLang(self,lang):
-        self._lang     = lang
+    def runtimeLang(self, lang):
+        self._lang = lang
         puzzle.runtime = lang
-        rt.lang        = lang
+        rt.lang = lang
 
     def __init__(self, lang="python"):
         """Constructor method initializes the main window and its components."""

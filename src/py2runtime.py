@@ -24,7 +24,7 @@ class _Py2Runtime:
         self._definitionsModule = {}
         self._solverModule = {}
         self._version = {}
-    
+
     @property
     def runtime(self):
         return self._runtime[self.lang]
@@ -36,7 +36,7 @@ class _Py2Runtime:
     @property
     def solver(self):
         return self._solverModule[self.lang]
-    
+
     @property
     def version(self):
         return self._version[self.lang]
@@ -49,16 +49,16 @@ class _Py2Runtime:
     def lang(self, lang):
         if not lang:
             return
-        
+
         lang = lang.lower()
         if lang == self.lang:
             return
-        
+
         if lang in self._runtime or lang in self._version:
             self._lang = lang
             uiLogger.info(f"Using {self.lang} runtime")
             return
-        
+
         if lang.lower() not in ["luajit", "lua", "julia", "python"]:
             raise ValueError(f"Invalid language: {lang}. Must be 'luajit','lua', or 'julia'.")
         self._lang = lang.lower()
@@ -110,40 +110,40 @@ class _Py2Runtime:
             self._solverModule["lua"] = lua.require("src.solver.LSolver")[0]
 
             uiLogger.info("\tLua Runtime initialized")
-            
-        elif lang == "julia" and self._lang not in self._version: # Julia
 
+        elif lang == "julia" and self._lang not in self._version:  # Julia
             uiLogger.info("Handling julia runtime... this can take a minute so")
             uiLogger.info("Resolving Package dependencies...")
-            juliaPkgTgt = os.path.normpath(os.path.join(os.path.dirname(__file__),'..'))
+            juliaPkgTgt = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
             import juliapkg as Pkg
-            
+
             uiLogger.debug("Requiring julia 1.5 or newer")
-            Pkg.require_julia("1.5",target=juliaPkgTgt)
+            Pkg.require_julia("1.5", target=juliaPkgTgt)
             uiLogger.debug("Adding Cachaing module package list")
-            Pkg.add("Caching","68ad905a-5087-500a-aae7-0fd6acda2eb1",
-                    dev=False,
-                    target=juliaPkgTgt)
+            Pkg.add(
+                "Caching", "68ad905a-5087-500a-aae7-0fd6acda2eb1", dev=False, target=juliaPkgTgt
+            )
             uiLogger.debug("Resolving Packages")
             Pkg.resolve()
-            
+
             uiLogger.info("Importing julia via juliacall and juliapkg.json")
-            
+
             from juliacall import Main as jl
+
             uiLogger.info(f"Using julia {jl.VERSION}")
             self._version["julia"] = jl.VERSION
 
             uiLogger.debug("Initializing julia runtime...")
             self._runtime["julia"] = jl
-            
+
             uiLogger.debug("\tImporting Julia Solver Module...")
             jl.include("src\\solver\\JSolver.jl")
 
             self._definitionsModule["julia"] = jl.JDefinitions
-            self._solverModule["julia"]      = jl.JSolver
+            self._solverModule["julia"] = jl.JSolver
 
             uiLogger.info("\tJulia Runtime initialized")
-            
+
         elif lang == "python" and self.lang not in self._version:
             import solver.PySolver as pysolver
 

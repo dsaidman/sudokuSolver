@@ -131,8 +131,7 @@ class UiSidebarButton(QPushButton):
             btn.style().polish(btn)
 
         puzzle.lang = self.text()
-        rt.lang     = self.text()
-        
+        rt.lang = self.text()
 
         self.setProperty("selected", True)
         self.style().unpolish(self)

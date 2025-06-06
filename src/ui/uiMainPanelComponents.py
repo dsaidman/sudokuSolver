@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QMainWindow, QVBoxLayout
 
 from Puzzle import puzzle as sudokuDefs
+
 from .uiControlComponents import UiPanel
 from .uiPuzzleComponents import PuzzleFrame
 

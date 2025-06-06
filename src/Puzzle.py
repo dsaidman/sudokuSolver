@@ -1,53 +1,53 @@
-from functools import cached_property, cache
-from enum import Enum
 import logging
+from enum import Enum
+from functools import cache, cached_property
+
 from py2runtime import RuntimePy as rt
 
 uiLogger = logging.getLogger("uiLogger")
 
+
 class SudokuPuzzle(object):
-    def __init__(self, lang:str = "python", value="."*81):
-        self._lang    = lang
-        rt.lang       = lang
-        self.value    = value
+    def __init__(self, lang: str = "python", value="." * 81):
+        self._lang = lang
+        rt.lang = lang
+        self.value = value
         self.solution = None
-        
+
     @property
     def runtimes(self) -> list[str]:
         return self._lang
 
     @property
-    def value(self) -> dict[str,str]:
+    def value(self) -> dict[str, str]:
         return self._value
 
     @value.setter
-    def value(self,inPuzzle) -> None:
-        
-        ptype      = type(inPuzzle)
-        pzl      = dict.fromkeys(self.squares,"123456789")
-        
+    def value(self, inPuzzle) -> None:
+        ptype = type(inPuzzle)
+        pzl = dict.fromkeys(self.squares, "123456789")
+
         if ptype is dict:
             for sqKey, sqValue in inPuzzle.items():
                 pzl[sqKey] = sqValue
         elif ptype is str and len(inPuzzle) == 81:
             for idx, val in enumerate(inPuzzle):
                 if val != ".":
-                    pzl[self.squares[idx]] = val 
+                    pzl[self.squares[idx]] = val
         self._value = pzl
 
     @property
-    def runtime(self)  -> str:
+    def runtime(self) -> str:
         return self._lang
-    
+
     @runtime.setter
-    def runtime(self,lang : str) -> None:
-        
+    def runtime(self, lang: str) -> None:
         if lang.lower() not in ["luajit", "lua", "julia", "python"]:
             raise ValueError(
                 "Invalid language specified. Choose from 'luajit','lua', 'julia', or 'python'."
             )
-        self.lang  = lang
-        rt.lang    = lang
+        self.lang = lang
+        rt.lang = lang
 
     @cached_property
     def rows(self):
@@ -93,8 +93,9 @@ class SudokuPuzzle(object):
             return sorted(list(rt.definitions.squares), reverse=False)
         elif self.runtime == "python":
             return sorted(rt.definitions.squares)
+
     @cache
-    def nextSquare(self, currentKey:str) -> str:
+    def nextSquare(self, currentKey: str) -> str:
         """
         Returns next square in list of square keys A1->I9.
 
@@ -107,7 +108,7 @@ class SudokuPuzzle(object):
         return self.squares[((self.squares.index(currentKey) + 1) % len(self.squares))]
 
     @cache
-    def lastSquare(self, currentKey:str) -> str:
+    def lastSquare(self, currentKey: str) -> str:
         """
         Returns previous square in list of square keys A1->I9.
 
@@ -120,7 +121,7 @@ class SudokuPuzzle(object):
         return self.squares[((self.squares.index(currentKey) + -1) % len(self.squares))]
 
     @cache
-    def neighbors(self, squareID:str) -> list[str]:
+    def neighbors(self, squareID: str) -> list[str]:
         """
         Returns list of squareID that cannot share the same value.
 
@@ -141,10 +142,10 @@ class SudokuPuzzle(object):
             return list(rt.definitions.neighbors[squareID])
         elif self.runtime == "python":
             return rt.definitions.neighbors[squareID]
-    
-    def solve(self) -> dict[str,str]:
+
+    def solve(self) -> dict[str, str]:
         puzzleArg = self.value
-        
+
         self.lang = rt.lang
         if rt.lang == "luajit" or rt.lang == "lua":
             puzzleArg = rt.dict2Table(puzzleArg)
@@ -159,18 +160,21 @@ class SudokuPuzzle(object):
             # Everything is ready to call
 
         result = solveFun(puzzleArg)
-        
-        self.solution = {squareKey : squareValue for squareKey, squareValue in result['solution'].items()}
+
+        self.solution = {
+            squareKey: squareValue for squareKey, squareValue in result["solution"].items()
+        }
         return result
 
 
 class DifficultyLevel(Enum):
-    TRIVIAL        = 0
-    EASY           = 1
-    MEH            = 2
-    HARD           = 3
-    VERYHARD       = 4
-    EVIL           = 5
+    TRIVIAL = 0
+    EASY = 1
+    MEH = 2
+    HARD = 3
+    VERYHARD = 4
+    EVIL = 5
     DASTURDLY_EVIL = 6
+
 
 puzzle = SudokuPuzzle()
