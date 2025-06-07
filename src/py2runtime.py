@@ -81,10 +81,10 @@ class _Py2Runtime:
 
             uiLogger.debug("\tImporting defintions.lua as table object...")
 
-            self._definitionsModule["luajit"] = lua.require("src.solver.definitions")[0]
+            self._definitionsModule["luajit"] = lua.require("src.solver.LDefinitions")[0]
 
             uiLogger.debug("\tImporting solver.lua as table object...")
-            self._solverModule["luajit"] = lua.require("src.solver.solver")[0]
+            self._solverModule["luajit"] = lua.require("src.solver.LSolver")[0]
 
             uiLogger.info("\tLuaJit Runtime initialized")
         elif lang == "lua" and self._lang not in self._version:

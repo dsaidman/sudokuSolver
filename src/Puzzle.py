@@ -161,21 +161,24 @@ class SudokuPuzzle(object):
 
         result = solveFun(puzzleArg)
         
+        if self._lang != "python":  # Convert lua table to a dict
+            result = dict(result)
+            result["solution"] = dict(result["solution"])
+            
         if type(result) is dict and "numRecursions" in result:
             result["difficultyLevel"] = getDifficulty(result["numRecursions"])
             
-        self.solution = {
-            squareKey: squareValue for squareKey, squareValue in result["solution"].items()
-        }
+        self.solution = dict(result["solution"])
+        
         return result
     
 class DifficultyLevel(Enum):
-    TRIVIAL = 0
-    EASY = 1
-    MEH = 2
-    HARD = 3
-    VERYHARD = 4
-    EVIL = 5
+    TRIVIAL        = 0
+    EASY           = 1
+    MEH            = 2
+    HARD           = 3
+    VERYHARD       = 4
+    EVIL           = 5
     DASTURDLY_EVIL = 6
 
 

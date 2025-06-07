@@ -179,10 +179,12 @@ class SolvePuzzleButton(QPushButton):
             thePzl.value = thePzlDict
 
             result          = thePzl.solve()
+            
             solution        = result["solution"] 
             tDuration_ms    = result["duration_ms"] 
             numRecursions   = result["numRecursions"]
             numOperations   = result["numOperations"]
+            
             difficultyLevel = result["difficultyLevel"]
             #bestSinglePass = result["bestSinglePass"]
 
@@ -190,18 +192,6 @@ class SolvePuzzleButton(QPushButton):
 
             uiPanel = grabWidget(QFrame, "UiPanel")
             uiPanel._setCompleted()
-
-            """
-            if rt.lang == "luajit" or rt.lang == "lua":
-                runtimeInfo = dict(result["info"])
-                difficultyEnum = runtimeInfo["difficulty"]
-                numRecursions = runtimeInfo["numRecursions"]
-                numOperations = runtimeInfo["numOperations"]
-            elif rt.lang == "julia":
-                difficultyEnum = "UNSET"
-                numRecursions = result["numRecursions"]
-                numOperations = result["numOperations"]
-            """
 
             displayLabel = grabWidget(QLabel, "infoDisplayLabel")
 
