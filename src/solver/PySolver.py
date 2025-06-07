@@ -262,7 +262,7 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
                     if len(pzl[solvedNeighbor]) > 1 and solvedValue in pzl[solvedNeighbor]:
                         didChange = True
                         singlePassCount += 1
-                        numOperations   += 1
+                        numOperations += 1
                         pzl[solvedNeighbor] = pzl[solvedNeighbor].replace(solvedValue, "")
 
         # Update best single elimination pass
@@ -270,14 +270,13 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         # Dont return a copy in this case, change in place
         return pzl
 
-    tStart      = ttoc()
-    solution    = _solveTheThing(puzzle)
-    duration_ms = (ttoc()-tStart)*1000.
+    tStart = ttoc()
+    solution = _solveTheThing(puzzle)
+    duration_ms = (ttoc() - tStart) * 1000.0
     return {
         "solution": solution,
         "bestSinglePass": bestSinglePass,
-        "numOperations" : numOperations,
-        "numRecursions" : numRecursions,
-        "duration_ms"   : duration_ms
+        "numOperations": numOperations,
+        "numRecursions": numRecursions,
+        "duration_ms": duration_ms,
     }
-     

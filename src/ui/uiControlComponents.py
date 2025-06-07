@@ -1,5 +1,4 @@
 import logging
-from time import process_time_ns as ttoc
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
@@ -178,15 +177,15 @@ class SolvePuzzleButton(QPushButton):
             # timed run
             thePzl.value = thePzlDict
 
-            result          = thePzl.solve()
-            
-            solution        = result["solution"] 
-            tDuration_ms    = result["duration_ms"] 
-            numRecursions   = result["numRecursions"]
-            numOperations   = result["numOperations"]
-            
+            result = thePzl.solve()
+
+            solution = result["solution"]
+            tDuration_ms = result["duration_ms"]
+            numRecursions = result["numRecursions"]
+            numOperations = result["numOperations"]
+
             difficultyLevel = result["difficultyLevel"]
-            #bestSinglePass = result["bestSinglePass"]
+            # bestSinglePass = result["bestSinglePass"]
 
             self.setSolution(solution)
 
