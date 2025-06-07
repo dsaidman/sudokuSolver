@@ -170,22 +170,28 @@ class SolvePuzzleButton(QPushButton):
             self.setProperty("completed", False)
             return False
         else:
-            thePzl = Puzzle(lang=rt.lang, value=puzzleFrame.asDict())
+            thePzlDict = puzzleFrame.asDict()
+            thePzl = Puzzle(lang=rt.lang, value=thePzlDict)
             # compilate run
             thePzl.solve()
 
             # timed run
-            thePzl.value = puzzleFrame.asDict()
+            thePzl.value = thePzlDict
 
-            # tStart = ttoc()
-            result = thePzl.solve()
-            tDuration_ms = result["duration_ms"]  # (ttoc() - tStart) / 1000000
+            result          = thePzl.solve()
+            solution        = result["solution"] 
+            tDuration_ms    = result["duration_ms"] 
+            numRecursions   = result["numRecursions"]
+            numOperations   = result["numOperations"]
+            difficultyLevel = result["difficultyLevel"]
+            #bestSinglePass = result["bestSinglePass"]
 
-            self.setSolution(thePzl.solution)
+            self.setSolution(solution)
 
             uiPanel = grabWidget(QFrame, "UiPanel")
             uiPanel._setCompleted()
 
+            """
             if rt.lang == "luajit" or rt.lang == "lua":
                 runtimeInfo = dict(result["info"])
                 difficultyEnum = runtimeInfo["difficulty"]
@@ -195,11 +201,12 @@ class SolvePuzzleButton(QPushButton):
                 difficultyEnum = "UNSET"
                 numRecursions = result["numRecursions"]
                 numOperations = result["numOperations"]
+            """
 
             displayLabel = grabWidget(QLabel, "infoDisplayLabel")
 
             displayText = f"Completed in {tDuration_ms:.2f} milliseconds - Difficulty: {
-                difficultyEnum:s
+                difficultyLevel:s
             }\n{numRecursions} Recursions - {numOperations} Operations"
             displayLabel.setText(displayText)
             displayLabel.setStyleSheet(

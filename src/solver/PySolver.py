@@ -272,7 +272,7 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
 
     tStart      = ttoc()
     solution    = _solveTheThing(puzzle)
-    duration_ms = (tStart-ttoc())*1000.
+    duration_ms = (ttoc()-tStart)*1000.
     return {
         "solution": solution,
         "bestSinglePass": bestSinglePass,

@@ -160,13 +160,15 @@ class SudokuPuzzle(object):
             # Everything is ready to call
 
         result = solveFun(puzzleArg)
-
+        
+        if type(result) is dict and "numRecursions" in result:
+            result["difficultyLevel"] = getDifficulty(result["numRecursions"])
+            
         self.solution = {
             squareKey: squareValue for squareKey, squareValue in result["solution"].items()
         }
         return result
-
-
+    
 class DifficultyLevel(Enum):
     TRIVIAL = 0
     EASY = 1
@@ -176,5 +178,23 @@ class DifficultyLevel(Enum):
     EVIL = 5
     DASTURDLY_EVIL = 6
 
+
+def getDifficulty(numRecursions: int) -> Enum:
+    if numRecursions == 0:
+        retVal = DifficultyLevel.TRIVIAL
+    elif numRecursions < 5:
+        retVal = DifficultyLevel.EASY
+    elif numRecursions < 25:
+        retVal = DifficultyLevel.MEH
+    elif numRecursions < 50:
+        retVal = DifficultyLevel.HARD
+    elif numRecursions < 100:
+        retVal = DifficultyLevel.VERYHARD
+    elif numRecursions < 400:
+        retVal = DifficultyLevel.EVIL
+    else:
+        retVal = DifficultyLevel.DASTURDLY_EVIL
+
+    return retVal.name
 
 puzzle = SudokuPuzzle()
