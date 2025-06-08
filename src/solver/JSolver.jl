@@ -1,19 +1,22 @@
 
 module JDefinitions
-export rowNames, columnNames, squares, neighbors, cellRows, cellColumns, puzzle0, families, VectorStringT, SquareT, FamiliesT, NeighborsT, SudokuPuzzleT
+export rowNames, columnNames, squares, neighbors, cellRows, cellColumns, puzzle0, families, VectorStringT, SquareT, FamiliesT, NeighborsT, SudokuPuzzleT, squareValue0, SquareValueT
 
 # Declare some types aliases for convenience
 VectorStringT = Vector{String}
-SquareT       = String
 FamiliesT     = Dict{Int,VectorStringT}
 NeighborsT    = Dict{String,VectorStringT}
-SudokuPuzzleT = Dict{String,String}
+SquareValueT  = Set{Int}
+SquareT       = String
+SudokuPuzzleT = Dict{SquareT,SquareValueT}
+
 
 const rowNames::String          = "ABCDEFGHI"
 const columnNames::String       = "123456789"
 const squares::VectorStringT     = unique([string(row, col) for row in rowNames for col in columnNames])
 const cellRows::VectorStringT    = ["ABC", "DEF", "GHI"]
 const cellColumns::VectorStringT = ["123", "456", "789"]
+squareValue0::SquareValueT = Set([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 _getRowNeighbors(sq)::VectorStringT    = sq[1] .* collect(columnNames)
 _getColumnNeighbors(sq)::VectorStringT = collect(rowNames) .* sq[2]
@@ -54,7 +57,7 @@ function _getFamilies()::FamiliesT
 end
 
 const families::FamiliesT = _getFamilies()
-puzzle0::SudokuPuzzleT = Dict(sq => "123456789" for sq in squares)
+puzzle0::SudokuPuzzleT = Dict(sq => squareValue0 for sq in squares)
 
 end
 
@@ -63,25 +66,30 @@ export solve
 
 using ..JDefinitions
 
-	
+
+
 @inline function isPuzzleComplete(pzl::SudokuPuzzleT)::Bool
-    all(v -> length(v) == 1, values(pzl))
+    all(length.(values(pzl)) == 1)
 end
 
 @inline function isFamilyCorrect(puzzle::SudokuPuzzleT,familySquares::VectorStringT)::Bool
-    Set(join([puzzle[familySq] for familySq in familySquares])) == Set("123456789")
+    reduce(union,puzzle[familySq] for familySq in familySquares) == squareValue0
+end
+
+@inline function allFamiliesValid(pzl::SudokuPuzzleT)::Bool
+    all(fam -> isFamilyCorrect(pzl, fam), values(families))
 end
 
 @inline function isPuzzleSolved(pzl::SudokuPuzzleT)::Bool
-    isPuzzleComplete(pzl) && all(fam -> isFamilyCorrect(pzl, fam), values(families))
+    isPuzzleComplete(pzl) && allFamiliesValid(pzl)
 end
 
 
-
 # Could use StatsBase, kinda like histcounts to get how often each value appears
-@inline function countOccurances(puzzle::SudokuPuzzleT)::Dict{Char,Int}
+@inline function countOccurances(puzzle::SudokuPuzzleT)::Dict{Int,Int}
 	# Collect all values in the puzzle together
-        return Dict(val => count(==(val), join(values(puzzle))) for val in "123456789")
+    return Dict(val => count(==(val), values(puzzle)) for val in squareValue0)
+    
 end
 
 function getNextEntryPoint(puzzle::SudokuPuzzleT)
@@ -93,7 +101,7 @@ function getNextEntryPoint(puzzle::SudokuPuzzleT)
     mostFrequentUnsolved = findfirst(v -> v == maximum(values(unsolvedCount)), unsolvedCount)
 
 	# get the square with fewest possiblities that contains mostFrequentlyUnresolved
-	smallestMostFrequent  = [length(v) for (k,v) in puzzle if length(v) > 1 && occursin(mostFrequentUnsolved, v)]
+	smallestMostFrequent  = [length(v) for (k,v) in puzzle if length(v) > 1 && mostFrequentUnsolved in v]
     if isempty(smallestMostFrequent)
 		return false   
 	else
@@ -104,7 +112,7 @@ function getNextEntryPoint(puzzle::SudokuPuzzleT)
 	# with mostFrequentUnsolved with fewest remaining possible values (smallestMostFrequent). 
 	# The selection will eliminate the most possible paths
     nextSquareChoice = squares[
-		findfirst(k -> length(puzzle[k]) == smallestMostFrequent && occursin(mostFrequentUnsolved, puzzle[k]), squares)
+		findfirst(k -> length(puzzle[k]) == smallestMostFrequent && mostFrequentUnsolved in puzzle[k], squares)
 		]
 	return length(puzzle[nextSquareChoice]) <= 1 ? false : nextSquareChoice
 
@@ -127,15 +135,17 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
         nextEntry = getNextEntryPoint(puzzle)
         nextEntry == false && return false
         
-        nextValues = join(
-                sort!(collect(puzzle[nextEntry]), by=x -> count(==(x), join(values(puzzle))), rev=true)
-			)
+        nextValues = sort(
+            collect(puzzle[nextEntry]), 
+            by=x -> count(==(x), reduce(vcat,collect.(values(puzzle)))), 
+            rev=true)
         # Sort the next values by how often they occur in the puzzle, most frequent first
         # This way we try the most frequent values first, which should lead to fewer branches
         # and hopefully a faster solution
         for nextValue in nextValues
             numRecursions += 1
             nextPuzzleGuess = copy(puzzle)
+            !allFamiliesValid(nextPuzzleGuess) && return
             nextPuzzleGuess[nextEntry] = string(nextValue)
             nextPuzzleGuess = solveTheThing(nextPuzzleGuess)
 
@@ -156,11 +166,11 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
                 solvedValue = puzzle[solvedSquare]
 
                 for nsq in neighbors[solvedSquare]
-                    if length(puzzle[nsq]) > 1 && occursin(solvedValue, puzzle[nsq])
+                    if first(solvedValue) in puzzle[nsq] && length(puzzle[nsq]) > 1
                         numEliminated+=1
                         numOperations+=1
                         didChange = true
-                        puzzle[nsq] = replace(puzzle[nsq], solvedValue => "")
+                        delete!(puzzle[nsq], solvedValue)
                     end
                 end
             end
@@ -174,7 +184,8 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
 	numOperations::Int  = 0
     bestSinglePass = 0
 
-	elapsedTime = @elapsed soln = solveTheThing(puzzle)
+	#elapsedTime = @elapsed soln = solveTheThing(puzzle)
+    soln = solveTheThing(puzzle)
 
 	return Dict(
 		"solution"=>soln,
@@ -185,16 +196,19 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
 end
 end
 
-#=
+
 using ..JDefinitions
 using ..JSolver
 @inline function testIt()
-    puzzleStr = ".......7..1.9.4..8..9........5..17....3..96..1...67..9........4.82.46...3...8...."
-    puzzle = Dict(squares[ix] => replace(string(v), "." => "123456789") for (ix, v) in enumerate(puzzleStr))
+    puzzleStr = ".15.7....4..8..75...8..9.169641.7.3..8239.5..5....4.9..2.41.8....17.39.4...92..65"
+
+    #puzzleStr = ".......7..1.9.4..8..9........5..17....3..96..1...67..9........4.82.46...3...8...."
+    puzzle = Dict{String,Set{Int}}( 
+        squares[ix] => v == '.' ? Set([1,2,3,4,5,6,7,8,9]) :  Set(Int(v)-Int('0')) for (ix, v) in enumerate(puzzleStr)
+        )
     soln = JSolver.solve(puzzle)
 	print("Hello")
 	
 end
 
 testIt()
-=#
