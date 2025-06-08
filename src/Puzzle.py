@@ -25,15 +25,16 @@ class SudokuPuzzle(object):
     @value.setter
     def value(self, inPuzzle) -> None:
         ptype = type(inPuzzle)
-        pzl = dict.fromkeys(self.squares, "123456789")
+
+        pzl = {sq : [1,2,3,4,5,6,7,8,9] for sq in self.squares}
 
         if ptype is dict:
             for sqKey, sqValue in inPuzzle.items():
-                pzl[sqKey] = sqValue
+                pzl[sqKey] = [int(sqValue)]
         elif ptype is str and len(inPuzzle) == 81:
             for idx, val in enumerate(inPuzzle):
                 if val != ".":
-                    pzl[self.squares[idx]] = val
+                    pzl[self.squares[idx]] = [int(val)]
         self._value = pzl
 
     @property

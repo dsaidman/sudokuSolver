@@ -27,7 +27,7 @@ def main():
     uiLogger.debug("Setting up application environment")
 
     # Parse command line arguments
-    uiLogger.debug("Parsing command line arguments")
+    uiLogger.debug("Parsing command line arguments") 
 
     # Import necessary PyQt modules
     from PyQt6.QtWidgets import QApplication

@@ -121,7 +121,7 @@ class MenuBar(QMenuBar):
             return None
 
         uiLogger.info(
-            f"Importing Puzzle {_id:s} with difficulty score {float(inputPuzzle['Score']) / 8.5 * 10.0} out of 10"
+            f"Importing Puzzle {_id:s} with difficulty score {float(inputPuzzle['Score']) / 8.5 * 10.0:.1} out of 10"
         )
         inputPuzzle = inputPuzzle["Puzzle"]
         self._setUiPuzzle(inputPuzzle)

@@ -3,12 +3,14 @@
 # This module provides functions to solve a Sudoku puzzle using a backtracking algorithm.
 
 from time import process_time as ttoc
-
+from copy import deepcopy
 # Playing with types, so make some type aliases
-type SudokuPuzzleT = dict[str, str]
 type SquareT = str
+type SquareValueT = list[int]
+type SudokuPuzzleT = dict[SquareT, SquareValueT]
+
 type VectorStringT = list[str]
-type NeighborT = tuple[dict[str, list[str]]]
+type NeighborT = tuple[dict[SquareT, list[str]]]
 type FamiliesT = tuple[list[VectorStringT]]
 
 rowNames: tuple[str] = "ABCDEFGHI"
@@ -17,6 +19,7 @@ squares: tuple[VectorStringT] = [row + col for row in rowNames for col in column
 cellRows: tuple[VectorStringT] = ["ABC", "DEF", "GHI"]
 cellColumns: tuple[VectorStringT] = ["123", "456", "789"]
 
+sqValues0: SquareValueT = set(range(1,10))
 # Combines all combinations for two strings into a single loopable list of tuples.
 
 
@@ -124,8 +127,11 @@ def isPuzzleComplete(pzl: SudokuPuzzleT) -> bool:
             bool: True if the puzzle is complete, False otherwise.
     """
     # Check if all squares have exactly one possible value
-    return all([len(v) == 1 for v in pzl.values()])
+    # Use a generator to break first time it invalid
+    return not any(len(v) > 1 for v in pzl.values())
 
+def allFamiliesValid(pzl: SudokuPuzzleT) -> bool:
+    return all(isFamilyCorrect(pzl, fam) for fam in families)
 
 def isFamilyCorrect(pzl: SudokuPuzzleT, familySquares: VectorStringT) -> bool:
     """Check if a family of squares is correct.
@@ -136,8 +142,8 @@ def isFamilyCorrect(pzl: SudokuPuzzleT, familySquares: VectorStringT) -> bool:
     Returns:
             bool: True if the family is correct, False otherwise.
     """
-    # Check if the values in the family squares contain all digits from 1 to 9 exactly once
-    return set([pzl[familySq] for familySq in familySquares]) == set("123456789")
+    # Check if the values in the family squares contain all digits from 1 to 9 exactly onceamilySquares], [])))
+    return set(sum([pzl[familySq] for familySq in familySquares],[])) == sqValues0
 
 
 def isPuzzleSolved(pzl: SudokuPuzzleT) -> bool:
@@ -148,7 +154,7 @@ def isPuzzleSolved(pzl: SudokuPuzzleT) -> bool:
     Returns:
             bool: True if the puzzle is solved, False otherwise.
     """
-    return isPuzzleComplete(pzl) and all(map(lambda fam: isFamilyCorrect(pzl, fam), families))
+    return isPuzzleComplete(pzl) and allFamiliesValid(pzl)
 
 
 def _getNextEntryPoint(pzl: SudokuPuzzleT):
@@ -160,10 +166,12 @@ def _getNextEntryPoint(pzl: SudokuPuzzleT):
             str: The key of the next square to solve.
     """
     # Of all unknowns, find the unknown value that occurs most often
-    pzlStr = "".join(list(pzl.values()))
-    unsolvedCount = [pzlStr.count(val) for val in "123456789"]
-    mostFrequentUnsolved = str(unsolvedCount.index(max(unsolvedCount)) + 1)
-
+    pzlStr = sum(list(pzl.values()),[])
+    #pzlStr = "".join(list(pzl.values()))
+    unsolvedCount = [pzlStr.count(val) for val in list(sqValues0)]
+    
+    #mostFrequentUnsolved = unsolvedCount.index(max(unsolvedCount)) + 1
+    mostFrequentUnsolved = unsolvedCount.index(max(unsolvedCount)) + 1
     # With the value that occurs most often (mostFrequentUnsolved), find the square
     # with mostFrequentUnsolved with fewest remaining possible values.
     # The selection will eliminate the most possible paths
@@ -173,11 +181,8 @@ def _getNextEntryPoint(pzl: SudokuPuzzleT):
     if len(nextSquareChoices) == 0:
         return (False, False)
     bestValueCount = min(nextSquareChoices.values())
-    nextSquareChoices = {k: v for k, v in nextSquareChoices.items() if v == bestValueCount}
-    nextSquareChoiceKey = list(nextSquareChoices.keys())[0]
-    nextSquareChoiceValues = "".join(
-        sorted(pzl[nextSquareChoiceKey], key=pzlStr.count, reverse=True)
-    )
+    nextSquareChoiceKey = next((k for k, v in nextSquareChoices.items() if v == bestValueCount),[])
+    nextSquareChoiceValues = sorted(pzl[nextSquareChoiceKey], key=pzlStr.count, reverse=True)
 
     return nextSquareChoiceKey, nextSquareChoiceValues
 
@@ -198,7 +203,7 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
     numOperations: int = 0
     bestSinglePass: int = 0
 
-    def _solveTheThing(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
+    def _solveTheThing(puzzleNext: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         """Recursively solve the Sudoku puzzle using backtracking.
         Args:
                 puzzle (SudokuPuzzleT): The Sudoku puzzle represented as a dictionary.
@@ -207,20 +212,24 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         """
         nonlocal numRecursions
 
-        # Were already done, so return
-        if isPuzzleSolved(puzzle):
-            return puzzle
-
         # Make a guess
-        puzzle = _eliminationPass(puzzle)
+        puzzle = _eliminationPass(puzzleNext)
 
+        # Exit early puzzle is false to avoid extra searching
         if puzzle is False:
             return False
 
-        if isPuzzleSolved(puzzle):
+        # Exit early if not a valid family to avoid extra looping
+        # an incomplete family can still be considered correct if no rules broken
+        if not allFamiliesValid(puzzle):
+            return False
+        
+        isSolved = isPuzzleSolved(puzzle)
+        if isSolved:
             return puzzle
 
-        if isPuzzleComplete(puzzle) and not isPuzzleSolved(puzzle):
+
+        if isPuzzleComplete(puzzle) and not isSolved:
             return False
         else:
             nextEntry, nextValues = _getNextEntryPoint(puzzle)
@@ -230,11 +239,17 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
 
             for nextValue in nextValues:
                 # Update number of recursions it takes
-                numRecursions += 1
+                
 
-                nextPuzzleGuess = puzzle.copy()
-                nextPuzzleGuess[nextEntry] = nextValue
-                nextPuzzleGuess = _solveTheThing(nextPuzzleGuess)
+                nextPuzzleGuess = deepcopy(puzzle)
+                
+                nextPuzzleGuess[nextEntry] = [nextValue]
+                if allFamiliesValid(nextPuzzleGuess):
+                    numRecursions += 1
+                    nextPuzzleGuess = _solveTheThing(nextPuzzleGuess)
+                else:
+                    nextPuzzleGuess = False
+                    continue
 
                 if not nextPuzzleGuess:
                     continue  # No solution found for this guess, try the next one
@@ -256,22 +271,27 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         didChange = True
         while didChange and not isPuzzleComplete(pzl):
             didChange = False
-            for solvedSquare in [sqKey for sqKey, sqVal in pzl.items() if len(sqVal) == 1]:
-                solvedValue = pzl[solvedSquare]
+            for solvedSquare in (sqKey for sqKey, sqVal in pzl.items() if len(sqVal) == 1):
+                solvedValue = pzl[solvedSquare][0]
                 for solvedNeighbor in neighbors[solvedSquare]:
                     if len(pzl[solvedNeighbor]) > 1 and solvedValue in pzl[solvedNeighbor]:
                         didChange = True
                         singlePassCount += 1
                         numOperations += 1
-                        pzl[solvedNeighbor] = pzl[solvedNeighbor].replace(solvedValue, "")
+                        pzl[solvedNeighbor].remove(solvedValue)
 
         # Update best single elimination pass
+
         bestSinglePass = max(bestSinglePass, singlePassCount)
-        # Dont return a copy in this case, change in place
         return pzl
+
 
     tStart = ttoc()
     solution = _solveTheThing(puzzle)
+    # Turn lists into strings for display
+    if solution:
+        for k,v in solution.items():
+            solution[k] = str(v[0])
     duration_ms = (ttoc() - tStart) * 1000.0
     return {
         "solution": solution,
