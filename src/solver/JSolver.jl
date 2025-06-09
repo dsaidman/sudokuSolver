@@ -156,10 +156,8 @@ function solve(puzzle::SudokuPuzzleT)
         numEliminated = 0
         didChange = true
         while didChange == true && ~isPuzzleComplete(puzzle)
-            solvedSquares = [k for (k, v) in puzzle if length(v) == 1]
-
             didChange = false
-            for solvedSquare in solvedSquares
+            for solvedSquare in [k for (k, v) in puzzle if length(v) == 1]
                 solvedValue = first(puzzle[solvedSquare])
 
                 for nsq in neighbors[solvedSquare]
@@ -182,6 +180,7 @@ function solve(puzzle::SudokuPuzzleT)
     bestSinglePass = 0
 
 	elapsedTime = @elapsed soln = solveTheThing(puzzle)
+
     if typeof(soln) == Dict
         soln = Dict{String,String}(k => string(first(soln[k])) for k in keys(soln))
     end
@@ -194,7 +193,7 @@ function solve(puzzle::SudokuPuzzleT)
 end
 end
 
-
+#=
 using ..JDefinitions
 using ..JSolver
 @inline function testIt()
@@ -211,3 +210,4 @@ using ..JSolver
 end
 
 testIt()
+=#
