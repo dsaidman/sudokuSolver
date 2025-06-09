@@ -181,9 +181,7 @@ function solve(puzzle::SudokuPuzzleT)
 
 	elapsedTime = @elapsed soln = solveTheThing(puzzle)
 
-    if typeof(soln) == Dict
-        soln = Dict{String,String}(k => string(first(soln[k])) for k in keys(soln))
-    end
+    soln = Dict{String,String}(k => string(first(soln[k])) for k in keys(soln))
 	return Dict(
         "solution" => soln,
 		"numRecursions"=>numRecursions,
