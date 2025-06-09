@@ -69,7 +69,7 @@ using ..JDefinitions
 
 
 @inline function isPuzzleComplete(pzl::SudokuPuzzleT)::Bool
-    all(length.(values(pzl)) == 1)
+    all(length.(values(pzl)) .== 1)
 end
 
 @inline function isFamilyCorrect(puzzle::SudokuPuzzleT,familySquares::VectorStringT)::Bool
@@ -161,16 +161,17 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
         didChange = true
         while didChange == true && ~isPuzzleComplete(puzzle)
             solvedSquares = [k for (k, v) in puzzle if length(v) == 1]
+
             didChange = false
             for solvedSquare in solvedSquares
-                solvedValue = puzzle[solvedSquare]
+                solvedValue = first(puzzle[solvedSquare])
 
                 for nsq in neighbors[solvedSquare]
-                    if first(solvedValue) in puzzle[nsq] && length(puzzle[nsq]) > 1
+                    if solvedValue in puzzle[nsq] && length(puzzle[nsq]) > 1
                         numEliminated+=1
                         numOperations+=1
                         didChange = true
-                        delete!(puzzle[nsq], solvedValue)
+                        puzzle[nsq] = delete!(puzzle[nsq], solvedValue)
                     end
                 end
             end
