@@ -120,7 +120,7 @@ end
 
 
 
-function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
+function solve(puzzle::SudokuPuzzleT)
     # Make sure the puzzle is valid
 
     function solveTheThing(puzzle::SudokuPuzzleT)
@@ -144,9 +144,9 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
         # and hopefully a faster solution
         for nextValue in nextValues
             numRecursions += 1
-            nextPuzzleGuess = copy(puzzle)
-            !allFamiliesValid(nextPuzzleGuess) && return
-            nextPuzzleGuess[nextEntry] = string(nextValue)
+            nextPuzzleGuess = deepcopy(puzzle)
+            !allFamiliesValid(nextPuzzleGuess) && continue
+            nextPuzzleGuess[nextEntry] = Set(nextValue)
             nextPuzzleGuess = solveTheThing(nextPuzzleGuess)
 
             nextPuzzleGuess == false && continue
@@ -185,11 +185,12 @@ function solve(puzzle::SudokuPuzzleT)::Dict{String,Any}
 	numOperations::Int  = 0
     bestSinglePass = 0
 
-	#elapsedTime = @elapsed soln = solveTheThing(puzzle)
-    soln = solveTheThing(puzzle)
-
+	elapsedTime = @elapsed soln = solveTheThing(puzzle)
+    if typeof(soln) == Dict
+        soln = Dict{String,String}(k => string(first(soln[k])) for k in keys(soln))
+    end
 	return Dict(
-		"solution"=>soln,
+        "solution" => soln,
 		"numRecursions"=>numRecursions,
 		"numOperations"=>numOperations,
         "bestSinglePass"=>bestSinglePass,
@@ -201,14 +202,15 @@ end
 using ..JDefinitions
 using ..JSolver
 @inline function testIt()
-    puzzleStr = ".15.7....4..8..75...8..9.169641.7.3..8239.5..5....4.9..2.41.8....17.39.4...92..65"
+    #puzzleStr = ".15.7....4..8..75...8..9.169641.7.3..8239.5..5....4.9..2.41.8....17.39.4...92..65"
 
-    #puzzleStr = ".......7..1.9.4..8..9........5..17....3..96..1...67..9........4.82.46...3...8...."
-    puzzle = Dict{String,Set{Int}}( 
+    puzzleStr = ".......7..1.9.4..8..9........5..17....3..96..1...67..9........4.82.46...3...8...."
+    puzzle = Dict( 
         squares[ix] => v == '.' ? Set([1,2,3,4,5,6,7,8,9]) :  Set(Int(v)-Int('0')) for (ix, v) in enumerate(puzzleStr)
         )
     soln = JSolver.solve(puzzle)
-	print("Hello")
+
+	print(soln["solution"])
 	
 end
 
