@@ -12,25 +12,20 @@ local allFamilies = defs.allFamilies
 
 local function isValidFamily( thePuzzle, theFamily )
 
-    --Check and see if all squares have only a single option left
+    -- check t
+    local  x = ""
     for _,squareKey in pairs( theFamily )
     do
-        if #thePuzzle[squareKey] > 1
-        then
+        x = x .. thePuzzle[squareKey]
+    end
+
+    for sqVal = 1, 9
+    do
+        if not string.find( x, tostring(sqVal) ) then
             return false
         end
     end
-
-    --If single option in all squares, make sure values are unique 1-9
-    local familyCheckVals = valueList -- copy of possible values
-
-    for _,squareKey in pairs( theFamily )
-    do
-        familyCheckVals = familyCheckVals:gsub(thePuzzle[squareKey],'')
-    end
-
-    -- If value list is empty, then family passed
-    return (familyCheckVals:len() == 0)
+    return true
 end
 
 local function isPuzzleComplete(thePuzzle)
@@ -192,32 +187,21 @@ function solver.solve(myPuzzle)
         thePuzzle = eliminationPass(thePuzzle)
         if (isPuzzleComplete(thePuzzle)==true)
         then
-            if (isPuzzleSolved(thePuzzle)==true)
-            then
-                return thePuzzle
-            else
-                return -1
-            end
+            return isPuzzleSolved(thePuzzle)==true and thePuzzle or -1
         else
             local nextPuzzleGuess
             local entryPoint, nextGuesses = getNextEntryPoint(thePuzzle)
-            if entryPoint == nil then
-                return -1
-            end
+            if entryPoint == nil then return -1 end
             for _,nextGuess in ipairs(nextGuesses)
             do
-                --print(string.format('Entry: %s - Value -%s',entryPoint, nextGuess ))
-                --printPuzzle(thePuzzle)
                 result.numRecursions = result.numRecursions+1
                 nextPuzzleGuess = myFuns.copyTable(thePuzzle)
                 nextPuzzleGuess[entryPoint] = nextGuess
                 if allFamiliesValid(nextPuzzleGuess) then
                     nextPuzzleGuess = solveTheThing(myFuns.copyTable(nextPuzzleGuess))
-                    if isPuzzleComplete(nextPuzzleGuess) == true then
-                        if (isPuzzleSolved(nextPuzzleGuess)==true)
-                        then
-                            return nextPuzzleGuess
-                        end
+                    if (isPuzzleSolved(nextPuzzleGuess)==true)
+                    then
+                        return nextPuzzleGuess
                     end
                 end
             end
@@ -232,8 +216,6 @@ function solver.solve(myPuzzle)
 
     return result
 end
-
-
 
 function solver.puzzleString2puzzle(puzzleStr)
 
@@ -252,10 +234,11 @@ function solver.puzzleString2puzzle(puzzleStr)
 end
 
 function solver.testIt()
-    local puzzleStr = ".15.7....4..8..75...8..9.169641.7.3..8239.5..5....4.9..2.41.8....17.39.4...92..65"
+   -- local puzzleStr = ".15.7....4..8..75...8..9.169641.7.3..8239.5..5....4.9..2.41.8....17.39.4...92..65"
+    local puzzleStr = "32.9.......52.7.....958...2.87..5.4.......6...3....7.86......17.....24...7.4...2."
     local puzzle    = solver.puzzleString2puzzle(puzzleStr)
-    puzzle = solver.solve(puzzle)
-    for k,v in pairs(puzzle) do print(k, v) end
+    local result = solver.solve(puzzle)
+    for k,v in pairs(result.solution) do print(k, v) end
 
 end
 
