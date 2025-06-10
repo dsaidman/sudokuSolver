@@ -1,5 +1,3 @@
----@diagnostic disable: trailing-space
--- sudoku solver in lua, at least an attempt of one
 
 local myFuns      = require("src.solver.LHelpers")
 local defs        = require('src.solver.LDefinitions')
@@ -7,12 +5,6 @@ local defs        = require('src.solver.LDefinitions')
 local rowNames    = defs.rowNames
 local colNames    = defs.colNames
 local valueList   = table.concat(defs.colNames)
-
-local result = {        ['solution'] = {},
-                        ['duration_ms']    = 0.0,
-                        ['bestSinglePass'] = 0,
-                        ['numOperations']  = 0,
-                        ['numRecursions']  = 0}
 
 local allKeys     = defs.allKeys
 local squares     = defs.allKeys
@@ -57,14 +49,8 @@ local function isPuzzleComplete(thePuzzle)
     return true
 end
 
-local function isPuzzleSolved(thePuzzle)
 
-    -- Now check all the families and make sure those are all valid
-    if thePuzzle == -1
-    then
-        return false
-    end
-
+local function allFamiliesValid(thePuzzle)
     for _, theFamily in ipairs( allFamilies )
     do
         if  isValidFamily( thePuzzle, theFamily ) == false
@@ -73,8 +59,23 @@ local function isPuzzleSolved(thePuzzle)
         end
     end
     return true
-
 end
+
+local function isPuzzleSolved(thePuzzle)
+    -- Now check all the families and make sure those are all valid
+    if thePuzzle == -1
+    then
+        return false
+    end
+
+    if not isPuzzleComplete(thePuzzle)
+    then
+        return false
+    end
+
+    return allFamiliesValid(thePuzzle)
+end
+
 
 local function initEmptyPuzzle()
     local emptyPuzzle = {}
@@ -83,16 +84,6 @@ local function initEmptyPuzzle()
          emptyPuzzle[gridKey] = valueList
     end
     return emptyPuzzle
-end
-
-local function importPuzzle(startingValues)
-    local startingPuzzle = initEmptyPuzzle()
-    for gridID, gridValue in pairs(startingValues)
-    do
-        -- print(gridID .. ' = ' .. gridValue)
-        startingPuzzle[gridID] = tostring(gridValue)
-    end
-    return startingPuzzle
 end
 
 --local previousKey
@@ -149,116 +140,123 @@ local function getNextEntryPoint(thePuzzle)
     end
 end
 
---[[ local function getDifficulty()
-    if solverInfo.numRecursions == 0 then
-        return difficultEnum[1]
-    elseif solverInfo.numRecursions < 5 then
-        return difficultEnum[2]
-    elseif solverInfo.numRecursions < 25 then
-        return difficultEnum[3]
-    elseif solverInfo.numRecursions < 50 then
-        return difficultEnum[4]
-    elseif solverInfo.numRecursions < 100 then
-        return difficultEnum[5]
-    elseif solverInfo.numRecursions < 400 then
-        return difficultEnum[6]
-    else
-        return difficultEnum[7]
-    end
-end ]]
 
-local function solveTheThing(thePuzzle)
 
-    local allNeighbors, neighborVals
-    local didChange = true
-
-    while (didChange==true) and (isPuzzleComplete(thePuzzle)==false)
+local solver = {}
+function solver.importPuzzle(startingValues)
+    local startingPuzzle = initEmptyPuzzle()
+    for gridID, gridValue in pairs(startingValues)
     do
-        didChange = false
-        for gridID,gridValues in pairs(thePuzzle)
-        do
+        startingPuzzle[gridID] = tostring(gridValue)
+    end
+    return startingPuzzle
+end
 
-            if #gridValues == 1
-            then
-                allNeighbors = defs.getNeighbors(gridID)
-                for neighborKey in pairs(allNeighbors)
-                do
-                    neighborVals = thePuzzle[neighborKey]
-                    if #neighborVals > 1 and neighborVals:find(gridValues)
-                    then
-                        result.numOperations = result.numOperations+1
-                        didChange = true
-                        thePuzzle[neighborKey] = neighborVals:gsub(gridValues,'')
+function solver.solve(myPuzzle)
+
+    local result = {        ['solution'] = {},
+        ['duration_ms']    = 0.0,
+        ['bestSinglePass'] = 0,
+        ['numOperations']  = 0,
+        ['numRecursions']  = 0}
+    local function eliminationPass(thePuzzle)
+
+        local allNeighbors, neighborVals
+        local didChange = true
+        while (didChange==true) and (isPuzzleComplete(thePuzzle)==false)
+        do
+            didChange = false
+            for gridID,gridValues in pairs(thePuzzle)
+            do
+
+                if #gridValues == 1
+                then
+                    allNeighbors = defs.getNeighbors(gridID)
+                    for neighborKey in pairs(allNeighbors)
+                    do
+                        neighborVals = thePuzzle[neighborKey]
+                        if #neighborVals > 1 and neighborVals:find(gridValues)
+                        then
+                            result.numOperations = result.numOperations+1
+                            didChange = true
+                            thePuzzle[neighborKey] = neighborVals:gsub(gridValues,'')
+                        end
                     end
                 end
             end
         end
+        return thePuzzle
     end
+    local function solveTheThing(thePuzzle)
 
-    if (isPuzzleComplete(thePuzzle)==true)
-    then
-
-        if (isPuzzleSolved(thePuzzle)==true)
+        thePuzzle = eliminationPass(thePuzzle)
+        if (isPuzzleComplete(thePuzzle)==true)
         then
-            return thePuzzle
-        else
-            return -1
-        end
-    else
-        local nextPuzzleGuess
-        local entryPoint, nextGuesses = getNextEntryPoint(thePuzzle)
-
-        if entryPoint == nil then
-            return -1
-        end
-        for _,nextGuess in ipairs(nextGuesses)
-        do
-            --print(string.format('Entry: %s - Value -%s',entryPoint, nextGuess ))
-            --printPuzzle(thePuzzle)
-            result.numRecursions = result.numRecursions+1
-            nextPuzzleGuess = myFuns.copyTable(thePuzzle)
-            nextPuzzleGuess[entryPoint] = nextGuess
-            nextPuzzleGuess = solveTheThing(myFuns.copyTable(nextPuzzleGuess))
-            if isPuzzleComplete(nextPuzzleGuess) == true then
-                if (isPuzzleSolved(nextPuzzleGuess)==true)
-                then
-                    return nextPuzzleGuess
-                end
-            --else
-                -- do next iter
+            if (isPuzzleSolved(thePuzzle)==true)
+            then
+                return thePuzzle
+            else
+                return -1
             end
+        else
+            local nextPuzzleGuess
+            local entryPoint, nextGuesses = getNextEntryPoint(thePuzzle)
+            if entryPoint == nil then
+                return -1
+            end
+            for _,nextGuess in ipairs(nextGuesses)
+            do
+                --print(string.format('Entry: %s - Value -%s',entryPoint, nextGuess ))
+                --printPuzzle(thePuzzle)
+                result.numRecursions = result.numRecursions+1
+                nextPuzzleGuess = myFuns.copyTable(thePuzzle)
+                nextPuzzleGuess[entryPoint] = nextGuess
+                if allFamiliesValid(nextPuzzleGuess) then
+                    nextPuzzleGuess = solveTheThing(myFuns.copyTable(nextPuzzleGuess))
+                    if isPuzzleComplete(nextPuzzleGuess) == true then
+                        if (isPuzzleSolved(nextPuzzleGuess)==true)
+                        then
+                            return nextPuzzleGuess
+                        end
+                    end
+                end
+            end
+            return -1 -- if it gets here, didnt find the soln
         end
-
-        return -1 -- if it gets here, didnt find the soln
     end
-end
-
-
----local function doTheThing(inFilePath)
----    local myPuzzle = importPuzzle(inFilePath)
----    printPuzzle(myPuzzle)
----   print(myFuns.cprint('Running...','red'))
----    local startTime = os.clock()
----    local theSolution = solveTheThing( myPuzzle )
----    solverInfo['runTime_seconds'] = os.clock()-startTime
----    printPuzzle(theSolution)
----    return theSolution
----end
-local solver = {}
-function solver.solve(myStartingVals)
-
-    local myPuzzle = importPuzzle(myStartingVals)
-    result.bestSinglePass = 0
-    result.numOperations  = 0
-    result.numRecursions  = 0
-    result.solution       = false
 
     local startTime = os.clock()
     local theSolution = solveTheThing( myPuzzle )
-    result['duration_ms'] = (os.clock()-startTime)*1000
-    result['solution'] = theSolution
+    result.duration_ms = (os.clock()-startTime)*1000
+    result.solution    = theSolution
 
     return result
+end
+
+
+
+function solver.puzzleString2puzzle(puzzleStr)
+
+    local pzlVals   = myFuns.string2Table(puzzleStr)
+    local puzzle = {}
+    for ix, sqKey in ipairs(defs.allKeys)
+    do
+        if pzlVals[ix] == "."
+        then
+            puzzle[sqKey] = "123456789"
+        else
+            puzzle[sqKey] = pzlVals[ix]
+        end
+    end
+    return puzzle
+end
+
+function solver.testIt()
+    local puzzleStr = ".15.7....4..8..75...8..9.169641.7.3..8239.5..5....4.9..2.41.8....17.39.4...92..65"
+    local puzzle    = solver.puzzleString2puzzle(puzzleStr)
+    puzzle = solver.solve(puzzle)
+    for k,v in pairs(puzzle) do print(k, v) end
+
 end
 
 return solver
