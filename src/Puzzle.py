@@ -149,6 +149,7 @@ class SudokuPuzzle(object):
 
         self.lang = rt.lang
         if rt.lang == "luajit" or rt.lang == "lua":
+            puzzleArg = {k : "".join([str(x) for x in puzzleArg[k]]) for k in puzzleArg.keys()} # temporary
             puzzleArg = rt.dict2Table(puzzleArg)
             solveFun = rt.solver["solve"]
         elif rt.lang == "julia":

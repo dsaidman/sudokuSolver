@@ -58,7 +58,6 @@ def main():
 
     sys.exit(app.exec())
 
-
 def setupLogging(loggingLevel="INFO") -> logging.Logger:
     """Set up logging for the application.
     This function configures the logging settings, including the format and level of logging.

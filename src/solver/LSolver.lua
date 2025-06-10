@@ -146,7 +146,7 @@ function solver.importPuzzle(startingValues)
     return startingPuzzle
 end
 
-function solver.solve(myPuzzle)
+function solver.solve(startingValues)
 
     local result = {        ['solution'] = {},
         ['duration_ms']    = 0.0,
