@@ -118,8 +118,9 @@ local function getNextEntryPoint(thePuzzle)
     for _, gridKey in ipairs(possibleKeys) do
         sumOccurances[gridKey] = 0
         local possibleVals = myFuns.string2Table(filteredPuzzle[gridKey])
+        if #possibleVals <= 1 then return nil,nil end
         for _,possibleVal in ipairs(possibleVals) do
-             sumOccurances[gridKey] =  sumOccurances[gridKey] + occuranceCount[possibleVal]
+            sumOccurances[gridKey] =  sumOccurances[gridKey] + occuranceCount[possibleVal]
         end
     end
 
@@ -134,8 +135,6 @@ local function getNextEntryPoint(thePuzzle)
         return entryPointKey, orderedGuesses
     end
 end
-
-
 
 local solver = {}
 function solver.importPuzzle(startingValues)
@@ -212,6 +211,7 @@ function solver.solve(myPuzzle)
         end
     end
 
+    local myPuzzle = solver.importPuzzle(startingValues)
     local startTime = os.clock()
     local theSolution = solveTheThing( myPuzzle )
     result.duration_ms = (os.clock()-startTime)*1000
@@ -238,7 +238,8 @@ end
 
 function solver.testIt()
    -- local puzzleStr = ".15.7....4..8..75...8..9.169641.7.3..8239.5..5....4.9..2.41.8....17.39.4...92..65"
-    local puzzleStr = "32.9.......52.7.....958...2.87..5.4.......6...3....7.86......17.....24...7.4...2."
+  --  local puzzleStr = "32.9.......52.7.....958...2.87..5.4.......6...3....7.86......17.....24...7.4...2."
+    local puzzleStr = ".......7..1.9.4..8..9........5..17....3..96..1...67..9........4.82.46...3...8...."
     local puzzle    = solver.puzzleString2puzzle(puzzleStr)
     local result = solver.solve(puzzle)
     for k,v in pairs(result.solution) do print(k, v) end

@@ -103,7 +103,7 @@ function getNextEntryPoint(puzzle::SudokuPuzzleT)
 
 	# get the square with fewest possiblities that contains mostFrequentlyUnresolved
 	smallestMostFrequent  = [length(v) for (k,v) in puzzle if length(v) > 1 && mostFrequentUnsolved in v]
-    smallestMostFrequent  = length(smallestMostFrequent) > 0 ? minimum(smallestMostFrequent) : return false
+    smallestMostFrequent  = length(smallestMostFrequent) > 0 ? maximum(smallestMostFrequent) : return false
     
 	# With the value that occurs most often (mostFrequentUnsolved), find the square 
 	# with mostFrequentUnsolved with fewest remaining possible values (smallestMostFrequent). 
