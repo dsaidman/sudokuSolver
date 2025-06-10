@@ -122,7 +122,7 @@ local function getNextEntryPoint(thePuzzle)
         for _,possibleVal in ipairs(possibleVals) do
             sumOccurances[gridKey] =  sumOccurances[gridKey] + occuranceCount[possibleVal]
         end
-    end
+    end 
 
     local entryPointKey = select(2,myFuns.max(sumOccurances))
     --previousKey = entryPointKey
