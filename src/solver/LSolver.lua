@@ -156,6 +156,7 @@ function solver.solve(myPuzzle)
         ['numRecursions']  = 0}
     local function eliminationPass(thePuzzle)
 
+        local thisSinglePass = 0
         local allNeighbors, neighborVals
         local didChange = true
         while (didChange==true) and (isPuzzleComplete(thePuzzle)==false)
@@ -173,6 +174,7 @@ function solver.solve(myPuzzle)
                         if #neighborVals > 1 and neighborVals:find(gridValues)
                         then
                             result.numOperations = result.numOperations+1
+                            thisSinglePass = thisSinglePass+1
                             didChange = true
                             thePuzzle[neighborKey] = neighborVals:gsub(gridValues,'')
                         end
@@ -180,6 +182,7 @@ function solver.solve(myPuzzle)
                 end
             end
         end
+        result.bestSinglePass = math.max(thisSinglePass, result.bestSinglePass)
         return thePuzzle
     end
     local function solveTheThing(thePuzzle)
