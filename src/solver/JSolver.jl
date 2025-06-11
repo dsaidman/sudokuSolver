@@ -138,10 +138,10 @@ function solve(puzzle::SudokuPuzzleT)
         # This way we try the most frequent values first, which should lead to fewer branches
         # and hopefully a faster solution
         for nextValue in nextValues
-            numRecursions += 1
-            nextPuzzleGuess = deepcopy(puzzle)
             
+            nextPuzzleGuess = deepcopy(puzzle)
             !allFamiliesValid(nextPuzzleGuess) && continue
+            numRecursions += 1
             nextPuzzleGuess[nextEntry] = Set(nextValue)
             nextPuzzleGuess = solveTheThing(nextPuzzleGuess)
 

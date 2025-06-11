@@ -87,46 +87,27 @@ local function getNextEntryPoint(thePuzzle)
     local maxOccuranceValue = tostring(select(2,myFuns.max(occuranceCount)))
     local filteredPuzzle = {}
     for theGridKey, theGridValue in pairs(thePuzzle) do
-        if string.find(theGridValue, maxOccuranceValue) then
+        if string.find(theGridValue, maxOccuranceValue) and #theGridValue > 1 then
            filteredPuzzle[theGridKey]=thePuzzle[theGridKey]
         end
     end
 
-    local maxAvailable   = 0
-    for _,value in pairs(thePuzzle)
+    local minAvailable   = 10000
+    for _,value in pairs(filteredPuzzle)
     do
-        maxAvailable = math.max(maxAvailable, #value)
+        minAvailable = math.min(minAvailable, #value)
+    end
+    local entryPointKey
+    for sqKey, sqVal in pairs(filteredPuzzle)
+    do
+        if #sqVal == minAvailable
+        then
+            entryPointKey = sqKey
+            break
+        end
     end
 
-    local possibleKeys = {}
-    for numPossibilities = 2, maxAvailable
-    do
-        local continueFlag = true
-        for theGridKey, theGridValue in pairs(filteredPuzzle) do
-
-            if string.find(theGridValue, maxOccuranceValue) and (#theGridValue == numPossibilities) --and (theGridKey~=previousKey)
-            then
-
-                continueFlag = false
-                table.insert(possibleKeys, theGridKey)
-            end
-        end
-        if continueFlag == false then break end
-    end
-
-    local sumOccurances = {}
-    for _, gridKey in ipairs(possibleKeys) do
-        sumOccurances[gridKey] = 0
-        local possibleVals = myFuns.string2Table(filteredPuzzle[gridKey])
-        if #possibleVals <= 1 then return nil,nil end
-        for _,possibleVal in ipairs(possibleVals) do
-            sumOccurances[gridKey] =  sumOccurances[gridKey] + occuranceCount[possibleVal]
-        end
-    end 
-
-    local entryPointKey = select(2,myFuns.max(sumOccurances))
-    --previousKey = entryPointKey
-    if thePuzzle[entryPointKey] == nil then
+    if thePuzzle[entryPointKey] == nil or #thePuzzle[entryPointKey] <= 1 then
         return nil, nil
     else
         local orderedGuesses = myFuns.string2Table(thePuzzle[entryPointKey])
@@ -196,10 +177,10 @@ function solver.solve(startingValues)
             if entryPoint == nil then return -1 end
             for _,nextGuess in ipairs(nextGuesses)
             do
-                result.numRecursions = result.numRecursions+1
                 nextPuzzleGuess = myFuns.copyTable(thePuzzle)
                 nextPuzzleGuess[entryPoint] = nextGuess
                 if allFamiliesValid(nextPuzzleGuess) then
+                    result.numRecursions = result.numRecursions+1
                     nextPuzzleGuess = solveTheThing(myFuns.copyTable(nextPuzzleGuess))
                     if (isPuzzleSolved(nextPuzzleGuess)==true)
                     then
