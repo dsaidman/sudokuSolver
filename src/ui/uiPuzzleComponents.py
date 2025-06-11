@@ -269,6 +269,7 @@ class PuzzleFrame(QFrame):
         rowHeaders = {}
         for rowKey in sudokuDefs.rows:
             rowHeaders[rowKey] = PuzzleHeader(self, rowKey, "RowHeader" + rowKey)
+            rowHeaders[rowKey].setObjectName("RowHeader" + rowKey)
             self.puzzleLayout.addWidget(
                 rowHeaders[rowKey],
                 3 + sudokuDefs.rows.index(rowKey) + floor(sudokuDefs.rows.index(rowKey) / 3.0),
@@ -281,6 +282,7 @@ class PuzzleFrame(QFrame):
         colHeaders = {}
         for colKey in sudokuDefs.columns:
             colHeaders[colKey] = PuzzleHeader(self, colKey, "ColumnHeader" + colKey)
+            colHeaders[colKey].setObjectName("ColumnHeader" + colKey)
             self.puzzleLayout.addWidget(
                 colHeaders[colKey],
                 1,
@@ -309,7 +311,7 @@ class PuzzleFrame(QFrame):
             lineBorders[vertLineNum] = PuzzleBorderLine(
                 self, QFrame.Shape.VLine, "verticalLine" + vertLineNum
             )
-
+            lineBorders[vertLineNum].setObjectName(vertLineNum)
             self.puzzleLayout.addWidget(
                 lineBorders[vertLineNum],
                 1,
@@ -322,6 +324,7 @@ class PuzzleFrame(QFrame):
             lineBorders[horizLineNum] = PuzzleBorderLine(
                 self, QFrame.Shape.HLine, "horizontalLine" + horizLineNum
             )
+            lineBorders[horizLineNum].setObjectName(horizLineNum)
             self.puzzleLayout.addWidget(
                 lineBorders[horizLineNum],
                 2 + (4 * ["A", "C", "F", "I"].index(horizLineNum)),
@@ -595,7 +598,36 @@ class PuzzleBorderLine(QFrame):
         self.setParent(parent)
         self.setLineWidth(3)
         self.setFrameShape(frameShape)
-
+        self.setFrameShadow(QFrame.Shadow.Plain)
+        self.setProperty("lang","python")
+        
+        self.setStyleSheet("""
+                            QFrame[lang="luajit"] {
+                                background-color: magenta;
+                                border-color: magenta;
+                                color: magenta;
+                            }
+                            QFrame[lang="lua"] {
+                                background-color: forestgreen;
+                                border-color: forestgreen;
+                                color: forestgreen;
+                            }
+                            QFrame[lang="julia"] {
+                                background-color: cyan;
+                                border-color: cyan;
+                                color: cyan;
+                            }
+                            QFrame[lang="python"] {
+                                background-color: yellow;
+                                border-color: yellow;
+                                color: yellow;
+                            }
+                            QFrame[lang="cython"] {
+                                background-color: orange;
+                                border-color: orange;
+                                color: orange;
+                            }
+                           """)
 
 class PuzzleHeader(QLabel):
     def __init__(self, parent, text=None, objectName=None):
@@ -611,4 +643,25 @@ class PuzzleHeader(QLabel):
         self.setScaledContents(True)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setFont(headerFont)
-        self.setStyleSheet("QLabel {background-color: rgb(70,70,70);border-color: rgb(70,70,70)}")
+        #self.setProperty("lang","python")
+        self.setStyleSheet("""
+                           QLabel {
+                               background-color: rgb(70,70,70);
+                               border-color: rgb(70,70,70)
+                               }
+                            QLabel[lang="luajit"] {
+                                color: magenta;
+                            }
+                            QLabel[lang="lua"] {
+                                color: forestgreen;
+                            }
+                            QLabel[lang="julia"] {
+                                color: cyan;
+                            }
+                            QLabel[lang="python"] {
+                                color: yellow;
+                            }
+                            QLabel[lang="cython"] {
+                                color: orange;
+                            }
+                           """)

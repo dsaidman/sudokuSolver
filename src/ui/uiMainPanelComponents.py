@@ -91,7 +91,7 @@ class UiTitleFrame(QFrame):
                                       QLabel#titleLabel {
                                           background-color: rgb(100,100,100);
                                           font-weight: bold;
-                                          font-size: 14px;
+                                          font-size: 18px;
                                           }
                                         """)
         self.setContentsMargins(0, 0, 0, 0)

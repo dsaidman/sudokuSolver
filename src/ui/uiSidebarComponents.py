@@ -1,10 +1,10 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QFrame, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import QFrame, QPushButton, QVBoxLayout, QLabel
 
 from Puzzle import puzzle
 from py2runtime import RuntimePy as rt
 
-from .uiHelpers import grabMainWindow
+from .uiHelpers import grabMainWindow, grabWidget
 
 
 class UiSidebar(QFrame):
@@ -130,6 +130,28 @@ class UiSidebarButton(QPushButton):
             btn.style().unpolish(btn)
             btn.style().polish(btn)
 
+        for btnName in ["1", "3", "6", "9","A","C","F","I"]:
+            borderFrame = grabWidget(QFrame, btnName)
+            borderFrame.setProperty("lang",self.text().lower())
+            borderFrame.style().unpolish(borderFrame)
+            borderFrame.style().polish(borderFrame)
+        """
+        for headerName in ["A","B","C","D","E","F","G","H","I"]:
+            headerObj = grabWidget(QLabel, "RowHeader" + headerName)
+            headerObj.setProperty("lang", self.text().lower())
+            headerObj.style().unpolish(headerObj)
+            headerObj.style().polish(headerObj)
+        for headerName in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+            headerObj = grabWidget(QLabel, "ColumnHeader" + headerName)
+            headerObj.setProperty("lang", self.text().lower())
+            headerObj.style().unpolish(headerObj)
+            headerObj.style().polish(headerObj)
+        """
+        pzlDisplayLabel = grabWidget(QLabel,"infoDisplayLabel")
+        pzlDisplayLabel.setProperty("lang",self.text().lower())
+        pzlDisplayLabel.style().unpolish(pzlDisplayLabel)
+        pzlDisplayLabel.style().polish(pzlDisplayLabel)
+            
         puzzle.lang = self.text()
         rt.lang = self.text()
 

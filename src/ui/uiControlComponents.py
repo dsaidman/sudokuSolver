@@ -87,10 +87,35 @@ class InfoDisplayLabel(QLabel):
         self.setText("")
         self.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
         self.setEnabled(False)
+        self.setVisible(False)
+        self.setProperty("lang","python")
+        self.setStyleSheet("""
+                           QLabel{
+                                font-size: 14px;
+                                font-weight: bold;
+                                background-color: rgba(0, 0, 0, 0.5);
+                           }
+                            QLabel[lang="luajit"] {
+                                color: magenta;
+                            }
+                            QLabel[lang="lua"] {
+                                color: forestgreen;
+                            }
+                            QLabel[lang="julia"] {
+                                color: cyan;
+                            }
+                            QLabel[lang="python"] {
+                                color: yellow;
+                            }
+                            QLabel[lang="cython"] {
+                                color: orange;
+                            }
+                           """)
 
     def _resetAction(self):
         self.setText("")
-        self.setStyleSheet("")
+        self.setVisible(False)
+        #self.setStyleSheet("")
 
 
 class SetPuzzleBtn(QPushButton):
@@ -198,15 +223,7 @@ class SolvePuzzleButton(QPushButton):
                 difficultyLevel:s
             }\n{numRecursions} Recursions - {numOperations} Operations"
             displayLabel.setText(displayText)
-            displayLabel.setStyleSheet(
-                """
-                font-size: 12px;
-                font-weight: bold;
-                color: rgb(0, 255, 0);
-                background-color: rgba(0, 0, 0, 0.5);
-                """
-            )
-
+            displayLabel.setVisible(True)
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
 

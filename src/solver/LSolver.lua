@@ -16,7 +16,12 @@ local function isValidFamily( thePuzzle, theFamily )
     local  x = ""
     for _,squareKey in pairs( theFamily )
     do
-        x = x .. thePuzzle[squareKey]
+        if #thePuzzle[squareKey] > 0
+        then
+            x  = x .. thePuzzle[squareKey]
+        else
+            return false
+        end
     end
 
     for sqVal = 1, 9
@@ -182,7 +187,7 @@ function solver.solve(startingValues)
                 if allFamiliesValid(nextPuzzleGuess) then
                     result.numRecursions = result.numRecursions+1
                     nextPuzzleGuess = solveTheThing(myFuns.copyTable(nextPuzzleGuess))
-                    if (isPuzzleSolved(nextPuzzleGuess)==true)
+                    if nextPuzzleGuess and (isPuzzleSolved(nextPuzzleGuess)==true)
                     then
                         return nextPuzzleGuess
                     end
