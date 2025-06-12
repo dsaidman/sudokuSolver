@@ -78,7 +78,7 @@ def setupLogging(loggingLevel="INFO") -> logging.Logger:
     logging.addLevelName(
         logging.ERROR, "\033[1;31m%-8s\033[1;0m" % logging.getLevelName(logging.ERROR)
     )
-    FORMAT = "%(levelname)s\033[1;34m%(module)s:%(funcName)s\033[0m -> %(message)s\t\033[30m(%(filename)s[%(lineno)d])\033[0m"
+    FORMAT = "%(levelname)s\033[1;34m%(module)s:%(funcName)s\033[0m -> %(message)s\t\033[35m(%(filename)s[%(lineno)d])\033[0m"
     logging.basicConfig(
         format=FORMAT,
         level=logging.__dict__[loggingLevel.upper()],
