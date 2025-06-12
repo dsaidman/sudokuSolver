@@ -66,7 +66,19 @@ def setupLogging(loggingLevel="INFO") -> logging.Logger:
         logging.Logger: The configured logger instance.
     """
 
-    FORMAT = "%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s"
+    logging.addLevelName(
+        logging.INFO, "\033[1;37m%-8s\033[1;0m" % logging.getLevelName(logging.INFO)
+    )
+    logging.addLevelName(
+        logging.DEBUG, "\033[1;32m%-8s\033[1;0m" % logging.getLevelName(logging.DEBUG)
+    )
+    logging.addLevelName(
+        logging.WARNING, "\033[33m%-8s\033[1;0m" % logging.getLevelName(logging.WARNING)
+    )
+    logging.addLevelName(
+        logging.ERROR, "\033[1;31m%-8s\033[1;0m" % logging.getLevelName(logging.ERROR)
+    )
+    FORMAT = "%(levelname)s\033[1;34m%(module)s:%(funcName)s\033[0m -> %(message)s\t\033[30m(%(filename)s[%(lineno)d])\033[0m"
     logging.basicConfig(
         format=FORMAT,
         level=logging.__dict__[loggingLevel.upper()],
@@ -105,7 +117,7 @@ def parseArgs() -> argparse.Namespace:
     parser.add_argument(
         "--loglevel",
         type=str,
-        default="info",
+        default="debug",
         choices=["debug", "info", "warning", "error", "critical"],
         help="Set the logging level (default: info). This option allows you to control the verbosity of the application logs. Choose from debug, info, warning, error, or critical.",
     )
@@ -121,6 +133,28 @@ def parseArgs() -> argparse.Namespace:
     args = parser.parse_args()
     return args
 
+class CustomFormatter(logging.Formatter):
+    green = "\033[32m"    
+    grey = "\033[37m"
+    yellow = "\033[33m"
+    red = "\033[31m"
+    bold_red = "\033[31m"
+    reset = "\033[1m"
+    format = "%(levelname)8s %(module)25s->%(funcName)-12s %(message)-30s"
+
+    FORMATS = {
+        logging.DEBUG: green + format + reset,
+        logging.INFO: grey + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: bold_red + format + reset,
+    }
+
+    def format(self, record):
+        
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
 
 if __name__ == "__main__":
     main()

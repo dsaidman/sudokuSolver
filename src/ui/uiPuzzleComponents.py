@@ -345,11 +345,7 @@ class PuzzleFrame(QFrame):
         Returns:
             bool: True if the event was handled, False otherwise.
         """
-        uiLogger.debug(
-            "PuzzleFrame eventFilter called with source: {source}, event: {event}".format(
-                source=source, event=event
-            )
-        )
+        
         if isinstance(source, PuzzleSquare) and event.type() == event.Type.KeyPress:
             sourceObjectName = source.objectName()
             rowNum = sourceObjectName[0]
