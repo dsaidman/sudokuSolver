@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QVBoxLayout,
+    QSizePolicy
 )
 
 from Puzzle import puzzle as sudokuDefs
@@ -92,10 +93,10 @@ class PuzzleFrame(QFrame):
         self.setLineWidth(3)
         self.setObjectName("puzzleFrame")
         self.setContentsMargins(0, 0, 0, 0)
-
+        
         self.puzzleLayout = QGridLayout()
         self.puzzleLayout.setObjectName("puzzleLayout")
-        self.puzzleLayout.setSpacing(3)
+        self.puzzleLayout.setSpacing(1)
         self.puzzleLayout.setContentsMargins(0, 0, 0, 0)
 
         mainPanelLayout = grabWidget(QVBoxLayout, "mainPanelLayout")
@@ -474,7 +475,7 @@ class PuzzleSquare(QLineEdit):
         self.setText("")
         self.setMaxLength(1)
         self.setFrame(True)
-
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setDragEnabled(True)
         self.setPlaceholderText("")

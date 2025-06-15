@@ -1,8 +1,17 @@
 import logging
 import os
 
-from PyQt6.QtGui import QAction, QKeySequence, QShortcut
-from PyQt6.QtWidgets import QInputDialog, QMenu, QMenuBar, QPushButton
+from PyQt6.QtGui import QAction, QKeySequence, QShortcut, QCursor
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QMenu,
+    QMenuBar,
+    QPushButton,
+    QDialog,
+    QSlider,
+    QHBoxLayout,
+    QLineEdit
+)
 
 from Puzzle import puzzle as sudokuDefs
 
@@ -46,8 +55,8 @@ class MenuBar(QMenuBar):
         self.importFromIniAction.setMenuRole(QAction.MenuRole.ApplicationSpecificRole)
         self.importFromIniAction.shortcut = QShortcut(QKeySequence("Ctrl+I"), self)
         self.importFromIniAction.setObjectName("importFromIniAction")
-        self.importFromIniAction.triggered.connect(self._importPuzzle)
-        self.importFromIniAction.shortcut.activated.connect(self._importPuzzle)
+        self.importFromIniAction.triggered.connect(self.importPuzzleBtnPushed)
+        self.importFromIniAction.shortcut.activated.connect(self.importPuzzleBtnPushed)
 
         self.resetAllAction = QAction(theMainWindow)
         self.resetAllAction.setText("&Reset")
@@ -58,37 +67,12 @@ class MenuBar(QMenuBar):
         self.resetAllAction.setObjectName("resetAction")
         self.resetAllAction.triggered.connect(grabMainWindow()._resetMainWindow)
         self.resetAllAction.shortcut.activated.connect(grabMainWindow()._resetMainWindow)
-
-    """def importPuzzle1(self):
-        import configparser
-        _basePath = getBasePath()
-        fname = os.path.normpath(os.path.join(_basePath, "..", "..", "resources", "samples.ini"))
-        if fname:
-            grabMainWindow()._resetMainWindow()
-
-            puzzleIni = configparser.ConfigParser()
-            puzzleIni.read(fname)
-            puzzleNames = list(puzzleIni._sections.keys())
-
-            if len(puzzleNames) == 0:
-                return
-            puzzleName = self._choosePuzzle(puzzleNames)
-            if not puzzleName:
-                return
-            squares = grabPuzzleSquares()
-
-            for squareKey, squareVal in puzzleIni._sections[puzzleName].items():
-                squares[squareKey.upper()].setText(squareVal)
-                squares[squareKey.upper()].squareType = SquareTypeEnum.InputUnlocked
-                squares[squareKey.upper()]._refresh()
-
-            grabMainWindow()._updateWindow()
-            grabPuzzleFrame().toggleLock()
-            grabWidget(QPushButton, "setPuzzleBtn")._enableMe()
-            """
-
-    def _importPuzzle(self) -> None | str:
-        _id = "16401"
+    
+    def importPuzzleBtnPushed(self):
+        PuzzleSelectDlg(self)
+        
+    def _importPuzzle(self, id) -> None | str:
+        _id = str(id)
         from csv import DictReader
 
         _basePath = getBasePath()
@@ -176,18 +160,6 @@ class MenuBar(QMenuBar):
         grabPuzzleFrame().toggleLock()
         grabWidget(QPushButton, "setPuzzleBtn")._enableMe()
 
-    def _choosePuzzle(self, puzzleNames):
-        if not puzzleNames:
-            return False
-        selectedValue, isSelected = QInputDialog.getItem(
-            self, "Import Puzzle", "Select Puzzle to Import:", puzzleNames
-        )
-
-        if isSelected:
-            return selectedValue
-        else:
-            return False
-
     def uncheckTheBox(self, otherBox):
         otherBox.setChecked(False)
 
@@ -196,3 +168,86 @@ class MenuBar(QMenuBar):
         squareKeys = sudokuDefs.squares
         pzlOut = dict.fromkeys(squareKeys, "123456789")
         return {pzlOut[squareKeys[idx]]: val for idx, val in enumerate(dotPuzzle) if val != "."}
+
+
+class PuzzleSelectDlg(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Select Puzzle")
+        #self.setGeometry(100, 100, 300, 200)
+
+        self.leftbtn = QPushButton(">", self)
+        self.leftbtn.setContentsMargins(0,0,0,0)
+        self.leftbtn.setFlat(True)
+        self.leftbtn.clicked.connect(self._addOne)
+        self.leftbtn.setFixedWidth(20)
+
+        
+        self.rightbtn = QPushButton("<", self)
+        self.rightbtn.setContentsMargins(0, 0, 0, 0)
+        self.rightbtn.setFlat(True)
+        self.rightbtn.setFixedWidth(20)
+        self.rightbtn.clicked.connect(self._loseOne)
+        
+        self.leftpagebtn = QPushButton(">>>", self)
+        self.leftpagebtn.setContentsMargins(0, 0, 0, 0)
+        self.leftpagebtn.setFlat(True)
+        self.leftpagebtn.clicked.connect(self._addOneT)
+        self.leftpagebtn.setFixedWidth(20)
+
+        self.rightpagebtn = QPushButton("<<<", self)
+        self.rightpagebtn.setContentsMargins(0, 0, 0, 0)
+        self.rightpagebtn.setFlat(True)
+        self.rightpagebtn.setFixedWidth(20)
+        self.rightpagebtn.clicked.connect(self._loseOneT)
+        
+        self.sliderbar = QSlider(Qt.Orientation.Horizontal,self)
+        self.sliderbar.setContentsMargins(0, 0, 0, 0)
+        self.sliderbar.setFixedWidth(400)
+        
+        self.sliderbar.setMinimum(0)
+        self.sliderbar.setMaximum(16401)
+        self.sliderbar.setSingleStep(1)
+        self.sliderbar.setPageStep(1000)
+        self.sliderbar.setValue(16401)
+        self.sliderbar.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.sliderbar.valueChanged.connect(self.update)
+        
+        self.selectionlabel = QLineEdit(str(self.sliderbar.value()),self)
+        self.selectionlabel.setContentsMargins(0, 0, 0, 0)
+        self.selectionlabel.textChanged.connect(self.update)
+        self.selectionlabel.setInputMethodHints(Qt.InputMethodHint.ImhDigitsOnly)
+        self.selectionlabel.setCursor(QCursor(Qt.CursorShape.IBeamCursor))
+        
+        self.okButton = QPushButton("OK", self)
+        self.okButton.setContentsMargins(0, 0, 0, 0)
+        self.okButton.setFlat(True)
+        self.okButton.setFixedWidth(20)
+        self.okButton.clicked.connect( lambda state: grabWidget(QMenuBar,"menuBar")._importPuzzle( self.sliderbar.value() ))
+        
+        
+        self.layout = QHBoxLayout(self)
+        self.layout.addWidget(self.rightpagebtn)
+        self.layout.addWidget(self.rightbtn)
+        self.layout.addWidget(self.sliderbar)
+        self.layout.addWidget(self.leftbtn)
+        self.layout.addWidget(self.leftpagebtn)
+        self.layout.addWidget(self.selectionlabel)
+        self.layout.addWidget(self.okButton)
+
+        self.setLayout(self.layout)
+        self.show()
+        
+    def update(self,value):
+        
+        self.sliderbar.setValue(int(value))
+        self.selectionlabel.setText(str(self.sliderbar.value()))
+
+    def _addOne(self):
+        self.sliderbar.setValue(min(self.sliderbar.value() + 1,16402))
+    def _loseOne(self):
+        self.sliderbar.setValue(max(self.sliderbar.value() - 1,0))
+    def _addOneT(self):
+            self.sliderbar.setValue(min(self.sliderbar.value() + 1000,16402))
+    def _loseOneT(self):
+            self.sliderbar.setValue(max(self.sliderbar.value() - 1000,0))
