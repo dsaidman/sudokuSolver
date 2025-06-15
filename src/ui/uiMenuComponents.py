@@ -225,6 +225,8 @@ class PuzzleSelectDlg(QDialog):
         self.okButton.setFixedWidth(20)
         self.okButton.clicked.connect( lambda state: grabWidget(QMenuBar,"menuBar")._importPuzzle( self.sliderbar.value() ))
         self.okButton.clicked.connect(self.close)
+        self.okButton.clicked.connect(grabPuzzleFrame().toggleLock)
+        self.okButton.clicked.connect( grabWidget(QPushButton, "setPuzzleBtn")._enableMe)
         
         
         self.layout = QHBoxLayout(self)
