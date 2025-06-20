@@ -116,7 +116,7 @@ class _Py2Runtime:
             uiLogger.info("Resolving Package dependencies...")
             juliaPkgTgt = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
             import juliapkg as Pkg
-            
+
             uiLogger.debug("Requiring julia 1.5 or newer")
             Pkg.require_julia("1.5", target=juliaPkgTgt)
             uiLogger.debug("Adding Cachaing module package list")

@@ -26,7 +26,7 @@ class SudokuPuzzle(object):
     def value(self, inPuzzle) -> None:
         ptype = type(inPuzzle)
 
-        pzl = {sq : [1,2,3,4,5,6,7,8,9] for sq in self.squares}
+        pzl = {sq: [1, 2, 3, 4, 5, 6, 7, 8, 9] for sq in self.squares}
 
         if ptype is dict:
             for sqKey, sqValue in inPuzzle.items():
@@ -149,7 +149,9 @@ class SudokuPuzzle(object):
 
         self.lang = rt.lang
         if rt.lang == "luajit" or rt.lang == "lua":
-            puzzleArg = {k : "".join([str(x) for x in puzzleArg[k]]) for k in puzzleArg.keys()} # temporary
+            puzzleArg = {
+                k: "".join([str(x) for x in puzzleArg[k]]) for k in puzzleArg.keys()
+            }  # temporary
             puzzleArg = rt.dict2Table(puzzleArg)
             solveFun = rt.solver["solve"]
         elif rt.lang == "julia":

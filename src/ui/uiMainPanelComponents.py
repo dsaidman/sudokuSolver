@@ -37,7 +37,7 @@ class UiMainPanel(QFrame):
         # make master layout widget for nestthig the layouts
         self.mainPanelLayout.setContentsMargins(0, 0, 0, 0)
 
-        #self.mainPanelLayout.addStretch()
+        # self.mainPanelLayout.addStretch()
         uiLogger.debug("Inserting uiTitleFrame Widget into UiMainPanel")
         self.mainPanelLayout.insertWidget(0, self.uiTitleFrame)
 
@@ -47,7 +47,7 @@ class UiMainPanel(QFrame):
         uiLogger.debug("Inserting UiControlFrame into UiMainPanel")
         self.mainPanelLayout.insertWidget(2, self.uiFrame)
 
-        #self.mainPanelLayout.addStretch()
+        # self.mainPanelLayout.addStretch()
 
     def orderTabs(self):
         uiLogger.debug("Ordering puzzle frame tabs")
@@ -67,7 +67,7 @@ class UiTitleFrame(QFrame):
         super(UiTitleFrame, self).__init__(parent)
 
         self.setObjectName("uiTitleFrame")
-        
+
         self.setParent(parent)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
 
@@ -85,7 +85,7 @@ class UiTitleFrame(QFrame):
         self.titleLabel.setObjectName("titleLabel")
         self.titleLabel.setToolTip(self.titleLabel.objectName())
         self.titleLabel.setParent(self)
-        
+
         # self.titleLabel.setAutoFillBackground(True)
         self.titleLabel.setText("Sudoku Solver")
         self.titleLabel.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)

@@ -95,7 +95,7 @@ class InfoDisplayLabel(QLabel):
         self.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
         self.setEnabled(False)
         self.setVisible(False)
-        self.setProperty("lang","python")
+        self.setProperty("lang", "python")
         self.setStyleSheet("""
                            QLabel{
                                 font-size: 14px;
@@ -124,7 +124,7 @@ class InfoDisplayLabel(QLabel):
         uiLogger.debug("Setting InfoDisplayLabel reset action")
         self.setText("")
         self.setVisible(False)
-        #self.setStyleSheet("")
+        # self.setStyleSheet("")
 
 
 class SetPuzzleBtn(QPushButton):
@@ -219,7 +219,7 @@ class SolvePuzzleButton(QPushButton):
             thePzl.solve()
             uiLogger.info("Compile step complete.  Evaluating puzzle for timed run")
             # timed run
-            
+
             uiLogger.debug("Resetting puzzle")
             thePzl.value = thePzlDict
             uiLogger.debug("Puzzle reset")
@@ -234,7 +234,6 @@ class SolvePuzzleButton(QPushButton):
             difficultyLevel = result["difficultyLevel"]
             # bestSinglePass = result["bestSinglePass"]
 
-            
             self.setSolution(solution)
 
             uiPanel = grabWidget(QFrame, "UiPanel")

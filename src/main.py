@@ -27,7 +27,7 @@ def main():
     uiLogger.debug("Setting up application environment")
 
     # Parse command line arguments
-    uiLogger.debug("Parsing command line arguments") 
+    uiLogger.debug("Parsing command line arguments")
 
     # Import necessary PyQt modules
     from PyQt6.QtWidgets import QApplication
@@ -57,6 +57,7 @@ def main():
     MainWindow.show()
 
     sys.exit(app.exec())
+
 
 def setupLogging(loggingLevel="INFO") -> logging.Logger:
     """Set up logging for the application.
@@ -133,8 +134,9 @@ def parseArgs() -> argparse.Namespace:
     args = parser.parse_args()
     return args
 
+
 class CustomFormatter(logging.Formatter):
-    green = "\033[32m"    
+    green = "\033[32m"
     grey = "\033[37m"
     yellow = "\033[33m"
     red = "\033[31m"
@@ -151,10 +153,10 @@ class CustomFormatter(logging.Formatter):
     }
 
     def format(self, record):
-        
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
 
 if __name__ == "__main__":
     main()

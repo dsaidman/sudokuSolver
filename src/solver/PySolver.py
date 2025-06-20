@@ -2,8 +2,9 @@
 # Sudoku Solver
 # This module provides functions to solve a Sudoku puzzle using a backtracking algorithm.
 
-from time import process_time as ttoc
 from copy import deepcopy
+from time import process_time as ttoc
+
 # Playing with types, so make some type aliases
 type SquareT = str
 type SquareValueT = list[int]
@@ -19,7 +20,7 @@ squares: tuple[VectorStringT] = [row + col for row in rowNames for col in column
 cellRows: tuple[VectorStringT] = ["ABC", "DEF", "GHI"]
 cellColumns: tuple[VectorStringT] = ["123", "456", "789"]
 
-sqValues0: SquareValueT = set(range(1,10))
+sqValues0: SquareValueT = set(range(1, 10))
 # Combines all combinations for two strings into a single loopable list of tuples.
 
 
@@ -130,8 +131,10 @@ def isPuzzleComplete(pzl: SudokuPuzzleT) -> bool:
     # Use a generator to break first time it invalid
     return not any(len(v) > 1 for v in pzl.values())
 
+
 def allFamiliesValid(pzl: SudokuPuzzleT) -> bool:
     return all(isFamilyCorrect(pzl, fam) for fam in families)
+
 
 def isFamilyCorrect(pzl: SudokuPuzzleT, familySquares: VectorStringT) -> bool:
     """Check if a family of squares is correct.
@@ -143,7 +146,7 @@ def isFamilyCorrect(pzl: SudokuPuzzleT, familySquares: VectorStringT) -> bool:
             bool: True if the family is correct, False otherwise.
     """
     # Check if the values in the family squares contain all digits from 1 to 9 exactly onceamilySquares], [])))
-    return set(sum([pzl[familySq] for familySq in familySquares],[])) == sqValues0
+    return set(sum([pzl[familySq] for familySq in familySquares], [])) == sqValues0
 
 
 def isPuzzleSolved(pzl: SudokuPuzzleT) -> bool:
@@ -166,11 +169,11 @@ def _getNextEntryPoint(pzl: SudokuPuzzleT):
             str: The key of the next square to solve.
     """
     # Of all unknowns, find the unknown value that occurs most often
-    pzlStr = sum(list(pzl.values()),[])
-    #pzlStr = "".join(list(pzl.values()))
+    pzlStr = sum(list(pzl.values()), [])
+    # pzlStr = "".join(list(pzl.values()))
     unsolvedCount = [pzlStr.count(val) for val in list(sqValues0)]
-    
-    #mostFrequentUnsolved = unsolvedCount.index(max(unsolvedCount)) + 1
+
+    # mostFrequentUnsolved = unsolvedCount.index(max(unsolvedCount)) + 1
     mostFrequentUnsolved = unsolvedCount.index(max(unsolvedCount)) + 1
     # With the value that occurs most often (mostFrequentUnsolved), find the square
     # with mostFrequentUnsolved with fewest remaining possible values.
@@ -181,7 +184,7 @@ def _getNextEntryPoint(pzl: SudokuPuzzleT):
     if len(nextSquareChoices) == 0:
         return (False, False)
     bestValueCount = min(nextSquareChoices.values())
-    nextSquareChoiceKey = next((k for k, v in nextSquareChoices.items() if v == bestValueCount),[])
+    nextSquareChoiceKey = next((k for k, v in nextSquareChoices.items() if v == bestValueCount), [])
     nextSquareChoiceValues = sorted(pzl[nextSquareChoiceKey], key=pzlStr.count, reverse=True)
 
     return nextSquareChoiceKey, nextSquareChoiceValues
@@ -223,11 +226,10 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         # an incomplete family can still be considered correct if no rules broken
         if not allFamiliesValid(puzzle):
             return False
-        
+
         isSolved = isPuzzleSolved(puzzle)
         if isSolved:
             return puzzle
-
 
         if isPuzzleComplete(puzzle) and not isSolved:
             return False
@@ -239,10 +241,9 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
 
             for nextValue in nextValues:
                 # Update number of recursions it takes
-                
 
                 nextPuzzleGuess = deepcopy(puzzle)
-                
+
                 nextPuzzleGuess[nextEntry] = [nextValue]
                 if allFamiliesValid(nextPuzzleGuess):
                     numRecursions += 1
@@ -285,12 +286,11 @@ def solve(puzzle: SudokuPuzzleT) -> SudokuPuzzleT | bool:
         bestSinglePass = max(bestSinglePass, singlePassCount)
         return pzl
 
-
     tStart = ttoc()
     solution = _solveTheThing(puzzle)
     # Turn lists into strings for display
     if solution:
-        for k,v in solution.items():
+        for k, v in solution.items():
             solution[k] = str(v[0])
     duration_ms = (ttoc() - tStart) * 1000.0
     return {

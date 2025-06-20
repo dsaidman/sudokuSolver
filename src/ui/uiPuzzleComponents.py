@@ -12,8 +12,8 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
-    QSizePolicy
 )
 
 from Puzzle import puzzle as sudokuDefs
@@ -93,7 +93,7 @@ class PuzzleFrame(QFrame):
         self.setLineWidth(3)
         self.setObjectName("puzzleFrame")
         self.setContentsMargins(0, 0, 0, 0)
-        
+
         self.puzzleLayout = QGridLayout()
         self.puzzleLayout.setObjectName("puzzleLayout")
         self.puzzleLayout.setSpacing(1)
@@ -225,7 +225,7 @@ class PuzzleFrame(QFrame):
         Returns:
             None
         """
-        
+
         if key is None:
             uiLogger.debug(f"Setting cursor to {key:s}")
             key = self.objectName()
@@ -350,7 +350,7 @@ class PuzzleFrame(QFrame):
         Returns:
             bool: True if the event was handled, False otherwise.
         """
-        
+
         if isinstance(source, PuzzleSquare) and event.type() == event.Type.KeyPress:
             sourceObjectName = source.objectName()
             rowNum = sourceObjectName[0]
@@ -572,7 +572,7 @@ class PuzzleSquare(QLineEdit):
         self.style().polish(self)
 
     def _refresh(self):
-        #uiLogger.debug("Performing PuzzleSquare _refresh action")
+        # uiLogger.debug("Performing PuzzleSquare _refresh action")
         isValid = self.isValid
         if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
             self.setProperty("squareType", "InputUnlockedAndValid")
@@ -604,7 +604,7 @@ class PuzzleBorderLine(QFrame):
         self.setLineWidth(3)
         self.setFrameShape(frameShape)
         self.setFrameShadow(QFrame.Shadow.Plain)
-        self.setProperty("lang","python")
+        self.setProperty("lang", "python")
         self.setStyleSheet("""
                             QFrame[lang="luajit"] {
                                 background-color: magenta;
@@ -633,6 +633,7 @@ class PuzzleBorderLine(QFrame):
                             }
                            """)
 
+
 class PuzzleHeader(QLabel):
     def __init__(self, parent, text=None, objectName=None):
         super(PuzzleHeader, self).__init__(parent, text=None, objectName=None)
@@ -647,7 +648,7 @@ class PuzzleHeader(QLabel):
         self.setScaledContents(True)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setFont(headerFont)
-        #self.setProperty("lang","python")
+        # self.setProperty("lang","python")
         self.setStyleSheet("""
                            QLabel {
                                background-color: rgb(70,70,70);
