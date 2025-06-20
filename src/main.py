@@ -79,7 +79,7 @@ def setupLogging(loggingLevel="INFO") -> logging.Logger:
     logging.addLevelName(
         logging.ERROR, "\033[1;31m%-8s\033[1;0m" % logging.getLevelName(logging.ERROR)
     )
-    FORMAT = "%(levelname)s\033[1;34m%(module)s:%(funcName)s\033[0m -> %(message)s\t\033[35m(%(filename)s[%(lineno)d])\033[0m"
+    FORMAT = "%(levelname)s\033[1;34m%(module)s\033[0m:\033[1;33m%(funcName)s\033[0m -> %(message)s\t\033[35m(%(filename)s[%(lineno)d])\033[0m"
     logging.basicConfig(
         format=FORMAT,
         level=logging.__dict__[loggingLevel.upper()],
@@ -118,7 +118,7 @@ def parseArgs() -> argparse.Namespace:
     parser.add_argument(
         "--loglevel",
         type=str,
-        default="debug",
+        default="info",
         choices=["debug", "info", "warning", "error", "critical"],
         help="Set the logging level (default: info). This option allows you to control the verbosity of the application logs. Choose from debug, info, warning, error, or critical.",
     )

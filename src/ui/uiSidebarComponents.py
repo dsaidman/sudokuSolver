@@ -178,8 +178,20 @@ class UiSidebarButton(QPushButton):
 
     def onButtonClicked(self, button):
         """
-        Set the selected button in the sidebar.
-        :param button: The button to be selected.
+        Handles the button click event in the sidebar.
+        Updates the selected state of all buttons, updates the UI styling for various elements,
+        and sets the current language for the puzzle solver.
+
+        Args:
+            button: The button that was clicked
+
+        Effects:
+            - Updates selected state of all sidebar buttons
+            - Updates border frame language properties
+            - Updates puzzle display label language property  
+            - Sets puzzle and runtime language
+            - Updates main window runtime language
+            - Updates status bar language label
         """
         uiLogger.debug(f"Button clicked: {self.text()}")
         parent = self.parent()

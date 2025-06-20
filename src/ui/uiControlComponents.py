@@ -213,7 +213,7 @@ class SolvePuzzleButton(QPushButton):
             thePzlDict = puzzleFrame.asDict()
             thePzl = Puzzle(lang=rt.lang, value=thePzlDict)
             uiLogger.info("Puzzle successfully imported")
-            uiLogger.debug(f"thePzlDict: {thePzlDict:s}")
+            #uiLogger.debug(f"thePzlDict: {thePzlDict:s}")
             # compilate run
             uiLogger.info("Evaluating puzzle: untimed compile step")
             thePzl.solve()
