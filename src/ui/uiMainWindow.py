@@ -105,6 +105,7 @@ class AppMainWindow(QMainWindow):
 
         self.uiStatusBar = self.statusBar()
         self.uiStatusBar.setObjectName("uiStatusBar")
+        self.uiStatusBar.setToolTip(self.uiStatusBar.objectName())
         self.uiStatusBar.showMessage("Starting Up")
 
         self.uiStatusBar.statusWidget = QWidget(self.uiStatusBar)
@@ -116,6 +117,9 @@ class AppMainWindow(QMainWindow):
 
         self.uiStatusBar.statusWidget.languageLabel = QLabel(self.uiStatusBar.statusWidget)
         self.uiStatusBar.statusWidget.languageLabel.setObjectName("languageLabel")
+        self.uiStatusBar.statusWidget.languageLabel.setToolTip(
+            self.uiStatusBar.statusWidget.languageLabel.objectName()
+        )
         self.uiStatusBar.statusWidget.languageLabel.setText(f"{grabMainWindow().runtimeLang}")
         self.uiStatusBar.statusWidget.languageLabel.setStyleSheet("""
                                                                     color: yellow;

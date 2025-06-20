@@ -84,6 +84,7 @@ class InfoDisplayLabel(QLabel):
 
         self.setParent(parent)
         self.setObjectName(objectName)
+        self.setToolTip(self.objectName())
         self.setText("")
         self.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
         self.setEnabled(False)
@@ -124,6 +125,7 @@ class SetPuzzleBtn(QPushButton):
 
         self.setParent(parent)
         self.setObjectName(objectName)
+        self.setToolTip(self.objectName())
         self.setText("Lock")
         # self.setFlat(True)
         self.clicked.connect(grabPuzzleFrame().toggleLock)
@@ -165,6 +167,7 @@ class SolvePuzzleButton(QPushButton):
         self.setText("Solve")
         self.setShortcut("")
         self.setObjectName("solveBtn")
+        self.setToolTip(self.objectName())
         self.setProperty("completed", False)
         # self.setFlat(True)
         self._disableMe()

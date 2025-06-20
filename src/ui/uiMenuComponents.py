@@ -1,5 +1,6 @@
 import logging
 import os
+from random import randint
 
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut, QCursor
 from PyQt6.QtCore import Qt
@@ -9,7 +10,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QDialog,
     QSlider,
-    QHBoxLayout,
+    QGridLayout,
     QLineEdit
 )
 
@@ -182,7 +183,6 @@ class PuzzleSelectDlg(QDialog):
         self.leftbtn.clicked.connect(self._addOne)
         self.leftbtn.setFixedWidth(20)
 
-        
         self.rightbtn = QPushButton("<", self)
         self.rightbtn.setContentsMargins(0, 0, 0, 0)
         self.rightbtn.setFlat(True)
@@ -204,16 +204,18 @@ class PuzzleSelectDlg(QDialog):
         self.sliderbar = QSlider(Qt.Orientation.Horizontal,self)
         self.sliderbar.setContentsMargins(0, 0, 0, 0)
         self.sliderbar.setFixedWidth(400)
+        self.sliderbar.setTickInterval(500)
         
         self.sliderbar.setMinimum(0)
         self.sliderbar.setMaximum(16401)
         self.sliderbar.setSingleStep(1)
         self.sliderbar.setPageStep(1000)
-        self.sliderbar.setValue(16401)
-        self.sliderbar.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.sliderbar.setValue(randint(0,14601))
+        self.sliderbar.setTickPosition(QSlider.TickPosition.TicksAbove)
         self.sliderbar.valueChanged.connect(self.update)
         
         self.selectionlabel = QLineEdit(str(self.sliderbar.value()),self)
+        self.selectionlabel.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
         self.selectionlabel.setContentsMargins(0, 0, 0, 0)
         self.selectionlabel.textChanged.connect(self.update)
         self.selectionlabel.setInputMethodHints(Qt.InputMethodHint.ImhDigitsOnly)
@@ -229,14 +231,14 @@ class PuzzleSelectDlg(QDialog):
         self.okButton.clicked.connect( grabWidget(QPushButton, "setPuzzleBtn")._enableMe)
         
         
-        self.layout = QHBoxLayout(self)
-        self.layout.addWidget(self.rightpagebtn)
-        self.layout.addWidget(self.rightbtn)
-        self.layout.addWidget(self.sliderbar)
-        self.layout.addWidget(self.leftbtn)
-        self.layout.addWidget(self.leftpagebtn)
-        self.layout.addWidget(self.selectionlabel)
-        self.layout.addWidget(self.okButton)
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.rightpagebtn, 0, 0, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.rightbtn, 0, 1, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.sliderbar, 0, 2, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.leftbtn, 0, 7, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.leftpagebtn, 0, 8, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.selectionlabel, 0, 2, 4, 1, Qt.AlignmentFlag.AlignTop)
+        self.layout.addWidget(self.okButton, 1, 2, 4, 1, Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(self.layout)
         self.show()

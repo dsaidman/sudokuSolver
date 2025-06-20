@@ -23,18 +23,19 @@ class UiSidebar(QFrame):
         # Set up the sidebar properties
         self.setParent(parent)
         self.setObjectName("UiSidebar")
-        self.setFixedWidth(75)  # Adjust width as needed
+        #self.setFixedWidth(75)  # Adjust width as needed
         self.setContentsMargins(0, 0, 0, 0)
+        
         # Example layout and styling
         layout = QVBoxLayout(self)
         layout.setObjectName("uiSidebarLayout")
-        layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignRight)
-        layout.setSpacing(3)
+        layout.setAlignment(Qt.AlignmentFlag.AlignAbsolute)
+        layout.setSpacing(1)
         self.setLayout(layout)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
 
         self.setLineWidth(1)
-        self.setStyleSheet("""
+        self.setStyleSheet("""                          
                             QPushButton {
                                padding: 5px;
                                font-weight: bold;
@@ -74,6 +75,7 @@ class UiSidebar(QFrame):
         self.luajitBtn.setEnabled(True)
         self.luajitBtn.setProperty("selected", False)
         self.luajitBtn.setToolTip("Using lupa")
+        
 
         self.luaBtn = UiSidebarButton("Lua", self)
         self.luaBtn.setObjectName("luaBtn")
@@ -117,6 +119,7 @@ class UiSidebarButton(QPushButton):
         self.setText(text)
         self.setParent(parent)
         self.setContentsMargins(0, 0, 0, 0)
+        
 
     def onButtonClicked(self, button):
         """

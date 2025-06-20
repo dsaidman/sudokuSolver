@@ -19,7 +19,7 @@ class UiMainPanel(QFrame):
         self.setObjectName("uiMainPanel")
         self.setParent(parent)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
-        self.setContentsMargins(3, 3, 3, 3)
+        self.setContentsMargins(1, 1, 1, 1)
         self.setLineWidth(1)
         self.setupUi()
 
@@ -68,6 +68,7 @@ class UiTitleFrame(QFrame):
         super(UiTitleFrame, self).__init__(parent)
 
         self.setObjectName("uiTitleFrame")
+        
         self.setParent(parent)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
 
@@ -82,16 +83,17 @@ class UiTitleFrame(QFrame):
 
         self.titleLabel = QLabel(self)
         self.titleLabel.setObjectName("titleLabel")
+        self.titleLabel.setToolTip(self.titleLabel.objectName())
         self.titleLabel.setParent(self)
+        
         # self.titleLabel.setAutoFillBackground(True)
         self.titleLabel.setText("Sudoku Solver")
         self.titleLabel.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
-        self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.titleLabel.setStyleSheet("""
                                       QLabel#titleLabel {
-                                          background-color: rgb(100,100,100);
                                           font-weight: bold;
-                                          font-size: 18px;
+                                          font-size: 20px;
                                           }
                                         """)
         self.setContentsMargins(0, 0, 0, 0)

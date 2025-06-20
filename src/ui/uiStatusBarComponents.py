@@ -11,6 +11,7 @@ class PuzzleInfoLabel(QLabel):
 
         self.setParent(parent)
         self.setObjectName(objectName)
+        self.setToolTip(self.objectName())
         self.setText("0 OF 17 Squares Set")
         self.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.setProperty("state", "NotSolvable")
