@@ -19,7 +19,7 @@ class UiMainPanel(QFrame):
         self.setObjectName("uiMainPanel")
         self.setParent(parent)
         self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
-        self.setContentsMargins(1, 1, 1, 1)
+        self.setContentsMargins(0, 0, 0, 0)
         self.setLineWidth(1)
         self.setupUi()
 
@@ -37,8 +37,7 @@ class UiMainPanel(QFrame):
         # make master layout widget for nestthig the layouts
         self.mainPanelLayout.setContentsMargins(0, 0, 0, 0)
 
-        self.mainPanelLayout.addStretch()
-
+        #self.mainPanelLayout.addStretch()
         uiLogger.debug("Inserting uiTitleFrame Widget into UiMainPanel")
         self.mainPanelLayout.insertWidget(0, self.uiTitleFrame)
 
@@ -48,7 +47,7 @@ class UiMainPanel(QFrame):
         uiLogger.debug("Inserting UiControlFrame into UiMainPanel")
         self.mainPanelLayout.insertWidget(2, self.uiFrame)
 
-        self.mainPanelLayout.addStretch()
+        #self.mainPanelLayout.addStretch()
 
     def orderTabs(self):
         uiLogger.debug("Ordering puzzle frame tabs")
@@ -78,6 +77,7 @@ class UiTitleFrame(QFrame):
         self.titleFrameLayout.setObjectName("uiTitleFrameLayout")
         self.titleFrameLayout.setParent(self)
         self.titleFrameLayout.setSpacing(0)
+        self.titleFrameLayout
         self.titleFrameLayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.titleFrameLayout)
 
@@ -91,6 +91,11 @@ class UiTitleFrame(QFrame):
         self.titleLabel.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Plain)
         self.titleLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.titleLabel.setStyleSheet("""
+                                      QFrame {
+                                          padding: 0;
+                                          margin: 0;
+                                          border: none;
+                                      }
                                       QLabel#titleLabel {
                                           font-weight: bold;
                                           font-size: 20px;

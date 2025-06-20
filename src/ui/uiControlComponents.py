@@ -25,8 +25,13 @@ class UiPanel(QFrame):
 
         self.setStyleSheet(
             """
+            QFrame {
+                border: none;
+                margin: 0;
+                padding: 0;
+            }
             QPushButton {
-                border: 1px solid purple;
+                border: none;
                 border-radius: 5px;
                 font-size: 16px;
                 }
@@ -65,6 +70,7 @@ class UiPanel(QFrame):
         uiFrameLayout.addWidget(self.infoDisplayLabel, 1, 0, 1, 2, Qt.AlignmentFlag.AlignVCenter)
 
     def _setCompleted(self):
+        uiLogger.debug("Setting UiPanel Puzzle completed")
         self.setPuzzleBtn._disableMe()
         self.setPuzzleBtn.setProperty("completed", True)
         self.setPuzzleBtn.setToolTip("Puzzle is complete! Nothing to do here")
@@ -95,6 +101,7 @@ class InfoDisplayLabel(QLabel):
                                 font-size: 14px;
                                 font-weight: bold;
                                 background-color: rgba(0, 0, 0, 0.5);
+                                border: none;
                            }
                             QLabel[lang="luajit"] {
                                 color: magenta;
@@ -114,6 +121,7 @@ class InfoDisplayLabel(QLabel):
                            """)
 
     def _resetAction(self):
+        uiLogger.debug("Setting InfoDisplayLabel reset action")
         self.setText("")
         self.setVisible(False)
         #self.setStyleSheet("")
@@ -133,6 +141,7 @@ class SetPuzzleBtn(QPushButton):
         self.setProperty("completed", False)
 
     def _enableMe(self):
+        uiLogger.debug("Performing SetPuzzleBtn _enableMe action")
         self.setEnabled(True)
         self.setProperty("completed", False)
         if self.text() == "Lock":
@@ -144,6 +153,7 @@ class SetPuzzleBtn(QPushButton):
         self.style().unpolish(self)
 
     def _disableMe(self):
+        uiLogger.debug("Performing SetPuzzleBtn _disableMe action")
         self.setToolTip(
             "The puzzle can be solved once the minimum number of squares required for a unique solution have been entered"
         )
@@ -153,6 +163,7 @@ class SetPuzzleBtn(QPushButton):
         self.style().unpolish(self)
 
     def _completeMe(self):
+        uiLogger.debug("Performing SetPuzzleBtn _completeMe action")
         self.setToolTip("Puzzle is completed, nothing to do here")
         self.setText("DONE")
         self.setProperty("completed", True)
@@ -175,6 +186,7 @@ class SolvePuzzleButton(QPushButton):
         self.clicked.connect(self._disableMe)
 
     def _enableMe(self):
+        uiLogger.debug("Performing SolvePuzzleButton _enableMe action")
         self.setEnabled(True)
         self.setProperty("completed", False)
         self.setToolTip("Im valid, defined, and ready to go")
@@ -182,6 +194,7 @@ class SolvePuzzleButton(QPushButton):
         self.style().unpolish(self)
 
     def _disableMe(self):
+        uiLogger.debug("Performing SolvePuzzleButton _disableMe action")
         self.setDisabled(True)
         self.setProperty("completed", False)
         self.setText("Solve")
@@ -190,7 +203,7 @@ class SolvePuzzleButton(QPushButton):
         self.style().unpolish(self)
 
     def solveIt(self):
-        print("Entered solvePuzzle method of solvePuzzleButton!")
+        uiLogger.info("Entered solvePuzzle method of solvePuzzleButton!")
         puzzleFrame = grabPuzzleFrame()
         if puzzleFrame.isValid is not ValidityEnum.Valid:
             print("\tPuzzle not valid condition, returning")
@@ -199,13 +212,19 @@ class SolvePuzzleButton(QPushButton):
         else:
             thePzlDict = puzzleFrame.asDict()
             thePzl = Puzzle(lang=rt.lang, value=thePzlDict)
+            uiLogger.info("Puzzle successfully imported")
+            uiLogger.debug(f"thePzlDict: {thePzlDict:s}")
             # compilate run
+            uiLogger.info("Evaluating puzzle: untimed compile step")
             thePzl.solve()
-
+            uiLogger.info("Compile step complete.  Evaluating puzzle for timed run")
             # timed run
+            
+            uiLogger.debug("Resetting puzzle")
             thePzl.value = thePzlDict
-
+            uiLogger.debug("Puzzle reset")
             result = thePzl.solve()
+            uiLogger.info("Puzzle solved. Collecting result")
 
             solution = result["solution"]
             tDuration_ms = result["duration_ms"]
@@ -215,6 +234,7 @@ class SolvePuzzleButton(QPushButton):
             difficultyLevel = result["difficultyLevel"]
             # bestSinglePass = result["bestSinglePass"]
 
+            
             self.setSolution(solution)
 
             uiPanel = grabWidget(QFrame, "UiPanel")
@@ -225,12 +245,15 @@ class SolvePuzzleButton(QPushButton):
             displayText = f"Completed in {tDuration_ms:.2f} milliseconds - Difficulty: {
                 difficultyLevel:s
             }\n{numRecursions} Recursions - {numOperations} Operations"
+            uiLogger.info(displayText)
             displayLabel.setText(displayText)
+            uiLogger.debug("Showing displayLabel result")
             displayLabel.setVisible(True)
             self._disableMe()
             uiPanel.setPuzzleBtn._disableMe()
 
     def setSolution(self, theSolutionDict):
+        uiLogger.debug("Setting puzzle solution")
         puzzleFrame = grabPuzzleFrame()
         puzzleSquares = puzzleFrame.squares
         for puzzleKey in sudokuDefs.squares:

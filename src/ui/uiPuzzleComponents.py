@@ -158,6 +158,7 @@ class PuzzleFrame(QFrame):
         Returns:
             None
         """
+        uiLogger.debug("Toggling puzzle frame lock")
         puzzleValid = grabPuzzleFrame().isValid
         solveBtn = grabWidget(QPushButton, "solveBtn")
         setBtn = grabWidget(QPushButton, "setPuzzleBtn")
@@ -198,6 +199,7 @@ class PuzzleFrame(QFrame):
         Returns:
             bool: True if the focus was successfully set to the new square, False otherwise.
         """
+        uiLogger.debug(f"Setting focus to {newKey:s}")
         returnVal = False
         if oldKey in self.squares and oldKey != newKey:
             self.squares[oldKey].clearFocus()
@@ -223,7 +225,9 @@ class PuzzleFrame(QFrame):
         Returns:
             None
         """
+        
         if key is None:
+            uiLogger.debug(f"Setting cursor to {key:s}")
             key = self.objectName()
         self.squares[key].setCursorPosition(0)
 
@@ -397,6 +401,7 @@ class PuzzleFrame(QFrame):
         Returns:
             None
         """
+        uiLogger.debug("Performing puzzle frame reset action")
         puzzleFrame = grabPuzzleFrame()
         for squareVal in puzzleFrame.squares.values():
             squareVal._onResetAction()
@@ -475,7 +480,7 @@ class PuzzleSquare(QLineEdit):
         self.setText("")
         self.setMaxLength(1)
         self.setFrame(True)
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.MinimumExpanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setDragEnabled(True)
         self.setPlaceholderText("")
@@ -542,6 +547,7 @@ class PuzzleSquare(QLineEdit):
         return super().focusInEvent(evnt)
 
     def onChanged(self, newTextStr):
+        uiLogger.debug("Performing PuzzleSquare onChanged action")
         _prevText = self.text()
         _newText = newTextStr
         _newTextStr = list([val for val in _newText if val.isnumeric()])
@@ -556,6 +562,7 @@ class PuzzleSquare(QLineEdit):
         grabPuzzleFrame()._setNewFocus(self.objectName(), _nextKey)
 
     def _onResetAction(self):
+        uiLogger.debug("Performing PuzzleSquare _onResetAction action")
         self.setEnabled(True)
         self.setText("")
         self.squareType = SquareTypeEnum.InputUnlocked
@@ -565,6 +572,7 @@ class PuzzleSquare(QLineEdit):
         self.style().polish(self)
 
     def _refresh(self):
+        #uiLogger.debug("Performing PuzzleSquare _refresh action")
         isValid = self.isValid
         if isValid == ValidityEnum.Valid and self.squareType == SquareTypeEnum.InputUnlocked:
             self.setProperty("squareType", "InputUnlockedAndValid")
@@ -597,7 +605,6 @@ class PuzzleBorderLine(QFrame):
         self.setFrameShape(frameShape)
         self.setFrameShadow(QFrame.Shadow.Plain)
         self.setProperty("lang","python")
-        
         self.setStyleSheet("""
                             QFrame[lang="luajit"] {
                                 background-color: magenta;

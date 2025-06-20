@@ -44,7 +44,7 @@ def main():
     app.setApplicationVersion("1.0.0")
     uiLogger.debug("Application initialized with name and version")
 
-    appStyle = "Fusion"
+    appStyle = "fusion"
     uiLogger.debug(f"Setting application style to {appStyle}")
     app.setStyle(appStyle)
 
