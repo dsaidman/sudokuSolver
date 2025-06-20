@@ -39,19 +39,14 @@ Using sudoku as a sample problem to learn the essential parts of some new langua
 <dl>
     <dt>Square or tile</dt>
     <dd> a </dd>
-
     <dt>Row</dt>
     <dd> a </dd>
-
     <dt> Column </dt>
     <dd> a</dd>
-    
     <dt> Cell </dt>
     <dd>a </dd>
-
     <dt> Family </dt>
     <dd> A group of nine squares that must have 1-9 without repeats. Each row, each column, and each cell a single family, for a total of 27 families. Every square belongs to exact 3 families. For example: A1, A2,...,A9 is a single family. </dd>
-
     <dt> Neighbor </dt>
     <dd> The neighbor of a given square are the all other squares that cannot share a value with that square. Since every square is a member of 3 families, the neighbors of a square consists of all other squares its row, column and cell, excluding itself. For example, all the squares in row A, column 1, and the upper left cell are neighbors of square A1. </dd>
 </dl>
