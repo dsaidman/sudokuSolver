@@ -1,17 +1,37 @@
 import inspect
 import logging
 import os
+from random import randint
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QFrame, QLabel, QPushButton, QSizePolicy, QVBoxLayout
+from PyQt6.QtGui import QCursor, QIcon
+from PyQt6.QtWidgets import (
+    QDialog,
+    QFrame,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QSizePolicy,
+    QSlider,
+    QVBoxLayout,
+)
 
 from Puzzle import puzzle
+from Puzzle import puzzle as sudokuDefs
 from py2runtime import RuntimePy as rt
 
-from .uiHelpers import grabMainWindow, grabWidget
+from .uiEnums import SquareTypeEnum
+from .uiHelpers import (
+    grabMainWindow,
+    grabPuzzleFrame,
+    grabPuzzleSquares,
+    grabWidget,
+)
+from .uiPuzzleFile import puzzleInput
 
 uiLogger = logging.getLogger("uiLogger")
+__all__ = ["UiSidebar"]
 
 
 class UiSidebar(QFrame):
@@ -25,7 +45,6 @@ class UiSidebar(QFrame):
         Initializes the sidebar with a specified parent widget.
         :param parent: The parent widget for the sidebar.
         """
-
         super().__init__(parent)
         # Set up the sidebar properties
         self.setParent(parent)
@@ -104,6 +123,21 @@ class UiSidebar(QFrame):
         filename = inspect.getframeinfo(inspect.currentframe()).filename
         path = os.path.dirname(os.path.abspath(filename))
         iconpath = os.path.join(os.path.dirname(os.path.dirname(path)), "resources", "icons")
+        puzzlePath = os.path.join(os.path.dirname(os.path.dirname(path)), "resources", "icons")
+
+        self.importBtn = UiSidebarButton("Import", self)
+        self.importBtn.setObjectName("importBtn")
+        self.importBtn.setEnabled(True)
+        self.importBtn.setIcon(QIcon(os.path.join(iconpath, "importIcon.ico")))
+        self.importBtn.setToolTip(f"Import a puzzle from {puzzlePath:s}")
+        self.importBtn.clicked.connect(PuzzleSelectDlg)
+
+        self.resetBtn = UiSidebarButton("Reset", self)
+        self.resetBtn.setObjectName("resetBtn")
+        self.resetBtn.setEnabled(True)
+        self.resetBtn.setIcon(QIcon(os.path.join(iconpath, "resetIcon.ico")))
+        self.resetBtn.setToolTip("Reset to blank puzzle")
+        self.resetBtn.clicked.connect(grabMainWindow()._resetMainWindow)
 
         self.luajitBtn = UiSidebarButton("LuaJit", self)
         self.luajitBtn.setObjectName("luajitBtn")
@@ -148,6 +182,8 @@ class UiSidebar(QFrame):
         self.jsBtn.setIcon(QIcon(os.path.join(iconpath, "js.ico")))
 
         layout = self.layout()
+        layout.addWidget(self.importBtn)
+        layout.addWidget(self.resetBtn)
         layout.addStretch(3)
         layout.addWidget(self.luajitBtn)
         layout.addWidget(self.luaBtn)
@@ -188,7 +224,7 @@ class UiSidebarButton(QPushButton):
         Effects:
             - Updates selected state of all sidebar buttons
             - Updates border frame language properties
-            - Updates puzzle display label language property  
+            - Updates puzzle display label language property
             - Sets puzzle and runtime language
             - Updates main window runtime language
             - Updates status bar language label
@@ -237,3 +273,120 @@ class UiSidebarButton(QPushButton):
             + self.palette().color(self.foregroundRole()).name()
             + "; font-weight: bold; } "
         )
+
+
+class PuzzleSelectDlg(QDialog):
+    def __init__(self, parent=None):
+        super().__init__()
+        self.setWindowTitle("Select Puzzle")
+        self.setObjectName("PuzzleSelectDlg")
+        self.setContentsMargins(0, 0, 0, 0)
+        self.initUi()
+
+    def initUi(self):
+        self.leftbtn = QPushButton(">", self)
+        self.leftbtn.setContentsMargins(0, 0, 0, 0)
+        self.leftbtn.setFlat(True)
+        self.leftbtn.clicked.connect(self._addOne)
+        self.leftbtn.setFixedWidth(20)
+
+        self.rightbtn = QPushButton("<", self)
+        self.rightbtn.setContentsMargins(0, 0, 0, 0)
+        self.rightbtn.setFlat(True)
+        self.rightbtn.setFixedWidth(20)
+        self.rightbtn.clicked.connect(self._loseOne)
+
+        self.leftpagebtn = QPushButton(">>>", self)
+        self.leftpagebtn.setContentsMargins(0, 0, 0, 0)
+        self.leftpagebtn.setFlat(True)
+        self.leftpagebtn.clicked.connect(self._addOneT)
+        self.leftpagebtn.setFixedWidth(20)
+
+        self.rightpagebtn = QPushButton("<<<", self)
+        self.rightpagebtn.setContentsMargins(0, 0, 0, 0)
+        self.rightpagebtn.setFlat(True)
+        self.rightpagebtn.setFixedWidth(20)
+        self.rightpagebtn.clicked.connect(self._loseOneT)
+
+        self.sliderbar = QSlider(Qt.Orientation.Horizontal, self)
+        self.sliderbar.setContentsMargins(0, 0, 0, 0)
+        self.sliderbar.setFixedWidth(400)
+        self.sliderbar.setTickInterval(500)
+        self.sliderbar.setMinimum(puzzleInput.minID)
+        self.sliderbar.setMaximum(puzzleInput.maxID)
+        self.sliderbar.setSingleStep(1)
+        self.sliderbar.setPageStep(1000)
+        self.sliderbar.setValue(randint(puzzleInput.minID, puzzleInput.maxID))
+        self.sliderbar.setTickPosition(QSlider.TickPosition.TicksAbove)
+        self.sliderbar.valueChanged.connect(self.update)
+
+        self.selectionlabel = QLineEdit(str(self.sliderbar.value()), self)
+        self.selectionlabel.setAlignment(
+            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+        )
+        self.selectionlabel.setContentsMargins(0, 0, 0, 0)
+        self.selectionlabel.textChanged.connect(self.update)
+        self.selectionlabel.setInputMethodHints(Qt.InputMethodHint.ImhDigitsOnly)
+        self.selectionlabel.setCursor(QCursor(Qt.CursorShape.IBeamCursor))
+
+        self.okButton = QPushButton("OK", self)
+        self.okButton.setContentsMargins(0, 0, 0, 0)
+        self.okButton.setFlat(True)
+        self.okButton.setFixedWidth(20)
+        self.okButton.clicked.connect(
+            lambda state: _setUiPuzzle(puzzleInput.puzzles[self.sliderbar.value()])
+        )
+        self.okButton.clicked.connect(self.close)
+        self.okButton.clicked.connect(grabPuzzleFrame().toggleLock)
+        self.okButton.clicked.connect(grabWidget(QPushButton, "setPuzzleBtn")._enableMe)
+
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.rightpagebtn, 0, 0, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.rightbtn, 0, 1, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.sliderbar, 0, 2, 4, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.leftbtn, 0, 7, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.leftpagebtn, 0, 8, 1, 1, Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.selectionlabel, 0, 2, 4, 1, Qt.AlignmentFlag.AlignTop)
+        self.layout.addWidget(self.okButton, 1, 2, 4, 1, Qt.AlignmentFlag.AlignCenter)
+
+        self.setLayout(self.layout)
+        self.show()
+
+    def update(self, value):
+        uiLogger.debug(f"Slider value changed to {value}")
+        self.sliderbar.setValue(int(value))
+        self.selectionlabel.setText(str(self.sliderbar.value()))
+
+    def _addOne(self):
+        self.sliderbar.setValue(min(self.sliderbar.value() + 1, 16402))
+
+    def _loseOne(self):
+        self.sliderbar.setValue(max(self.sliderbar.value() - 1, 0))
+
+    def _addOneT(self):
+        self.sliderbar.setValue(min(self.sliderbar.value() + 1000, 16402))
+
+    def _loseOneT(self):
+        self.sliderbar.setValue(max(self.sliderbar.value() - 1000, 0))
+
+
+def _setUiPuzzle(dotPuzzle) -> None:
+    squares = grabPuzzleSquares()
+
+    squareKeys = sudokuDefs.squares
+
+    for idx, val in enumerate(dotPuzzle):
+        sq = squares[squareKeys[idx]]
+        if val == ".":
+            sq.squareType = SquareTypeEnum.InputUnlocked
+            sq.setProperty("squareType", "UserSetAndValid")
+        else:
+            sq.setText(val)
+            sq.squareType = SquareTypeEnum.InputLocked
+            sq.setProperty(
+                "squareType", "InputLockedAndValid"
+            )  # We'll assume for now input puzzles are are valid
+        sq._refresh()
+    grabMainWindow()._updateWindow()
+    grabPuzzleFrame().toggleLock()
+    grabWidget(QPushButton, "setPuzzleBtn")._enableMe()

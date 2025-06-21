@@ -1,6 +1,8 @@
 import logging
+import os
 
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QFrame, QGridLayout, QLabel, QPushButton, QVBoxLayout
 
 from Puzzle import SudokuPuzzle as Puzzle
@@ -8,9 +10,10 @@ from Puzzle import puzzle as sudokuDefs
 from py2runtime import RuntimePy as rt
 
 from .uiEnums import SquareTypeEnum, ValidityEnum
-from .uiHelpers import grabPuzzleFrame, grabStatusBar, grabWidget
+from .uiHelpers import getBasePath, grabPuzzleFrame, grabStatusBar, grabWidget
 
 uiLogger = logging.getLogger("uiLogger")
+iconPath = os.path.normpath(os.path.join(getBasePath(), "..", "..", "resources", "icons"))
 
 
 class UiPanel(QFrame):
@@ -176,6 +179,7 @@ class SolvePuzzleButton(QPushButton):
 
         self.setParent(parent)
         self.setText("Solve")
+        self.setIcon(QIcon(os.path.join(iconPath, "runIcon.ico")))
         self.setShortcut("")
         self.setObjectName("solveBtn")
         self.setToolTip(self.objectName())
@@ -213,7 +217,7 @@ class SolvePuzzleButton(QPushButton):
             thePzlDict = puzzleFrame.asDict()
             thePzl = Puzzle(lang=rt.lang, value=thePzlDict)
             uiLogger.info("Puzzle successfully imported")
-            #uiLogger.debug(f"thePzlDict: {thePzlDict:s}")
+            # uiLogger.debug(f"thePzlDict: {thePzlDict:s}")
             # compilate run
             uiLogger.info("Evaluating puzzle: untimed compile step")
             thePzl.solve()

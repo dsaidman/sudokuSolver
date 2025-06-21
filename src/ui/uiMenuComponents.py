@@ -253,3 +253,27 @@ class PuzzleSelectDlg(QDialog):
 
     def _loseOneT(self):
         self.sliderbar.setValue(max(self.sliderbar.value() - 1000, 0))
+
+
+def _readPuzzleCsv():
+    from csv import DictReader
+
+    _basePath = getBasePath()
+    puzzleFile = os.path.normpath(os.path.join(_basePath, "..", "..", "resources", "puzzles.csv"))
+
+    if not os.path.isfile(puzzleFile):
+        uiLogger.error("Puzzle file %s not found", puzzleFile)
+        return None
+
+    inputPuzzle = []
+    try:
+        with open(puzzleFile, "r") as puzzleCsv:
+            puzzleReader = DictReader(puzzleCsv)
+            for row in puzzleReader:
+                inputPuzzle.append(row["Puzzle"])
+    except OSError:
+        uiLogger.error("Failed to open %s", puzzleFile)
+        return None
+
+    uiLogger.info("Puzzles imported")
+    return inputPuzzle

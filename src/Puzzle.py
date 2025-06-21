@@ -176,6 +176,10 @@ class SudokuPuzzle(object):
 
         return result
 
+    def clear(self):
+        self.value = "." * 81
+        self.solution = None
+
 
 class DifficultyLevel(Enum):
     TRIVIAL = 0

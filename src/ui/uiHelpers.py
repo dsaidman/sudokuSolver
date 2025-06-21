@@ -192,5 +192,5 @@ def getBasePath() -> str:
         inputsPath = currentPath.parts[0:-1]
         inputsPath = os.path.join(*inputsPath, "input")
 
-    setAppStatusbar(f"Using input location {inputsPath:s}")
+    # setAppStatusbar(f"Using input location {inputsPath:s}")
     return inputsPath

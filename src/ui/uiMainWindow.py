@@ -21,7 +21,6 @@ from py2runtime import RuntimePy as rt
 from .uiEnums import AppStatusEnum
 from .uiHelpers import grabMainWindow, grabPuzzleFrame, grabWidget
 from .uiMainPanelComponents import UiMainPanel
-from .uiMenuComponents import MenuBar
 from .uiSidebarComponents import UiSidebar
 from .uiStatusBarComponents import PuzzleInfoLabel
 
@@ -138,7 +137,7 @@ class AppMainWindow(QMainWindow):
         statusWidgetLayout.addStretch()
 
         self.uiStatusBar.addPermanentWidget(self.uiStatusBar.statusWidget)
-        self.menuBar = MenuBar(self)
+        # self.menuBar = MenuBar(self)
 
         QMetaObject.connectSlotsByName(self)
         self.uiStatusBar.showMessage("Ready")
@@ -146,6 +145,8 @@ class AppMainWindow(QMainWindow):
     def _resetMainWindow(self):
         self.uiStatusBar.statusWidget.puzzleInfoLabel.reset()
         self.uiMainPanel.puzzleFrame.resetPuzzle()
+        puzzle.clear()
+
         grabWidget(QLabel, "infoDisplayLabel")._resetAction()
         grabWidget(QPushButton, "setPuzzleBtn")._disableMe()
 
